@@ -87,13 +87,11 @@ LRESULT CALLBACK System::MessageHandler(HWND window, UINT msg, WPARAM wparam, LP
 		case WM_KEYUP:
 		{
 			input->key_up(static_cast<unsigned int>(wparam));
+			return 0;
 		} break;
-
-		default:
-		{
-			return DefWindowProc(window, msg, wparam, lparam);
-		}
 	}
+
+	return DefWindowProc(window, msg, wparam, lparam);
 }
 
 void System::init_windows(int& width, int& height)
@@ -125,7 +123,7 @@ void System::init_windows(int& width, int& height)
 	int x = 0;
 	int y = 0;
 
-	if (fullscreen)
+	if (Graphics::fullscreen)
 	{
 		memset(&screen_settings, 0, sizeof(screen_settings));
 		screen_settings.dmSize = sizeof(screen_settings);
@@ -164,7 +162,7 @@ void System::stop_windows()
 {
 	ShowCursor(true);
 
-	if (fullscreen)
+	if (Graphics::fullscreen)
 	{
 		ChangeDisplaySettings(0, 0);
 	}

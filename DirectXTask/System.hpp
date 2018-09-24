@@ -1,4 +1,5 @@
 #include <memory>
+#pragma once
 
 #define WINDOWS32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -21,8 +22,8 @@ private:
 	void stop_windows();
 
 	LPCSTR name;
-	HINSTANCE instance;
-	HWND window;
+	HINSTANCE instance = nullptr;
+	HWND window = nullptr;
 
 	std::unique_ptr<Input> input = nullptr;
 	std::unique_ptr<Graphics> graphics = nullptr;
