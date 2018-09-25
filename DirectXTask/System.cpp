@@ -146,6 +146,8 @@ void System::create_window(int& width, int& height)
 		y = (old_height - height) / 2;
 	}
 
+
+	//https://stackoverflow.com/questions/3970066/creating-a-transparent-window-in-c-win32
 	window = CreateWindowEx(0,
 		name, name,
 		WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU,
@@ -153,6 +155,8 @@ void System::create_window(int& width, int& height)
 		0, 0, instance, 0);
 
 	ShowWindow(window, SW_SHOW);
+	SetWindowLong(window, GWL_EXSTYLE, GetWindowLong(window, GWL_EXSTYLE) | WS_EX_LAYERED);
+	SetLayeredWindowAttributes(window, RGB(204, 51, 127), 0, LWA_COLORKEY);
 	SetForegroundWindow(window);
 	SetFocus(window);
 	ShowCursor(true);
