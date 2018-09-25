@@ -1,5 +1,8 @@
 #include "ColourShader.hpp"
 
+//STD
+#include <iostream>
+
 bool ColourShader::init(ID3D11Device* device, HWND window)
 {
 	//https://stackoverflow.com/questions/7016206/trying-to-createdirectory-getting-char-to-lpcwstr-error-willing-to-try-anothe
@@ -28,7 +31,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	ID3D10Blob* error_msg = nullptr;
 	ID3D10Blob* vertex_shader_buffer = nullptr;
 	
-	bool result = D3DCompileFromFile(vs_filename, 0, 0, "ColourVertexShader", "vs_5_0",
+	HRESULT result = D3DCompileFromFile(vs_filename, 0, 0, "ColourVertexShader", "vs_5_0",
 		D3D10_SHADER_ENABLE_STRICTNESS, 0, &vertex_shader_buffer, &error_msg);
 
 	if (FAILED(result))
@@ -96,6 +99,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 
 	element_count = sizeof(polygon) / sizeof(polygon[0]);
 
+	//fails here
 	result = device->CreateInputLayout(polygon, element_count, vertex_shader_buffer->GetBufferPointer(), 
 		vertex_shader_buffer->GetBufferSize(), &layout);
 	if(FAILED(result))
@@ -155,16 +159,16 @@ void ColourShader::stop_shader()
 
 void ColourShader::print_shader_error(ID3D10Blob* error_msg, HWND window, LPCWSTR filename)
 {
-	char* compileErrors = static_cast<char*>(error_msg->GetBufferPointer());
-	unsigned long long bufferSize = error_msg->GetBufferSize();
+	char* compile_errors = static_cast<char*>(error_msg->GetBufferPointer());
+	std::cout << compile_errors << "\n";
+	unsigned long long buffer_size = error_msg->GetBufferSize();
 
 	std::ofstream fout;
 	fout.open("shader-error.txt");
 
-	//todo, cout
-	for (unsigned long long i = 0; i < bufferSize; i++)
+	for (unsigned long long i = 0; i < buffer_size; i++)
 	{
-		fout << compileErrors[i];
+		fout << compile_errors[i];
 	}
 
 	fout.close();

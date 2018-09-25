@@ -1,4 +1,4 @@
-#pragma cbuffer MatrixBuffer
+cbuffer MatrixBuffer
 {
 	matrix world;
 	matrix view;
@@ -7,15 +7,15 @@
 
 struct VertexInputType
 {
-	float4 position: SV_POSITION:
+	float4 position: SV_POSITION;
 	float4 colour: COLOR;
-}
+};
 
 struct PixelInputType
 {
 	float4 position: SV_POSITION;
-	flaot4 colour : COLOR;
-}
+	float4 colour : COLOR;
+};
 
 PixelInputType ColourVertexShader(VertexInputType input)
 {
@@ -26,7 +26,7 @@ PixelInputType ColourVertexShader(VertexInputType input)
 	output.position = mul(output.position, view);
 	output.position = mul(output.position, projection);
 
-	output.color = input.color
+	output.colour = input.colour;
 
 	return output;
 }
