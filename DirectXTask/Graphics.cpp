@@ -3,19 +3,13 @@
 bool Graphics::init(int width, int height, HWND window)
 {
 	direct3d = std::make_unique<Direct3D>();
-	if (!direct3d)
-	{
-		return false;
-	}
-
-	bool result = direct3d->init(width, height, vsync, window, fullscreen, screen_depth, screen_near);
-	if (!result)
+	bool successful = direct3d->init(width, height, vsync, window, fullscreen, screen_depth, screen_near);
+	if (!successful)
 	{
 		MessageBox(window, "Could not init Direct3D", "ERROR", MB_OK);
-		return false;
 	}
 
-	return true;
+	return successful;
 }
 
 void Graphics::stop()
@@ -34,7 +28,7 @@ bool Graphics::frame()
 
 bool Graphics::render()
 {
-	direct3d->begin(0.8f, 0.2f, 0.5f, 1.0f);
+	direct3d->begin(0.8f, 0.2f, 0.5f, 0.5f);
 	direct3d->end();
 
 	return false;

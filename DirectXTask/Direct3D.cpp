@@ -170,7 +170,6 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 	result = device->CreateTexture2D(&depth_buffer_desc, 0, &depth_stencil_buffer);
 	if (FAILED(result))
 	{
-		std::cout << "oh no.\n";
 		return false;
 	}
 

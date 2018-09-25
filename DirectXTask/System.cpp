@@ -5,7 +5,7 @@ bool System::init()
 	int width = 0;
 	int height = 0;
 
-	init_windows(width, height);
+	create_window(width, height);
 
 	input = std::make_unique<Input>();
 	if (!input)
@@ -35,7 +35,7 @@ void System::stop()
 		input = nullptr;
 	}
 
-	stop_windows();
+	destroy_window();
 }
 
 void System::run()
@@ -94,7 +94,7 @@ LRESULT CALLBACK System::MessageHandler(HWND window, UINT msg, WPARAM wparam, LP
 	return DefWindowProc(window, msg, wparam, lparam);
 }
 
-void System::init_windows(int& width, int& height)
+void System::create_window(int& width, int& height)
 {
 	application = this;
 	instance = GetModuleHandle(0);
@@ -108,7 +108,7 @@ void System::init_windows(int& width, int& height)
 	window_settings.hInstance = instance;
 	window_settings.hIcon = LoadIcon(0, IDI_WINLOGO);
 	window_settings.hIconSm = window_settings.hIcon;
-	window_settings.hCursor = LoadCursor(0, IDC_ARROW);
+	window_settings.hCursor = LoadCursor(0, IDC_HAND);
 	window_settings.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 	window_settings.lpszMenuName = 0;
 	window_settings.lpszClassName = name;
@@ -146,19 +146,19 @@ void System::init_windows(int& width, int& height)
 		y = (old_height - height) / 2;
 	}
 
-	window = CreateWindowEx(WS_EX_APPWINDOW,
-		name,name,
-		WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_POPUP,
+	window = CreateWindowEx(0,
+		name, name,
+		WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU,
 		x, y, width, height,
 		0, 0, instance, 0);
 
 	ShowWindow(window, SW_SHOW);
 	SetForegroundWindow(window);
 	SetFocus(window);
-	ShowCursor(false);
+	ShowCursor(true);
 }
 
-void System::stop_windows()
+void System::destroy_window()
 {
 	ShowCursor(true);
 

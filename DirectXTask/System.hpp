@@ -14,12 +14,12 @@ public:
 	void stop();
 	void run();
 
-	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
+	LRESULT CALLBACK MessageHandler(HWND window, UINT msg, WPARAM wparam, LPARAM lparan);
 
 private:
 	bool frame();
-	void init_windows(int&, int&);
-	void stop_windows();
+	void create_window(int& width, int& height);
+	void destroy_window();
 
 	LPCSTR name;
 	HINSTANCE instance = nullptr;
@@ -29,5 +29,6 @@ private:
 	std::unique_ptr<Graphics> graphics = nullptr;
 };
 
-static LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
+static LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam);
+//todo make system a singleton or provide locator
 static System* application = 0;

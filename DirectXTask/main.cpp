@@ -1,17 +1,13 @@
 #include <iostream>
 #include <fstream>
-#include <io.h>
-#include <stdio.h> 
-#include <fcntl.h>  
-#include <sys/types.h>  
-#include <sys/stat.h>  
+#include <io.h> //_open_osfhandle
+#include <fcntl.h> //_O_TEXT
 
 #include "System.hpp"
 
-int WINAPI
-WinMain(HINSTANCE instance, HINSTANCE old_instance, PSTR cmd_line, int cmd_show)
+//https://stackoverflow.com/questions/191842/how-do-i-get-console-output-in-c-with-a-windows-program
+void create_console()
 {
-
 	//Create a console for this application
 	AllocConsole();
 
@@ -49,6 +45,12 @@ WinMain(HINSTANCE instance, HINSTANCE old_instance, PSTR cmd_line, int cmd_show)
 	std::cerr.clear();
 	std::wcin.clear();
 	std::cin.clear();
+}
+
+int WINAPI
+WinMain(HINSTANCE instance, HINSTANCE old_instance, PSTR cmd_line, int cmd_show)
+{
+	create_console();
 
 	std::unique_ptr<System> system = std::make_unique<System>();
 	if (!system)
