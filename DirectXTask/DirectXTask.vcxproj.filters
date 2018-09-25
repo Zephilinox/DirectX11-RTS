@@ -30,6 +30,9 @@
     <ClCompile Include="Direct3D.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ColourShader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="System.hpp">
@@ -44,5 +47,22 @@
     <ClInclude Include="Direct3D.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Model.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ColourShader.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="colour.vs">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="colour.ps">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
 </Project>
