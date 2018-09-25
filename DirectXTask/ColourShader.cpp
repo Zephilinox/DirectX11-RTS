@@ -30,7 +30,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 {
 	ID3D10Blob* error_msg = nullptr;
 	ID3D10Blob* vertex_shader_buffer = nullptr;
-	
+
 	HRESULT result = D3DCompileFromFile(vs_filename, 0, 0, "ColourVertexShader", "vs_5_0",
 		D3D10_SHADER_ENABLE_STRICTNESS, 0, &vertex_shader_buffer, &error_msg);
 
@@ -67,13 +67,13 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	}
 
 	result = device->CreateVertexShader(vertex_shader_buffer->GetBufferPointer(), vertex_shader_buffer->GetBufferSize(), NULL, &vertex_shader);
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		return false;
 	}
 
 	result = device->CreatePixelShader(pixel_shader_buffer->GetBufferPointer(), pixel_shader_buffer->GetBufferSize(), NULL, &pixel_shader);
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		return false;
 	}
@@ -102,7 +102,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	//fails here
 	result = device->CreateInputLayout(polygon, element_count, vertex_shader_buffer->GetBufferPointer(), 
 		vertex_shader_buffer->GetBufferSize(), &layout);
-	if(FAILED(result))
+	if (FAILED(result))
 	{
 		return false;
 	}
