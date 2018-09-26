@@ -323,6 +323,42 @@ void Direct3D::begin(float r, float g, float b, float a)
 	float colour[4] = { r, g, b, a };
 	device_context->ClearRenderTargetView(render_target_view, colour);
 	device_context->ClearDepthStencilView(depth_stencil_view, D3D11_CLEAR_DEPTH, 1.0f, 0);
+
+	static float xpos = 0;
+	static float ypos = 0;
+	static float zpos = 0;
+
+	if (GetAsyncKeyState('A'))
+	{
+		xpos += -1.0f;
+	}
+
+	if (GetAsyncKeyState('D'))
+	{
+		xpos += 1.0f;
+	}
+
+	if (GetAsyncKeyState('W'))
+	{
+		ypos += 1.0f;
+	}
+
+	if (GetAsyncKeyState('S'))
+	{
+		ypos -= 1.0f;
+	}
+
+	if (GetAsyncKeyState('Q'))
+	{
+		zpos += 1.0f;
+	}
+
+	if (GetAsyncKeyState('E'))
+	{
+		zpos -= 1.0f;
+	}
+
+	world_matrix += dx::XMMatrixTranslation(xpos, ypos, zpos);
 }
 
 void Direct3D::end()
@@ -335,6 +371,8 @@ void Direct3D::end()
 	{
 		swapchain->Present(0, 0);
 	}
+
+	world_matrix = dx::XMMatrixIdentity();
 }
 
 ID3D11Device* Direct3D::get_device()
