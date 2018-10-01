@@ -34,7 +34,6 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 		DXGI_ENUM_MODES_INTERLACED,
 		&mode_count,
 		0);
-
 	DXGI_MODE_DESC* display_modes = new DXGI_MODE_DESC[mode_count];
 	if (!display_modes)
 	{
@@ -45,14 +44,14 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 		DXGI_ENUM_MODES_INTERLACED,
 		&mode_count,
 		display_modes);
-	
+
+	unsigned int numerator = 0;
+	unsigned int denominator = 0;
+
 	if (FAILED(result))
 	{
 		return false;
 	}
-
-	unsigned int numerator = 0;
-	unsigned int denominator = 0;
 
 	for (unsigned int i = 0; i < mode_count; ++i)
 	{
@@ -93,39 +92,9 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 	//factory->Release();
 	//factory = 0;
 
-	DXGI_SWAP_CHAIN_DESC swapchain_desc;
-	ZeroMemory(&swapchain_desc, sizeof(swapchain_desc));
-	swapchain_desc.BufferCount = 1;
-	swapchain_desc.BufferDesc.Width = width;
-	swapchain_desc.BufferDesc.Height = height;
-	swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-
-	if (vsync)
-	{
-		swapchain_desc.BufferDesc.RefreshRate.Numerator = numerator;
-		swapchain_desc.BufferDesc.RefreshRate.Denominator = denominator;
-	}
-	else
-	{
-		swapchain_desc.BufferDesc.RefreshRate.Numerator = 0;
-		swapchain_desc.BufferDesc.RefreshRate.Denominator = 1;
-	}
-
-	swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapchain_desc.OutputWindow = window;
-
-	swapchain_desc.SampleDesc.Count = 1;
-	swapchain_desc.SampleDesc.Quality = 0;
-
-	swapchain_desc.Windowed = !fullscreen;
-
-	swapchain_desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
-	swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
-	swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	swapchain_desc.Flags = 0;
+	auto swapchain_desc = make_swapchain_desc(window, width, height, numerator, denominator);
 
 	//bloody hell this is a long function, refactor. todo
-
 	D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_11_0;
 
 	result = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, D3D11_CREATE_DEVICE_DEBUG, &feature_level, 1,
@@ -152,20 +121,7 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 	back_buffer->Release();
 	back_buffer = 0;
 
-	D3D11_TEXTURE2D_DESC depth_buffer_desc;
-	ZeroMemory(&depth_buffer_desc, sizeof(depth_buffer_desc));
-
-	depth_buffer_desc.Width = width;
-	depth_buffer_desc.Height = height;
-	depth_buffer_desc.MipLevels = 1;
-	depth_buffer_desc.ArraySize = 1;
-	depth_buffer_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depth_buffer_desc.SampleDesc.Count = 1;
-	depth_buffer_desc.SampleDesc.Quality = 0;
-	depth_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-	depth_buffer_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	depth_buffer_desc.CPUAccessFlags = 0;
-	depth_buffer_desc.MiscFlags = 0;
+	auto depth_buffer_desc = make_depth_buffer_desc(width, height);
 
 	result = device->CreateTexture2D(&depth_buffer_desc, 0, &depth_stencil_buffer);
 	if (FAILED(result))
@@ -416,4 +372,60 @@ void Direct3D::get_gpu_info(char* name, int& memory)
 {
 	strcpy_s(name, 128, gpu_description);
 	memory = gpu_memory;
+}
+
+DXGI_SWAP_CHAIN_DESC Direct3D::make_swapchain_desc(HWND window, int width, int height, unsigned int numerator, unsigned int denominator)
+{
+	DXGI_SWAP_CHAIN_DESC swapchain_desc;
+	ZeroMemory(&swapchain_desc, sizeof(swapchain_desc));
+	swapchain_desc.BufferCount = 1;
+	swapchain_desc.BufferDesc.Width = width;
+	swapchain_desc.BufferDesc.Height = height;
+	swapchain_desc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+
+	if (vsync)
+	{
+		swapchain_desc.BufferDesc.RefreshRate.Numerator = numerator;
+		swapchain_desc.BufferDesc.RefreshRate.Denominator = denominator;
+	}
+	else
+	{
+		swapchain_desc.BufferDesc.RefreshRate.Numerator = 0;
+		swapchain_desc.BufferDesc.RefreshRate.Denominator = 1;
+	}
+
+	swapchain_desc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	swapchain_desc.OutputWindow = window;
+
+	swapchain_desc.SampleDesc.Count = 1;
+	swapchain_desc.SampleDesc.Quality = 0;
+
+	swapchain_desc.Windowed = !fullscreen;
+
+	swapchain_desc.BufferDesc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	swapchain_desc.BufferDesc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+	swapchain_desc.SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
+	swapchain_desc.Flags = 0;
+
+	return swapchain_desc;
+}
+
+D3D11_TEXTURE2D_DESC Direct3D::make_depth_buffer_desc(int width, int height)
+{
+	D3D11_TEXTURE2D_DESC depth_buffer_desc;
+	ZeroMemory(&depth_buffer_desc, sizeof(depth_buffer_desc));
+
+	depth_buffer_desc.Width = width;
+	depth_buffer_desc.Height = height;
+	depth_buffer_desc.MipLevels = 1;
+	depth_buffer_desc.ArraySize = 1;
+	depth_buffer_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depth_buffer_desc.SampleDesc.Count = 1;
+	depth_buffer_desc.SampleDesc.Quality = 0;
+	depth_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	depth_buffer_desc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depth_buffer_desc.CPUAccessFlags = 0;
+	depth_buffer_desc.MiscFlags = 0;
+
+	return depth_buffer_desc;
 }

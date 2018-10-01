@@ -33,6 +33,9 @@ public:
 	void get_gpu_info(char* name, int& memory);
 
 private:
+	DXGI_SWAP_CHAIN_DESC make_swapchain_desc(HWND window, int width, int height, unsigned int numerator, unsigned int denominator);
+	D3D11_TEXTURE2D_DESC make_depth_buffer_desc(int width, int height);
+
 	bool vsync;
 	bool fullscreen;
 

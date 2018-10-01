@@ -80,7 +80,6 @@ bool Graphics::frame()
 
 bool Graphics::render()
 {
-
 	direct3d->begin(0.8f, 0.2f, 0.5f, 0.5f);
 
 	camera->render();
