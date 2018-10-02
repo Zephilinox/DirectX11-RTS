@@ -49,12 +49,9 @@ bool Graphics::render()
 
 	camera->render();
 
-	dx::XMMATRIX world;
-	direct3d->get_world_matrix(world);
-	dx::XMMATRIX view;
-	camera->get_view_matrix(view);
-	dx::XMMATRIX projection;
-	direct3d->get_projection_matrix(projection);
+	dx::XMMATRIX world = direct3d->get_world_matrix();
+	dx::XMMATRIX view =	camera->get_view_matrix();
+	dx::XMMATRIX projection = direct3d->get_projection_matrix();
 
 	model->render(direct3d->get_device_context());
 

@@ -102,7 +102,7 @@ void Camera::render()
 	view_matrix = dx::XMMatrixLookAtLH(position_vector, lookat_vector, up_vector);
 }
 
-void Camera::get_view_matrix(dx::XMMATRIX& matrix)
+dx::XMMATRIX Camera::get_view_matrix()
 {
-	matrix = view_matrix;
+	return view_matrix;
 }

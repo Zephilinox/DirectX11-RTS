@@ -358,19 +358,19 @@ ID3D11DeviceContext* Direct3D::get_device_context()
 	return device_context;
 }
 
-void Direct3D::get_projection_matrix(dx::XMMATRIX& matrix)
+dx::XMMATRIX Direct3D::get_projection_matrix()
 {
-	matrix = projection_matrix;
+	return projection_matrix;
 }
 
-void Direct3D::get_world_matrix(dx::XMMATRIX& matrix)
+dx::XMMATRIX Direct3D::get_world_matrix()
 {
-	matrix = world_matrix;
+	return world_matrix;
 }
 
-void Direct3D::get_ortho_matrix(dx::XMMATRIX& matrix)
+dx::XMMATRIX Direct3D::get_ortho_matrix()
 {
-	matrix = ortho_matrix;
+	return ortho_matrix;
 }
 
 void Direct3D::get_gpu_info(char* name, int& memory)

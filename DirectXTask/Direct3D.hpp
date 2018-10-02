@@ -20,15 +20,15 @@ public:
 	bool init(int width, int height, bool vsync, HWND window, bool fullscreen, float screen_depth, float screen_near);
 	void stop();
 
-	void begin(float, float, float, float);
+	void begin(float r, float g, float b, float a);
 	void end();
 
 	ID3D11Device* get_device();
 	ID3D11DeviceContext* get_device_context();
 
-	void get_projection_matrix(dx::XMMATRIX& matrix);
-	void get_world_matrix(dx::XMMATRIX& matrix);
-	void get_ortho_matrix(dx::XMMATRIX& matrix);
+	dx::XMMATRIX get_projection_matrix();
+	dx::XMMATRIX get_world_matrix();
+	dx::XMMATRIX get_ortho_matrix();
 
 	void get_gpu_info(char* name, int& memory);
 

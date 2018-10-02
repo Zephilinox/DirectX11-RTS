@@ -14,7 +14,7 @@ public:
 	dx::XMFLOAT3 get_rot();
 
 	void render();
-	void get_view_matrix(dx::XMMATRIX& matrix);
+	dx::XMMATRIX get_view_matrix();
 
 private:
 	float pos_x = 0.0f;
