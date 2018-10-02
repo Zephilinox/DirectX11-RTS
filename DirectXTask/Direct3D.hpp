@@ -7,6 +7,7 @@
 
 //SELF
 #include <memory>
+#include <array>
 
 //LIBS
 #include <d3d11.h>
@@ -62,7 +63,7 @@ private:
 	bool fullscreen;
 
 	int gpu_memory;
-	char gpu_description[128];
+	std::array<char, 128> gpu_description;
 	D3DRAII<IDXGISwapChain> swapchain;
 	D3DRAII<ID3D11Device> device;
 	D3DRAII<ID3D11DeviceContext> device_context;

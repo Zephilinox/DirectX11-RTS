@@ -95,7 +95,7 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 		gpu_memory = static_cast<int>(adapter_desc.DedicatedVideoMemory / 1024 / 1024);
 
 		size_t string_length;
-		int error = wcstombs_s(&string_length, gpu_description, 128, adapter_desc.Description, 128);
+		int error = wcstombs_s(&string_length, gpu_description.data(), gpu_description.size(), adapter_desc.Description, gpu_description.size());
 		if (error != 0)
 		{
 			return false;
@@ -230,7 +230,7 @@ dx::XMMATRIX Direct3D::get_ortho_matrix()
 
 void Direct3D::get_gpu_info(char* name, int& memory)
 {
-	strcpy_s(name, 128, gpu_description);
+	strcpy_s(name, gpu_description.size(), gpu_description.data());
 	memory = gpu_memory;
 }
 
@@ -304,20 +304,21 @@ bool Direct3D::create_device_and_swapchain(HWND window, int width, int height, i
 
 bool Direct3D::create_render_target_view()
 {
-	ID3D11Texture2D* back_buffer;
-	HRESULT result = swapchain.val->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&back_buffer);
+	D3DRAII<ID3D11Texture2D> back_buffer;
+	HRESULT result = swapchain.val->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&back_buffer.val);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	result = device.val->CreateRenderTargetView(back_buffer, 0, &render_target_view.val);
+	result = device.val->CreateRenderTargetView(back_buffer.val, 0, &render_target_view.val);
+
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	back_buffer->Release();
+	return true;
 }
 
 bool Direct3D::create_texture2d(int width, int height)
