@@ -331,22 +331,22 @@ void Direct3D::begin(float r, float g, float b, float a)
 
 	if (GetAsyncKeyState('A'))
 	{
-		xpos += -1.0f;
+		xpos += -0.4f;
 	}
 
 	if (GetAsyncKeyState('D'))
 	{
-		xpos += 1.0f;
+		xpos += 0.4f;
 	}
 
 	if (GetAsyncKeyState('W'))
 	{
-		ypos += 1.0f;
+		ypos += 0.4f;
 	}
 
 	if (GetAsyncKeyState('S'))
 	{
-		ypos -= 1.0f;
+		ypos += -0.4f;
 	}
 
 	if (GetAsyncKeyState('Q'))
@@ -367,6 +367,11 @@ void Direct3D::begin(float r, float g, float b, float a)
 	if (GetAsyncKeyState('X'))
 	{
 		xrot -= 4.0f;
+	}
+
+	if (GetAsyncKeyState(VK_SPACE))
+	{
+		world_matrix = ortho_matrix;
 	}
 
 	world_matrix += dx::XMMatrixRotationX(dx::XMConvertToRadians(xrot));

@@ -21,6 +21,8 @@ private:
 	void create_window(int& width, int& height);
 	void destroy_window();
 
+	void display_settings(int width, int height);
+
 	LPCSTR name;
 	HINSTANCE instance = nullptr;
 	HWND window = nullptr;

@@ -70,8 +70,7 @@ bool System::frame()
 		return true;
 	}
 
-	bool quit = graphics->frame();
-	return quit;
+	return graphics->frame();
 }
 
 LRESULT CALLBACK System::MessageHandler(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
