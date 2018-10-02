@@ -13,8 +13,9 @@ namespace dx = DirectX;
 class ColourShader
 {
 public:
-	bool init(ID3D11Device* device, HWND window);
-	void stop();
+	ColourShader(ID3D11Device* device, HWND window);
+	~ColourShader();
+
 	bool render(ID3D11DeviceContext* device_context, int index_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection);
 
 private:

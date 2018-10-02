@@ -3,14 +3,16 @@
 //STD
 #include <iostream>
 
-bool ColourShader::init(ID3D11Device* device, HWND window)
+ColourShader::ColourShader(ID3D11Device* device, HWND window)
 {
-	//https://stackoverflow.com/questions/7016206/trying-to-createdirectory-getting-char-to-lpcwstr-error-willing-to-try-anothe
-	bool successful = init_shader(device, window, L"colour.vs", L"colour.ps");
-	return successful;
+	if (!init_shader(device, window, L"colour.vs", L"colour.ps"))
+	{
+		MessageBoxW(window, L"Could not init shader", L"ERROR", MB_OK);
+		throw;
+	}
 }
 
-void ColourShader::stop()
+ColourShader::~ColourShader()
 {
 	stop_shader();
 }

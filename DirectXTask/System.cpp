@@ -1,6 +1,6 @@
 #include "System.hpp"
 
-bool System::init()
+System::System()
 {
 	int width = 0;
 	int height = 0;
@@ -8,33 +8,11 @@ bool System::init()
 	create_window(width, height);
 
 	input = std::make_unique<Input>();
-	if (!input)
-	{
-		return false;
-	}
-
-	graphics = std::make_unique<Graphics>();
-	if (!graphics)
-	{
-		return false;
-	}
-	
-	return graphics->init(width, height, window);
+	graphics = std::make_unique<Graphics>(width, height, window);
 }
 
-void System::stop()
+System::~System()
 {
-	if (graphics)
-	{
-		graphics->stop();
-		graphics = nullptr;
-	}
-
-	if (input)
-	{
-		input = nullptr;
-	}
-
 	destroy_window();
 }
 

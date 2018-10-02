@@ -53,16 +53,7 @@ WinMain(HINSTANCE instance, HINSTANCE old_instance, PSTR cmd_line, int cmd_show)
 	create_console();
 
 	std::unique_ptr<System> system = std::make_unique<System>();
-	if (!system)
-	{
-		return 0;
-	}
+	system->run();
 
-	if (system->init())
-	{
-		system->run();
-	}
-
-	system->stop();
 	return 0;
 }

@@ -10,8 +10,9 @@
 class System
 {
 public:
-	bool init();
-	void stop();
+	System();
+	~System();
+
 	void run();
 
 	LRESULT CALLBACK MessageHandler(HWND window, UINT msg, WPARAM wparam, LPARAM lparan);

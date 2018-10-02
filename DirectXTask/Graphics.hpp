@@ -12,8 +12,9 @@
 class Graphics
 {
 public:
-	bool init(int width, int height, HWND window);
-	void stop();
+	Graphics(int width, int height, HWND window);
+	~Graphics();
+
 	bool frame();
 
 	static constexpr bool fullscreen = false;
