@@ -14,6 +14,20 @@
 
 namespace dx = DirectX;
 
+template <typename T>
+struct D3DRAII
+{
+	~D3DRAII()
+	{
+		if (val)
+		{
+			val->Release();
+		}
+	}
+
+	T* val = nullptr;
+};
+
 class Direct3D
 {
 public:
@@ -49,14 +63,14 @@ private:
 
 	int gpu_memory;
 	char gpu_description[128];
-	IDXGISwapChain* swapchain = 0;
-	ID3D11Device* device = 0;
-	ID3D11DeviceContext* device_context = 0;
-	ID3D11RenderTargetView* render_target_view = 0;
-	ID3D11Texture2D* depth_stencil_buffer = 0;
-	ID3D11DepthStencilState* depth_stencil_state = 0;
-	ID3D11DepthStencilView* depth_stencil_view = 0;
-	ID3D11RasterizerState* raster_state = 0;
+	D3DRAII<IDXGISwapChain> swapchain;
+	D3DRAII<ID3D11Device> device;
+	D3DRAII<ID3D11DeviceContext> device_context;
+	D3DRAII<ID3D11RenderTargetView> render_target_view;
+	D3DRAII<ID3D11Texture2D> depth_stencil_buffer;
+	D3DRAII<ID3D11DepthStencilState> depth_stencil_state;
+	D3DRAII<ID3D11DepthStencilView> depth_stencil_view;
+	D3DRAII<ID3D11RasterizerState> raster_state;
 	dx::XMMATRIX projection_matrix;
 	dx::XMMATRIX world_matrix;
 	dx::XMMATRIX ortho_matrix;

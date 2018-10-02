@@ -107,13 +107,13 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 	create_texture2d(width, height);
 
 	create_depth_stencil_state();
-	device_context->OMSetDepthStencilState(depth_stencil_state, 1);
+	device_context.val->OMSetDepthStencilState(depth_stencil_state.val, 1);
 
 	create_depth_stencil_view();
-	device_context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
+	device_context.val->OMSetRenderTargets(1, &render_target_view.val, depth_stencil_view.val);
 
 	create_rasterizer_state();
-	device_context->RSSetState(raster_state);
+	device_context.val->RSSetState(raster_state.val);
 
 	create_viewport(static_cast<float>(width), static_cast<float>(height));
 	create_matrices(static_cast<float>(width), static_cast<float>(height), screen_near, screen_depth);
@@ -123,65 +123,17 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 
 void Direct3D::stop()
 {
-	if (swapchain)
+	if (swapchain.val)
 	{
-		swapchain->SetFullscreenState(false, 0);
-	}
-
-	if (raster_state)
-	{
-		raster_state->Release();
-		raster_state = 0;
-	}
-
-	if (depth_stencil_view)
-	{
-		depth_stencil_view->Release();
-		depth_stencil_view = 0;
-	}
-
-	if (depth_stencil_state)
-	{
-		depth_stencil_state->Release();
-		depth_stencil_state = 0;
-	}
-
-	if (depth_stencil_buffer)
-	{
-		depth_stencil_buffer->Release();
-		depth_stencil_buffer = 0;
-	}
-
-	if (render_target_view)
-	{
-		render_target_view->Release();
-		render_target_view = 0;
-	}
-
-	if (device_context)
-	{
-		device_context->Release();
-		device_context = 0;
-	}
-
-	if (device)
-	{
-		device->Release();
-		device = 0;
-	}
-
-	if (swapchain)
-	{
-		swapchain->Release();
-		swapchain = 0;
+		swapchain.val->SetFullscreenState(false, 0);
 	}
 }
 
 void Direct3D::begin(float r, float g, float b, float a)
 {
 	float colour[4] = { r, g, b, a };
-	device_context->ClearRenderTargetView(render_target_view, colour);
-	device_context->ClearDepthStencilView(depth_stencil_view, D3D11_CLEAR_DEPTH, 1.0f, 0);
+	device_context.val->ClearRenderTargetView(render_target_view.val, colour);
+	device_context.val->ClearDepthStencilView(depth_stencil_view.val, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
 	static float xpos = 0;
 	static float ypos = 0;
@@ -241,11 +193,11 @@ void Direct3D::end()
 {
 	if (vsync)
 	{
-		swapchain->Present(1, 0);
+		swapchain.val->Present(1, 0);
 	}
 	else
 	{
-		swapchain->Present(0, 0);
+		swapchain.val->Present(0, 0);
 	}
 
 	world_matrix = dx::XMMatrixIdentity();
@@ -253,12 +205,12 @@ void Direct3D::end()
 
 ID3D11Device* Direct3D::get_device()
 {
-	return device;
+	return device.val;
 }
 
 ID3D11DeviceContext* Direct3D::get_device_context()
 {
-	return device_context;
+	return device_context.val;
 }
 
 dx::XMMATRIX Direct3D::get_projection_matrix()
@@ -345,7 +297,7 @@ bool Direct3D::create_device_and_swapchain(HWND window, int width, int height, i
 	D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_11_0;
 
 	HRESULT result = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, D3D11_CREATE_DEVICE_DEBUG, &feature_level, 1,
-		D3D11_SDK_VERSION, &swapchain_desc, &swapchain, &device, 0, &device_context);
+		D3D11_SDK_VERSION, &swapchain_desc, &swapchain.val, &device.val, 0, &device_context.val);
 	
 	return !FAILED(result);
 }
@@ -353,13 +305,13 @@ bool Direct3D::create_device_and_swapchain(HWND window, int width, int height, i
 bool Direct3D::create_render_target_view()
 {
 	ID3D11Texture2D* back_buffer;
-	HRESULT result = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&back_buffer);
+	HRESULT result = swapchain.val->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&back_buffer);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
-	result = device->CreateRenderTargetView(back_buffer, 0, &render_target_view);
+	result = device.val->CreateRenderTargetView(back_buffer, 0, &render_target_view.val);
 	if (FAILED(result))
 	{
 		return false;
@@ -372,7 +324,7 @@ bool Direct3D::create_texture2d(int width, int height)
 {
 	auto depth_buffer_desc = make_depth_buffer_desc(width, height);
 
-	HRESULT result = device->CreateTexture2D(&depth_buffer_desc, 0, &depth_stencil_buffer);
+	HRESULT result = device.val->CreateTexture2D(&depth_buffer_desc, 0, &depth_stencil_buffer.val);
 	return !FAILED(result);
 }
 
@@ -385,7 +337,7 @@ bool Direct3D::create_depth_stencil_view()
 	depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 	depth_stencil_view_desc.Texture2D.MipSlice = 0;
 
-	HRESULT result = device->CreateDepthStencilView(depth_stencil_buffer, &depth_stencil_view_desc, &depth_stencil_view);
+	HRESULT result = device.val->CreateDepthStencilView(depth_stencil_buffer.val, &depth_stencil_view_desc, &depth_stencil_view.val);
 
 	return !FAILED(result);
 }
@@ -413,7 +365,7 @@ bool Direct3D::create_depth_stencil_state()
 	depth_stencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
 	depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
 
-	HRESULT result = device->CreateDepthStencilState(&depth_stencil_desc, &depth_stencil_state);
+	HRESULT result = device.val->CreateDepthStencilState(&depth_stencil_desc, &depth_stencil_state.val);
 	return !FAILED(result);
 }
 
@@ -431,7 +383,7 @@ bool Direct3D::create_rasterizer_state()
 	raster_desc.ScissorEnable = false;
 	raster_desc.SlopeScaledDepthBias = 0.0f;
 
-	HRESULT result = device->CreateRasterizerState(&raster_desc, &raster_state);
+	HRESULT result = device.val->CreateRasterizerState(&raster_desc, &raster_state.val);
 	return !FAILED(result);
 }
 
@@ -445,7 +397,7 @@ void Direct3D::create_viewport(float width, float height)
 	viewport.TopLeftX = 0.0f;
 	viewport.TopLeftY = 0.0f;
 
-	device_context->RSSetViewports(1, &viewport);
+	device_context.val->RSSetViewports(1, &viewport);
 }
 
 void Direct3D::create_matrices(float width, float height, float screen_near, float screen_depth)
