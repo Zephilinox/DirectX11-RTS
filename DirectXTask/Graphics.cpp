@@ -13,13 +13,13 @@ Graphics::Graphics(int width, int height, HWND window)
 	camera = std::make_unique<Camera>();
 	camera->set_pos(0.0f, 0.0f, -5.0f);
 
-	model = std::make_unique<Model>();
-
-	result = model->init(direct3d->get_device());
-	if (!result)
+	try
+	{
+		model = std::make_unique<Model>(direct3d->get_device());
+	}
+	catch (...)
 	{
 		MessageBoxW(window, L"Could not init model", L"ERROR", MB_OK);
-		throw;
 	}
 
 	colour_shader = std::make_unique<ColourShader>(direct3d->get_device(), window);
@@ -28,13 +28,7 @@ Graphics::Graphics(int width, int height, HWND window)
 Graphics::~Graphics()
 {
 	colour_shader = nullptr;
-
-	if (model)
-	{
-		model->stop();
-		model = nullptr;
-	}
-
+	model = nullptr;
 	camera = nullptr;
 
 	if (direct3d)

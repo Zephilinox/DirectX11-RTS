@@ -8,8 +8,9 @@ namespace dx = DirectX;
 class Model
 {
 public:
-	bool init(ID3D11Device* device);
-	void stop();
+	Model(ID3D11Device* device);
+	~Model();
+
 	void render(ID3D11DeviceContext* device_context);
 
 	int get_index_count();
@@ -21,12 +22,12 @@ private:
 		dx::XMFLOAT4 colour;
 	};
 
-	bool init_buffers(ID3D11Device* device);
 	void stop_buffers();
 	void render_buffers(ID3D11DeviceContext* device_context);
 
-	ID3D11Buffer* vertex_buffer = nullptr;
-	ID3D11Buffer* index_buffer = nullptr;
+	//Do not wrap, need to call release() manually
+	ID3D11Buffer* vertex_buffer;
+	ID3D11Buffer* index_buffer;
 	int vertex_count = 0;
 	int index_count = 0;
 };
