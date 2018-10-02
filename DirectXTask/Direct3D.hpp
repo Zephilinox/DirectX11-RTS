@@ -35,6 +35,14 @@ public:
 private:
 	DXGI_SWAP_CHAIN_DESC make_swapchain_desc(HWND window, int width, int height, unsigned int numerator, unsigned int denominator);
 	D3D11_TEXTURE2D_DESC make_depth_buffer_desc(int width, int height);
+	bool create_device_and_swapchain(HWND window, int width, int height, int numerator, int denominator);
+	bool create_render_target_view();
+	bool create_texture2d(int width, int height);
+	bool create_depth_stencil_view();
+	bool create_depth_stencil_state();
+	bool create_rasterizer_state();
+	void create_viewport(float width, float height);
+	void create_matrices(float width, float height, float screen_near, float screen_depth);
 
 	bool vsync;
 	bool fullscreen;

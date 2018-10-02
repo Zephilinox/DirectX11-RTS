@@ -1,6 +1,8 @@
 #include "Direct3D.hpp"
 
 #include <iostream>
+#include <array>
+#include <vector>
 
 bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscreen, float screen_depth, float screen_near)
 {
@@ -8,212 +10,113 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 	this->fullscreen = fullscreen;
 
 	HRESULT result;
-	IDXGIFactory* factory;
-	result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	IDXGIAdapter* adapter;
-	result = factory->EnumAdapters(0, &adapter);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	IDXGIOutput* adapter_out;
-	result = adapter->EnumOutputs(0, &adapter_out);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	unsigned int mode_count;
-	result = adapter_out->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
-		DXGI_ENUM_MODES_INTERLACED,
-		&mode_count,
-		0);
-	DXGI_MODE_DESC* display_modes = new DXGI_MODE_DESC[mode_count];
-	if (!display_modes)
-	{
-		return false;
-	}
-
-	result = adapter_out->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
-		DXGI_ENUM_MODES_INTERLACED,
-		&mode_count,
-		display_modes);
 
 	unsigned int numerator = 0;
 	unsigned int denominator = 0;
-
-	if (FAILED(result))
 	{
-		return false;
-	}
 
-	for (unsigned int i = 0; i < mode_count; ++i)
-	{
-		if (display_modes[i].Width == static_cast<unsigned int>(width))
+		IDXGIAdapter* adapter;
+
+		//adapter & factory
 		{
-			if (display_modes[i].Height == static_cast<unsigned int>(height))
+			IDXGIFactory* factory;
+			result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
+			if (FAILED(result))
 			{
-				numerator = display_modes[i].RefreshRate.Numerator;
-				denominator = display_modes[i].RefreshRate.Denominator;
+				return false;
 			}
+
+			result = factory->EnumAdapters(0, &adapter);
+			factory->Release();
+			if (FAILED(result))
+			{
+				return false;
+			}
+		}
+
+		//adapter_output?
+		{
+			IDXGIOutput* adapter_out;
+			result = adapter->EnumOutputs(0, &adapter_out);
+			if (FAILED(result))
+			{
+				return false;
+			}
+
+			unsigned int mode_count;
+			result = adapter_out->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
+				DXGI_ENUM_MODES_INTERLACED,
+				&mode_count,
+				0);
+
+			//get_display_modes;
+			std::vector<DXGI_MODE_DESC> display_modes(mode_count);
+			{
+				result = adapter_out->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
+					DXGI_ENUM_MODES_INTERLACED,
+					&mode_count,
+					display_modes.data());
+
+				if (FAILED(result))
+				{
+					return false;
+				}
+			}
+
+			adapter_out->Release();
+			adapter_out = 0;
+
+			//get_best_numerator_denominator
+			{
+				for (unsigned int i = 0; i < mode_count; ++i)
+				{
+					if (display_modes[i].Width == static_cast<unsigned int>(width))
+					{
+						if (display_modes[i].Height == static_cast<unsigned int>(height))
+						{
+							numerator = display_modes[i].RefreshRate.Numerator;
+							denominator = display_modes[i].RefreshRate.Denominator;
+						}
+					}
+				}
+			}
+		}
+
+		DXGI_ADAPTER_DESC adapter_desc;
+		result = adapter->GetDesc(&adapter_desc);
+		if (FAILED(result))
+		{
+			return false;
+		}
+
+		adapter->Release();
+		adapter = 0;
+
+		gpu_memory = static_cast<int>(adapter_desc.DedicatedVideoMemory / 1024 / 1024);
+
+		size_t string_length;
+		int error = wcstombs_s(&string_length, gpu_description, 128, adapter_desc.Description, 128);
+		if (error != 0)
+		{
+			return false;
 		}
 	}
 
-	DXGI_ADAPTER_DESC adapter_desc;
-	result = adapter->GetDesc(&adapter_desc);
-	if (FAILED(result))
-	{
-		return false;
-	}
+	create_device_and_swapchain(window, width, height, numerator, denominator);
+	create_render_target_view();
+	create_texture2d(width, height);
 
-	gpu_memory = static_cast<int>(adapter_desc.DedicatedVideoMemory / 1024 / 1024);
-
-	size_t string_length;
-	int error = wcstombs_s(&string_length, gpu_description, 128, adapter_desc.Description, 128);
-	if (error != 0)
-	{
-		return false;
-	}
-
-	//todo: RAII
-	delete[] display_modes;
-	display_modes = 0;
-
-	adapter_out->Release();
-	adapter_out = 0;
-	adapter->Release();
-	adapter = 0;
-	//factory->Release();
-	//factory = 0;
-
-	auto swapchain_desc = make_swapchain_desc(window, width, height, numerator, denominator);
-
-	//bloody hell this is a long function, refactor. todo
-	D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_11_0;
-
-	result = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, D3D11_CREATE_DEVICE_DEBUG, &feature_level, 1,
-		D3D11_SDK_VERSION, &swapchain_desc, &swapchain, &device, 0, &device_context);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	ID3D11Texture2D* back_buffer;
-	result = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&back_buffer);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	result = device->CreateRenderTargetView(back_buffer, 0, &render_target_view);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	//RAII todo
-	back_buffer->Release();
-	back_buffer = 0;
-
-	auto depth_buffer_desc = make_depth_buffer_desc(width, height);
-
-	result = device->CreateTexture2D(&depth_buffer_desc, 0, &depth_stencil_buffer);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
-	//So very long, todo refactor
-
-	D3D11_DEPTH_STENCIL_DESC depth_stencil_desc;
-	ZeroMemory(&depth_stencil_desc, sizeof(depth_stencil_desc));
-
-	depth_stencil_desc.DepthEnable = true;
-	depth_stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-	depth_stencil_desc.DepthFunc = D3D11_COMPARISON_LESS;
-
-	depth_stencil_desc.StencilEnable = true;
-	depth_stencil_desc.StencilReadMask = 0xFF;
-	depth_stencil_desc.StencilWriteMask = 0xFF;
-
-	depth_stencil_desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depth_stencil_desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
-	depth_stencil_desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depth_stencil_desc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	depth_stencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
-	depth_stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
-	depth_stencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
-	depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
-
-	result = device->CreateDepthStencilState(&depth_stencil_desc, &depth_stencil_state);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
+	create_depth_stencil_state();
 	device_context->OMSetDepthStencilState(depth_stencil_state, 1);
 
-	//so very very long, refactor
-	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc;
-	ZeroMemory(&depth_stencil_view_desc, sizeof(depth_stencil_view_desc));
-
-	depth_stencil_view_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
-	depth_stencil_view_desc.Texture2D.MipSlice = 0;
-
-	result = device->CreateDepthStencilView(depth_stencil_buffer, &depth_stencil_view_desc, &depth_stencil_view);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
+	create_depth_stencil_view();
 	device_context->OMSetRenderTargets(1, &render_target_view, depth_stencil_view);
 
-	D3D11_RASTERIZER_DESC raster_desc;
-	raster_desc.AntialiasedLineEnable = false;
-	raster_desc.CullMode = D3D11_CULL_BACK;
-	raster_desc.DepthBias = 0;
-	raster_desc.DepthBiasClamp = 0.0f;
-	raster_desc.DepthClipEnable = true;
-	raster_desc.FillMode = D3D11_FILL_SOLID;
-	raster_desc.FrontCounterClockwise = false;
-	raster_desc.MultisampleEnable = false;
-	raster_desc.ScissorEnable = false;
-	raster_desc.SlopeScaledDepthBias = 0.0f;
-
-	result = device->CreateRasterizerState(&raster_desc, &raster_state);
-	if (FAILED(result))
-	{
-		return false;
-	}
-
+	create_rasterizer_state();
 	device_context->RSSetState(raster_state);
 
-	D3D11_VIEWPORT viewport;
-	viewport.Width = static_cast<float>(width);
-	viewport.Height = static_cast<float>(height);
-	viewport.MinDepth = 0.0f;
-	viewport.MaxDepth = 1.0f;
-	viewport.TopLeftX = 0.0f;
-	viewport.TopLeftY = 0.0f;
-
-	device_context->RSSetViewports(1, &viewport);
-
-	//sigh, so very very very very very very very long, refactor
-	static constexpr float PI = 3.14159f;
-	float fov = PI / 4.0f;
-	float aspect_ratio = static_cast<float>(width) / static_cast<float>(height);
-
-	projection_matrix = dx::XMMatrixPerspectiveFovLH(fov, aspect_ratio, screen_near, screen_depth);
-	world_matrix = dx::XMMatrixIdentity();
-	ortho_matrix = dx::XMMatrixOrthographicLH(static_cast<float>(width), static_cast<float>(height), screen_near, screen_depth);
+	create_viewport(static_cast<float>(width), static_cast<float>(height));
+	create_matrices(static_cast<float>(width), static_cast<float>(height), screen_near, screen_depth);
 
 	return true;
 }
@@ -433,4 +336,125 @@ D3D11_TEXTURE2D_DESC Direct3D::make_depth_buffer_desc(int width, int height)
 	depth_buffer_desc.MiscFlags = 0;
 
 	return depth_buffer_desc;
+}
+
+bool Direct3D::create_device_and_swapchain(HWND window, int width, int height, int numerator, int denominator)
+{
+	auto swapchain_desc = make_swapchain_desc(window, width, height, numerator, denominator);
+
+	D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_11_0;
+
+	HRESULT result = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, D3D11_CREATE_DEVICE_DEBUG, &feature_level, 1,
+		D3D11_SDK_VERSION, &swapchain_desc, &swapchain, &device, 0, &device_context);
+	
+	return !FAILED(result);
+}
+
+bool Direct3D::create_render_target_view()
+{
+	ID3D11Texture2D* back_buffer;
+	HRESULT result = swapchain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&back_buffer);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	result = device->CreateRenderTargetView(back_buffer, 0, &render_target_view);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
+	back_buffer->Release();
+}
+
+bool Direct3D::create_texture2d(int width, int height)
+{
+	auto depth_buffer_desc = make_depth_buffer_desc(width, height);
+
+	HRESULT result = device->CreateTexture2D(&depth_buffer_desc, 0, &depth_stencil_buffer);
+	return !FAILED(result);
+}
+
+bool Direct3D::create_depth_stencil_view()
+{
+	D3D11_DEPTH_STENCIL_VIEW_DESC depth_stencil_view_desc;
+	ZeroMemory(&depth_stencil_view_desc, sizeof(depth_stencil_view_desc));
+
+	depth_stencil_view_desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depth_stencil_view_desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depth_stencil_view_desc.Texture2D.MipSlice = 0;
+
+	HRESULT result = device->CreateDepthStencilView(depth_stencil_buffer, &depth_stencil_view_desc, &depth_stencil_view);
+
+	return !FAILED(result);
+}
+
+bool Direct3D::create_depth_stencil_state()
+{	
+	D3D11_DEPTH_STENCIL_DESC depth_stencil_desc;
+	ZeroMemory(&depth_stencil_desc, sizeof(depth_stencil_desc));
+
+	depth_stencil_desc.DepthEnable = true;
+	depth_stencil_desc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depth_stencil_desc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depth_stencil_desc.StencilEnable = true;
+	depth_stencil_desc.StencilReadMask = 0xFF;
+	depth_stencil_desc.StencilWriteMask = 0xFF;
+
+	depth_stencil_desc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depth_stencil_desc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depth_stencil_desc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depth_stencil_desc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	depth_stencil_desc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depth_stencil_desc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depth_stencil_desc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depth_stencil_desc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	HRESULT result = device->CreateDepthStencilState(&depth_stencil_desc, &depth_stencil_state);
+	return !FAILED(result);
+}
+
+bool Direct3D::create_rasterizer_state()
+{
+	D3D11_RASTERIZER_DESC raster_desc;
+	raster_desc.AntialiasedLineEnable = false;
+	raster_desc.CullMode = D3D11_CULL_BACK;
+	raster_desc.DepthBias = 0;
+	raster_desc.DepthBiasClamp = 0.0f;
+	raster_desc.DepthClipEnable = true;
+	raster_desc.FillMode = D3D11_FILL_SOLID;
+	raster_desc.FrontCounterClockwise = false;
+	raster_desc.MultisampleEnable = false;
+	raster_desc.ScissorEnable = false;
+	raster_desc.SlopeScaledDepthBias = 0.0f;
+
+	HRESULT result = device->CreateRasterizerState(&raster_desc, &raster_state);
+	return !FAILED(result);
+}
+
+void Direct3D::create_viewport(float width, float height)
+{
+	D3D11_VIEWPORT viewport;
+	viewport.Width = width;
+	viewport.Height = height;
+	viewport.MinDepth = 0.0f;
+	viewport.MaxDepth = 1.0f;
+	viewport.TopLeftX = 0.0f;
+	viewport.TopLeftY = 0.0f;
+
+	device_context->RSSetViewports(1, &viewport);
+}
+
+void Direct3D::create_matrices(float width, float height, float screen_near, float screen_depth)
+{
+	static constexpr float PI = 3.14159f;
+	float fov = PI / 4.0f;
+	float aspect_ratio = width / height;
+
+	projection_matrix = dx::XMMatrixPerspectiveFovLH(fov, aspect_ratio, screen_near, screen_depth);
+	world_matrix = dx::XMMatrixIdentity();
+	ortho_matrix = dx::XMMatrixOrthographicLH(width, height, screen_near, screen_depth);
 }
