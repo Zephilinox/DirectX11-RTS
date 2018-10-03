@@ -70,6 +70,37 @@ Model::Model(ID3D11Device* device,
 
 	delete [] indices;
 	indices = 0;
+
+	instance_count = 4;
+
+	InstanceType* instances = new InstanceType[instance_count];
+	
+	instances[0].position = dx::XMFLOAT3(-1.5f, -1.5f, 5.0f);
+	instances[1].position = dx::XMFLOAT3(-1.5f, 1.5f, 5.0f);
+	instances[2].position = dx::XMFLOAT3(1.5f, -1.5f, 5.0f);
+	instances[3].position = dx::XMFLOAT3(1.5f, 1.5f, 5.0f);
+	
+	D3D11_BUFFER_DESC instance_buffer_desc;
+	instance_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	instance_buffer_desc.ByteWidth = sizeof(InstanceType) * instance_count;
+	instance_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	instance_buffer_desc.CPUAccessFlags = 0;
+	instance_buffer_desc.MiscFlags = 0;
+	instance_buffer_desc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA instance_data;
+	instance_data.pSysMem = instances;
+	instance_data.SysMemPitch = 0;
+	instance_data.SysMemSlicePitch = 0;
+
+	result = device->CreateBuffer(&instance_buffer_desc, &instance_data, &instance_buffer);
+	if (FAILED(result))
+	{
+		throw;
+	}
+
+	delete[] instances;
+	instances = 0;
 }
 
 Model::~Model()
@@ -82,6 +113,16 @@ void Model::render(ID3D11DeviceContext* device_context)
 	render_buffers(device_context);
 }
 
+int Model::get_vertex_count()
+{
+	return vertex_count;
+}
+
+int Model::get_instance_count()
+{
+	return instance_count;
+}
+
 int Model::get_index_count()
 {
 	return index_count;
@@ -89,6 +130,12 @@ int Model::get_index_count()
 
 void Model::stop_buffers()
 {
+	if (instance_buffer)
+	{
+		instance_buffer->Release();
+		instance_buffer = nullptr;
+	}
+
 	if (index_buffer)
 	{
 		index_buffer->Release();
@@ -104,10 +151,12 @@ void Model::stop_buffers()
 
 void Model::render_buffers(ID3D11DeviceContext* device_context)
 {
-	unsigned int stride = sizeof(VertexType); 
-	unsigned int offset = 0;
+	unsigned int strides[2] = { sizeof(VertexType), sizeof(InstanceType) };
+	unsigned int offsets[2] = { 0, 0 };
 
-	device_context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+	ID3D11Buffer* buffer_pointers[2] = { vertex_buffer, instance_buffer };
+
+	device_context->IASetVertexBuffers(0, 2, buffer_pointers, strides, offsets);
 	device_context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
 	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }

@@ -16,6 +16,8 @@ public:
 
 	void render(ID3D11DeviceContext* device_context);
 
+	int get_vertex_count();
+	int get_instance_count();
 	int get_index_count();
 
 private:
@@ -25,12 +27,19 @@ private:
 		dx::XMFLOAT4 colour;
 	};
 
+	struct InstanceType
+	{
+		dx::XMFLOAT3 position;
+	};
+
 	void stop_buffers();
 	void render_buffers(ID3D11DeviceContext* device_context);
 
 	//Do not wrap, need to call release() manually
 	ID3D11Buffer* vertex_buffer;
 	ID3D11Buffer* index_buffer;
+	ID3D11Buffer* instance_buffer;
 	int vertex_count = 0;
 	int index_count = 0;
+	int instance_count = 0;
 };

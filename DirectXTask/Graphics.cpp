@@ -56,7 +56,7 @@ bool Graphics::render()
 		model2->render(direct3d->get_device_context());
 	}
 
-	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), world, view, projection);
+	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), model->get_vertex_count(), model->get_instance_count(), world, view, projection);
 	if (!result)
 	{
 		return false;

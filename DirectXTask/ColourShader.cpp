@@ -17,12 +17,12 @@ ColourShader::~ColourShader()
 	stop_shader();
 }
 
-bool ColourShader::render(ID3D11DeviceContext* device_context, int index_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection)
+bool ColourShader::render(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection)
 {
 	bool successful = set_shader_params(device_context, world, view, projection);
 	if (successful)
 	{
-		render_shader(device_context, index_count);
+		render_shader(device_context, index_count, vertex_count, instance_count);
 	}
 
 	return successful;
@@ -47,6 +47,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 			MessageBoxW(window, vs_filename, L"Missing VS Shader File", MB_OK);
 		}
 
+		throw;
 		return false;
 	}
 
@@ -65,22 +66,25 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 			MessageBoxW(window, ps_filename, L"Missing PS Shader File", MB_OK);
 		}
 
+		throw;
 		return false;
 	}
 
 	result = device->CreateVertexShader(vertex_shader_buffer->GetBufferPointer(), vertex_shader_buffer->GetBufferSize(), NULL, &vertex_shader);
 	if (FAILED(result))
 	{
+		throw;
 		return false;
 	}
 
 	result = device->CreatePixelShader(pixel_shader_buffer->GetBufferPointer(), pixel_shader_buffer->GetBufferSize(), NULL, &pixel_shader);
 	if (FAILED(result))
 	{
+		throw;
 		return false;
 	}
 
-	D3D11_INPUT_ELEMENT_DESC polygon[2];
+	D3D11_INPUT_ELEMENT_DESC polygon[3];
 	unsigned int element_count;
 
 	polygon[0].SemanticName = "POSITION";
@@ -99,6 +103,14 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	polygon[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygon[1].InstanceDataStepRate = 0;
 
+	polygon[2].SemanticName = "TEXCOORD";
+	polygon[2].SemanticIndex = 0;
+	polygon[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
+	polygon[2].InputSlot = 1;
+	polygon[2].AlignedByteOffset = 0;
+	polygon[2].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
+	polygon[2].InstanceDataStepRate = 1;
+
 	element_count = sizeof(polygon) / sizeof(polygon[0]);
 
 	//fails here
@@ -106,6 +118,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 		vertex_shader_buffer->GetBufferSize(), &layout);
 	if (FAILED(result))
 	{
+		throw;
 		return false;
 	}
 
@@ -211,12 +224,12 @@ bool ColourShader::set_shader_params(ID3D11DeviceContext* device_context, dx::XM
 	return true;
 }
 
-void ColourShader::render_shader(ID3D11DeviceContext* device_context, int index_count)
+void ColourShader::render_shader(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count)
 {
 	device_context->IASetInputLayout(layout);
 
 	device_context->VSSetShader(vertex_shader, 0, 0);
 	device_context->PSSetShader(pixel_shader, 0, 0);
 
-	device_context->DrawIndexed(index_count, 0, 0);
+	device_context->DrawIndexedInstanced(index_count, instance_count, 0, 0, 0);
 }

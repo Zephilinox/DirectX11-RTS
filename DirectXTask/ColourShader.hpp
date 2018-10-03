@@ -16,7 +16,7 @@ public:
 	ColourShader(ID3D11Device* device, HWND window);
 	~ColourShader();
 
-	bool render(ID3D11DeviceContext* device_context, int index_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection);
+	bool render(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection);
 
 private:
 	struct MatrixBuffer
@@ -31,7 +31,7 @@ private:
 	void print_shader_error(ID3D10Blob* error_msg, HWND window, LPCWSTR filename);
 
 	bool set_shader_params(ID3D11DeviceContext* device_context, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection);
-	void render_shader(ID3D11DeviceContext* device_context, int);
+	void render_shader(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count);
 
 	ID3D11VertexShader* vertex_shader = nullptr;
 	ID3D11PixelShader* pixel_shader = nullptr;
