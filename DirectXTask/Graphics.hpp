@@ -28,5 +28,6 @@ private:
 	std::unique_ptr<Direct3D> direct3d;
 	std::unique_ptr<Camera> camera;
 	std::unique_ptr<Model> model;
+	std::unique_ptr<Model> model2;
 	std::unique_ptr<ColourShader> colour_shader;
 };

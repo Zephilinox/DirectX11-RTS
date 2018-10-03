@@ -1,6 +1,9 @@
 #include "Model.hpp"
 
-Model::Model(ID3D11Device* device)
+Model::Model(ID3D11Device* device,
+	dx::XMFLOAT3 vertex1,
+	dx::XMFLOAT3 vertex2,
+	dx::XMFLOAT3 vertex3)
 {
 	vertex_count = 3;
 	index_count = 3;
@@ -9,15 +12,15 @@ Model::Model(ID3D11Device* device)
 	unsigned long* indices = new unsigned long[index_count];
 
 	//Bottom left
-	vertices[0].position = dx::XMFLOAT3(-1.0f, -1.0f, 0.0f);  
+	vertices[0].position = vertex1;  
 	vertices[0].colour = dx::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	//Top middle
-	vertices[1].position = dx::XMFLOAT3(0.0f, 1.0f, 0.0f);  
+	vertices[1].position = vertex2;  
 	vertices[1].colour = dx::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
 
 	//Bottom right
-	vertices[2].position = dx::XMFLOAT3(1.0f, -1.0f, 0.0f);  
+	vertices[2].position = vertex3;  
 	vertices[2].colour = dx::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
 
 	indices[0] = 0;

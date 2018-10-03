@@ -8,7 +8,10 @@ namespace dx = DirectX;
 class Model
 {
 public:
-	Model(ID3D11Device* device);
+	Model(ID3D11Device* device,
+		dx::XMFLOAT3 vertex1 = dx::XMFLOAT3(-1.0F, -1.0f, 0.0f),
+		dx::XMFLOAT3 vertex2 = dx::XMFLOAT3(0.0F, 1.0f, 0.0f),
+		dx::XMFLOAT3 vertex3 = dx::XMFLOAT3(1.0F, -1.0f, 0.0f));
 	~Model();
 
 	void render(ID3D11DeviceContext* device_context);

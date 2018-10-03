@@ -4,102 +4,47 @@
 #include <array>
 #include <vector>
 
-bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscreen, float screen_depth, float screen_near)
+Direct3D::Direct3D(int width, int height, bool vsync, HWND window, bool fullscreen, float screen_depth, float screen_near)
 {
+
 	this->vsync = vsync;
 	this->fullscreen = fullscreen;
 
 	HRESULT result;
 
-	unsigned int numerator = 0;
-	unsigned int denominator = 0;
+	D3DRAII<IDXGIAdapter> adapter;
+
 	{
-
-		IDXGIAdapter* adapter;
-
-		//adapter & factory
-		{
-			IDXGIFactory* factory;
-			result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory);
-			if (FAILED(result))
-			{
-				return false;
-			}
-
-			result = factory->EnumAdapters(0, &adapter);
-			factory->Release();
-			if (FAILED(result))
-			{
-				return false;
-			}
-		}
-
-		//adapter_output?
-		{
-			IDXGIOutput* adapter_out;
-			result = adapter->EnumOutputs(0, &adapter_out);
-			if (FAILED(result))
-			{
-				return false;
-			}
-
-			unsigned int mode_count;
-			result = adapter_out->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
-				DXGI_ENUM_MODES_INTERLACED,
-				&mode_count,
-				0);
-
-			//get_display_modes;
-			std::vector<DXGI_MODE_DESC> display_modes(mode_count);
-			{
-				result = adapter_out->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
-					DXGI_ENUM_MODES_INTERLACED,
-					&mode_count,
-					display_modes.data());
-
-				if (FAILED(result))
-				{
-					return false;
-				}
-			}
-
-			adapter_out->Release();
-			adapter_out = 0;
-
-			//get_best_numerator_denominator
-			{
-				for (unsigned int i = 0; i < mode_count; ++i)
-				{
-					if (display_modes[i].Width == static_cast<unsigned int>(width))
-					{
-						if (display_modes[i].Height == static_cast<unsigned int>(height))
-						{
-							numerator = display_modes[i].RefreshRate.Numerator;
-							denominator = display_modes[i].RefreshRate.Denominator;
-						}
-					}
-				}
-			}
-		}
-
-		DXGI_ADAPTER_DESC adapter_desc;
-		result = adapter->GetDesc(&adapter_desc);
+		D3DRAII<IDXGIFactory> factory;
+		result = CreateDXGIFactory(__uuidof(IDXGIFactory), (void**)&factory.val);
 		if (FAILED(result))
 		{
-			return false;
+			throw;
 		}
 
-		adapter->Release();
-		adapter = 0;
-
-		gpu_memory = static_cast<int>(adapter_desc.DedicatedVideoMemory / 1024 / 1024);
-
-		size_t string_length;
-		int error = wcstombs_s(&string_length, gpu_description.data(), gpu_description.size(), adapter_desc.Description, gpu_description.size());
-		if (error != 0)
+		result = factory.val->EnumAdapters(0, &adapter.val);
+		if (FAILED(result))
 		{
-			return false;
+			throw;
 		}
+	}
+
+	auto [numerator, denominator] = get_display_mode_data(width, height, adapter.val);
+
+	DXGI_ADAPTER_DESC adapter_desc;
+	result = adapter.val->GetDesc(&adapter_desc);
+	if (FAILED(result))
+	{
+		throw;
+	}
+
+	gpu_memory = static_cast<int>(adapter_desc.DedicatedVideoMemory / 1024 / 1024);
+
+	size_t string_length;
+	int error = wcstombs_s(&string_length, gpu_description.data(), gpu_description.size(), adapter_desc.Description, gpu_description.size());
+	if (error != 0)
+	{
+		throw;
 	}
 
 	create_device_and_swapchain(window, width, height, numerator, denominator);
@@ -117,11 +62,9 @@ bool Direct3D::init(int width, int height, bool vsync, HWND window, bool fullscr
 
 	create_viewport(static_cast<float>(width), static_cast<float>(height));
 	create_matrices(static_cast<float>(width), static_cast<float>(height), screen_near, screen_depth);
-
-	return true;
 }
 
-void Direct3D::stop()
+Direct3D::~Direct3D()
 {
 	if (swapchain.val)
 	{
@@ -288,6 +231,49 @@ D3D11_TEXTURE2D_DESC Direct3D::make_depth_buffer_desc(int width, int height)
 	depth_buffer_desc.MiscFlags = 0;
 
 	return depth_buffer_desc;
+}
+
+std::tuple<unsigned int, unsigned int> Direct3D::get_display_mode_data(int width, int height, IDXGIAdapter* adapter)
+{
+	D3DRAII<IDXGIOutput> adapter_out;
+	HRESULT result = adapter->EnumOutputs(0, &adapter_out.val);
+	if (FAILED(result))
+	{
+		throw;
+	}
+
+	unsigned int mode_count;
+	result = adapter_out.val->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
+		DXGI_ENUM_MODES_INTERLACED,
+		&mode_count,
+		0);
+
+	//get_display_modes;
+	std::vector<DXGI_MODE_DESC> display_modes(mode_count);
+	{
+		result = adapter_out.val->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
+			DXGI_ENUM_MODES_INTERLACED,
+			&mode_count,
+			display_modes.data());
+
+		if (FAILED(result))
+		{
+			throw;
+		}
+	}
+	
+	for (unsigned int i = 0; i < mode_count; ++i)
+	{
+		if (display_modes[i].Width == static_cast<unsigned int>(width))
+		{
+			if (display_modes[i].Height == static_cast<unsigned int>(height))
+			{
+				return { display_modes[i].RefreshRate.Numerator, display_modes[i].RefreshRate.Denominator };
+			}
+		}
+	}
+
+	return { 0, 0 };
 }
 
 bool Direct3D::create_device_and_swapchain(HWND window, int width, int height, int numerator, int denominator)

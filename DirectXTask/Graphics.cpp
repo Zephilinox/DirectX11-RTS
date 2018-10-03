@@ -2,9 +2,11 @@
 
 Graphics::Graphics(int width, int height, HWND window)
 {
-	direct3d = std::make_unique<Direct3D>();
-	bool result = direct3d->init(width, height, vsync, window, fullscreen, screen_depth, screen_near);
-	if (!result)
+	try
+	{
+		direct3d = std::make_unique<Direct3D>(width, height, vsync, window, fullscreen, screen_depth, screen_near);
+	}
+	catch (...)
 	{
 		MessageBox(window, "Could not init Direct3D", "ERROR", MB_OK);
 		throw;
@@ -16,10 +18,11 @@ Graphics::Graphics(int width, int height, HWND window)
 	try
 	{
 		model = std::make_unique<Model>(direct3d->get_device());
+		model2 = std::make_unique<Model>(direct3d->get_device(), dx::XMFLOAT3(-2.0f, -2.0f, 0.0f), dx::XMFLOAT3(-1.0F, 0.0f, 0.0f), dx::XMFLOAT3(0.0F, -2.0f, 0.0f));
 	}
 	catch (...)
 	{
-		MessageBoxW(window, L"Could not init model", L"ERROR", MB_OK);
+		MessageBoxW(window, L"Could not init Model", L"ERROR", MB_OK);
 	}
 
 	colour_shader = std::make_unique<ColourShader>(direct3d->get_device(), window);
@@ -27,15 +30,6 @@ Graphics::Graphics(int width, int height, HWND window)
 
 Graphics::~Graphics()
 {
-	colour_shader = nullptr;
-	model = nullptr;
-	camera = nullptr;
-
-	if (direct3d)
-	{
-		direct3d->stop();
-		direct3d = nullptr;
-	}
 }
 
 bool Graphics::frame()
@@ -53,7 +47,14 @@ bool Graphics::render()
 	dx::XMMATRIX view =	camera->get_view_matrix();
 	dx::XMMATRIX projection = direct3d->get_projection_matrix();
 
-	model->render(direct3d->get_device_context());
+	if (rand() % 2)
+	{
+		model->render(direct3d->get_device_context());
+	}
+	else
+	{
+		model2->render(direct3d->get_device_context());
+	}
 
 	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), world, view, projection);
 	if (!result)

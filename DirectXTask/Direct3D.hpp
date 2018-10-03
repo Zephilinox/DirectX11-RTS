@@ -32,8 +32,8 @@ struct D3DRAII
 class Direct3D
 {
 public:
-	bool init(int width, int height, bool vsync, HWND window, bool fullscreen, float screen_depth, float screen_near);
-	void stop();
+	Direct3D(int width, int height, bool vsync, HWND window, bool fullscreen, float screen_depth, float screen_near);
+	~Direct3D();
 
 	void begin(float r, float g, float b, float a);
 	void end();
@@ -50,6 +50,7 @@ public:
 private:
 	DXGI_SWAP_CHAIN_DESC make_swapchain_desc(HWND window, int width, int height, unsigned int numerator, unsigned int denominator);
 	D3D11_TEXTURE2D_DESC make_depth_buffer_desc(int width, int height);
+	std::tuple<unsigned int, unsigned int> get_display_mode_data(int width, int height, IDXGIAdapter* adapte);
 	bool create_device_and_swapchain(HWND window, int width, int height, int numerator, int denominator);
 	bool create_render_target_view();
 	bool create_texture2d(int width, int height);
