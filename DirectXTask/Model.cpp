@@ -5,27 +5,83 @@ Model::Model(ID3D11Device* device,
 	dx::XMFLOAT3 vertex2,
 	dx::XMFLOAT3 vertex3)
 {
-	vertex_count = 3;
-	index_count = 3;
+	vertex_count = 8;
+	index_count = 36;
 
 	VertexType* vertices = new VertexType[vertex_count];
 	unsigned long* indices = new unsigned long[index_count];
 
-	//Bottom left
-	vertices[0].position = vertex1;  
-	vertices[0].colour = dx::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[0].position = { -1.0f, -1.0f, -1.0f };
+	vertices[0].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	//Top middle
-	vertices[1].position = vertex2;  
-	vertices[1].colour = dx::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	vertices[1].position = { -1.0f, 1.0f, -1.0f };
+	vertices[1].colour = dx::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
 
-	//Bottom right
-	vertices[2].position = vertex3;  
-	vertices[2].colour = dx::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	vertices[2].position = { 1.0f, 1.0f, -1.0f };;
+	vertices[2].colour = dx::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
+	vertices[3].position = { 1.0f, -1.0f, -1.0f };;
+	vertices[3].colour = dx::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+
+	vertices[4].position = { -1.0f, -1.0f, 1.0f };;
+	vertices[4].colour = dx::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+
+	vertices[5].position = { -1.0f, 1.0f, 1.0f };;
+	vertices[5].colour = dx::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	vertices[6].position = { 1.0f, 1.0f, 1.0f };;
+	vertices[6].colour = dx::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+
+	vertices[7].position = { 1.0f, -1.0f, 1.0f };;
+	vertices[7].colour = dx::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+
+	//front
 	indices[0] = 0;
 	indices[1] = 1;
 	indices[2] = 2;
+	indices[3] = 0;
+	indices[4] = 2;
+	indices[5] = 3;
+
+	//back
+	indices[6] = 4;
+	indices[7] = 6;
+	indices[8] = 5;
+	indices[9] = 4;
+	indices[10] = 7;
+	indices[11] = 6;
+
+	//left
+	indices[12] = 4;
+	indices[13] = 5;
+	indices[14] = 1;
+	indices[15] = 4;
+	indices[16] = 1;
+	indices[17] = 0;
+
+	//right
+	indices[18] = 3;
+	indices[19] = 2;
+	indices[20] = 6;
+	indices[21] = 3;
+	indices[22] = 6;
+	indices[23] = 7;
+
+	//top
+	indices[24] = 1;
+	indices[25] = 5;
+	indices[26] = 6;
+	indices[27] = 1;
+	indices[28] = 6;
+	indices[29] = 2;
+
+	//bottom
+	indices[30] = 4;
+	indices[31] = 0;
+	indices[32] = 3;
+	indices[33] = 4;
+	indices[34] = 3;
+	indices[35] = 7;
 
 	D3D11_BUFFER_DESC vertex_buffer_desc;
 	vertex_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
