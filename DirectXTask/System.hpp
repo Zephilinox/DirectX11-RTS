@@ -1,11 +1,16 @@
-#include <memory>
 #pragma once
 
+//STD
+#include <memory>
+
+//LIBS
 #define WINDOWS32_LEAN_AND_MEAN
 #include <Windows.h>
 
+//SELF
 #include "Input.hpp"
 #include "Graphics.hpp"
+#include "Timer.hpp"
 
 class System
 {
@@ -22,14 +27,13 @@ private:
 	void create_window(int& width, int& height);
 	void destroy_window();
 
-	void display_settings(int width, int height);
-
 	LPCSTR name;
 	HINSTANCE instance = nullptr;
 	HWND window = nullptr;
 
 	std::unique_ptr<Input> input = nullptr;
 	std::unique_ptr<Graphics> graphics = nullptr;
+	Timer frame_timer;
 };
 
 static LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam);

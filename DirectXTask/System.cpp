@@ -1,5 +1,8 @@
 #include "System.hpp"
 
+#include <iostream>
+#include <thread>
+
 System::System()
 {
 	int width = 0;
@@ -38,6 +41,8 @@ void System::run()
 		{
 			quit = frame();
 		}
+		std::cout << "FPS: " << static_cast<int>(1.0f / frame_timer.getElapsedTime<Timer::seconds_float>()) << "\n";
+		frame_timer.restart();
 	}
 }
 
@@ -133,7 +138,6 @@ void System::create_window(int& width, int& height)
 
 	ShowWindow(window, SW_SHOW);
 	SetWindowLong(window, GWL_EXSTYLE, GetWindowLong(window, GWL_EXSTYLE) | WS_EX_LAYERED);
-	SetLayeredWindowAttributes(window, RGB(204, 51, 127), 0, LWA_COLORKEY);
 	SetForegroundWindow(window);
 	SetFocus(window);
 	ShowCursor(true);

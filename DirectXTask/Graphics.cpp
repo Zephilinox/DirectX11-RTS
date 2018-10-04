@@ -39,7 +39,7 @@ bool Graphics::frame()
 
 bool Graphics::render()
 {
-	direct3d->begin(0.8f, 0.2f, 0.5f, 0.5f);
+	direct3d->begin(0.0f, 0.0f, 0.0f, 1.0f);
 
 	if (GetAsyncKeyState('A'))
 	{
