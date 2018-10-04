@@ -39,21 +39,23 @@ void System::run()
 		}	
 		else
 		{
-			quit = frame();
+			quit = update();
+			quit = quit || draw();
 		}
-		std::cout << "FPS: " << static_cast<int>(1.0f / frame_timer.getElapsedTime<Timer::seconds_float>()) << "\n";
+		dt = frame_timer.getElapsedTime<Timer::seconds_float>();
+		std::cout << "FPS: " << static_cast<int>(1.0f / dt) << "\n";
 		frame_timer.restart();
 	}
 }
 
-bool System::frame()
+bool System::update()
 {
-	if (input->is_key_down(VK_ESCAPE))
-	{
-		return true;
-	}
+	return (input->is_key_down(VK_ESCAPE)) || graphics->update(input.get(), dt);
+}
 
-	return graphics->frame();
+bool System::draw()
+{
+	return graphics->draw();
 }
 
 LRESULT CALLBACK System::MessageHandler(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
@@ -90,7 +92,7 @@ void System::create_window(int& width, int& height)
 	window_settings.hInstance = instance;
 	window_settings.hIcon = LoadIcon(0, IDI_WINLOGO);
 	window_settings.hIconSm = window_settings.hIcon;
-	window_settings.hCursor = LoadCursor(0, IDC_HAND);
+	window_settings.hCursor = LoadCursor(0, IDC_ARROW);
 	window_settings.hbrBackground = static_cast<HBRUSH>(GetStockObject(BLACK_BRUSH));
 	window_settings.lpszMenuName = 0;
 	window_settings.lpszClassName = name;
@@ -128,8 +130,6 @@ void System::create_window(int& width, int& height)
 		y = (old_height - height) / 2;
 	}
 
-
-	//https://stackoverflow.com/questions/3970066/creating-a-transparent-window-in-c-win32
 	window = CreateWindowEx(0,
 		name, name,
 		WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU,

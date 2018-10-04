@@ -4,6 +4,9 @@
 #include <directxmath.h>
 namespace dx = DirectX;
 
+//SELF
+#include "Input.hpp"
+
 class Camera
 {
 public:
@@ -13,7 +16,8 @@ public:
 	dx::XMFLOAT3 get_pos();
 	dx::XMFLOAT3 get_rot();
 
-	void render();
+	void update(Input* input, float dt);
+	void draw();
 	dx::XMMATRIX get_view_matrix();
 
 private:
@@ -24,5 +28,9 @@ private:
 	float rot_x = 0.0f;
 	float rot_y = 0.0f;
 	float rot_z = 0.0f;
+
+	float pos_speed = 20.0f;
+	float rot_speed = 50.0f;
+
 	dx::XMMATRIX view_matrix;
 };

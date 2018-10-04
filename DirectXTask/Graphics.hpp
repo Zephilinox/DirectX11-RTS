@@ -8,14 +8,15 @@
 #include "Camera.hpp"
 #include "Model.hpp"
 #include "ColourShader.hpp"
+#include "World.hpp"
 
 class Graphics
 {
 public:
 	Graphics(int width, int height, HWND window);
-	~Graphics();
 
-	bool frame();
+	bool update(Input* input, float dt);
+	bool draw();
 
 	static constexpr bool fullscreen = false;
 	static constexpr bool vsync = true;
@@ -23,11 +24,8 @@ public:
 	static constexpr float screen_near = 0.1f;
 
 private:
-	bool render();
-
 	std::unique_ptr<Direct3D> direct3d;
 	std::unique_ptr<Camera> camera;
 	std::unique_ptr<Model> model;
-	std::unique_ptr<Model> model2;
 	std::unique_ptr<ColourShader> colour_shader;
 };

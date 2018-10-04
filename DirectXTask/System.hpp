@@ -11,6 +11,7 @@
 #include "Input.hpp"
 #include "Graphics.hpp"
 #include "Timer.hpp"
+#include "World.hpp"
 
 class System
 {
@@ -23,7 +24,9 @@ public:
 	LRESULT CALLBACK MessageHandler(HWND window, UINT msg, WPARAM wparam, LPARAM lparan);
 
 private:
-	bool frame();
+	bool update();
+	bool draw();
+
 	void create_window(int& width, int& height);
 	void destroy_window();
 
@@ -31,9 +34,11 @@ private:
 	HINSTANCE instance = nullptr;
 	HWND window = nullptr;
 
-	std::unique_ptr<Input> input = nullptr;
-	std::unique_ptr<Graphics> graphics = nullptr;
+	std::unique_ptr<Input> input;
+	std::unique_ptr<Graphics> graphics;
+	std::unique_ptr<World> world;
 	Timer frame_timer;
+	float dt;
 };
 
 static LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam);

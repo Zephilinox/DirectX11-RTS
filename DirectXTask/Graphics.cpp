@@ -13,12 +13,12 @@ Graphics::Graphics(int width, int height, HWND window)
 	}
 
 	camera = std::make_unique<Camera>();
-	camera->set_pos(0.0f, 0.0f, -5.0f);
+	camera->set_pos(0.0f, 0.0f, -10.0f);
+	camera->set_rot(0, 0, 0);
 
 	try
 	{
 		model = std::make_unique<Model>(direct3d->get_device());
-		model2 = std::make_unique<Model>(direct3d->get_device(), dx::XMFLOAT3(-2.0f, -2.0f, 0.0f), dx::XMFLOAT3(-1.0F, 0.0f, 0.0f), dx::XMFLOAT3(0.0F, -2.0f, 0.0f));
 	}
 	catch (...)
 	{
@@ -28,97 +28,23 @@ Graphics::Graphics(int width, int height, HWND window)
 	colour_shader = std::make_unique<ColourShader>(direct3d->get_device(), window);
 }
 
-Graphics::~Graphics()
+bool Graphics::update(Input* input, float dt)
 {
+	camera->update(input, dt);
+	return false;
 }
 
-bool Graphics::frame()
-{
-	return render();
-}
-
-bool Graphics::render()
+bool Graphics::draw()
 {
 	direct3d->begin(0.0f, 0.0f, 0.0f, 1.0f);
 
-	if (GetAsyncKeyState('A'))
-	{
-		camera->set_pos(
-			camera->get_pos().x - 0.4f,
-			camera->get_pos().y,
-			camera->get_pos().z);
-	}
-
-	if (GetAsyncKeyState('D'))
-	{
-		camera->set_pos(
-			camera->get_pos().x + 0.4f,
-			camera->get_pos().y,
-			camera->get_pos().z);
-	}
-
-	if (GetAsyncKeyState('W'))
-	{
-		camera->set_pos(
-			camera->get_pos().x,
-			camera->get_pos().y + 0.4f,
-			camera->get_pos().z);
-	}
-
-	if (GetAsyncKeyState('S'))
-	{
-		camera->set_pos(
-			camera->get_pos().x,
-			camera->get_pos().y - 0.4f,
-			camera->get_pos().z);
-	}
-
-	if (GetAsyncKeyState('Q'))
-	{
-		camera->set_pos(
-			camera->get_pos().x,
-			camera->get_pos().y,
-			camera->get_pos().z + 0.4f);
-	}
-
-	if (GetAsyncKeyState('E'))
-	{
-		camera->set_pos(
-			camera->get_pos().x,
-			camera->get_pos().y,
-			camera->get_pos().z - 0.4f);
-	}
-
-	if (GetAsyncKeyState('Z'))
-	{
-		camera->set_rot(
-			camera->get_rot().x + 4.0f,
-			camera->get_rot().y,
-			camera->get_rot().z);
-	}
-
-	if (GetAsyncKeyState('X'))
-	{
-		camera->set_rot(
-			camera->get_rot().x - 4.0f,
-			camera->get_rot().y,
-			camera->get_rot().z);
-	}
-
-	camera->render();
+	camera->draw();
 
 	dx::XMMATRIX world = direct3d->get_world_matrix();
 	dx::XMMATRIX view =	camera->get_view_matrix();
 	dx::XMMATRIX projection = direct3d->get_projection_matrix();
 
-	if (rand() % 2)
-	{
-		model->render(direct3d->get_device_context());
-	}
-	else
-	{
-		model2->render(direct3d->get_device_context());
-	}
+	model->render(direct3d->get_device_context());
 
 	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), model->get_vertex_count(), model->get_instance_count(), world, view, projection);
 	if (!result)
