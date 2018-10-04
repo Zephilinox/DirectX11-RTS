@@ -152,6 +152,31 @@ World::World(ID3D11Device* device)
 	{
 		throw;
 	}
+	
+	instance_count = 1;
+
+	InstanceType* instances = new InstanceType[instance_count];
+
+	instances[0].position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
+
+	D3D11_BUFFER_DESC instance_buffer_desc;
+	instance_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
+	instance_buffer_desc.ByteWidth = sizeof(InstanceType) * instance_count;
+	instance_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	instance_buffer_desc.CPUAccessFlags = 0;
+	instance_buffer_desc.MiscFlags = 0;
+	instance_buffer_desc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA instance_data;
+	instance_data.pSysMem = instances;
+	instance_data.SysMemPitch = 0;
+	instance_data.SysMemSlicePitch = 0;
+
+	result = device->CreateBuffer(&instance_buffer_desc, &instance_data, &instance_buffer);
+	if (FAILED(result))
+	{
+		throw;
+	}
 
 	// Release the arrays now that the buffers have been created and loaded.
 	delete[] vertices;
@@ -159,10 +184,19 @@ World::World(ID3D11Device* device)
 
 	delete[] indices;
 	indices = 0;
+
+	delete[] instances;
+	instances = 0;
 }
 
 World::~World()
 {
+	// Release the index buffer.
+	if (instance_buffer)
+	{
+		instance_buffer->Release();
+		instance_buffer = 0;
+	}
 
 	// Release the index buffer.
 	if (index_buffer)
@@ -177,7 +211,6 @@ World::~World()
 		vertex_buffer->Release();
 		vertex_buffer = 0;
 	}
-
 }
 
 bool World::update(Input* input, float dt)
@@ -192,20 +225,14 @@ int World::get_index_count()
 
 bool World::draw(ID3D11DeviceContext* device_context)
 {
-	unsigned int stride;
-	unsigned int offset;
 
-	// Set vertex buffer stride and offset.
-	stride = sizeof(VertexType);
-	offset = 0;
+	unsigned int strides[2] = { sizeof(VertexType), sizeof(InstanceType) };
+	unsigned int offsets[2] = { 0, 0 };
 
-	// Set the vertex buffer to active in the input assembler so it can be rendered.
-	device_context->IASetVertexBuffers(0, 1, &vertex_buffer, &stride, &offset);
+	ID3D11Buffer* buffer_pointers[2] = { vertex_buffer, instance_buffer };
 
-	// Set the index buffer to active in the input assembler so it can be rendered.
+	device_context->IASetVertexBuffers(0, 2, buffer_pointers, strides, offsets);
 	device_context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
-
-	// Set the type of primitive that should be rendered from this vertex buffer, in this case lines.
 	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_LINELIST);
 
 	return false;

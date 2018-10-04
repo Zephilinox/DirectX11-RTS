@@ -28,7 +28,7 @@ bool ColourShader::render(ID3D11DeviceContext* device_context, int index_count, 
 	return successful;
 }
 
-bool ColourShader::render(ID3D11DeviceContext * device_context, int index_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection)
+bool ColourShader::render(ID3D11DeviceContext* device_context, int index_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection)
 {
 	bool successful = set_shader_params(device_context, world, view, projection);
 	if (successful)
@@ -124,7 +124,6 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 
 	element_count = sizeof(polygon) / sizeof(polygon[0]);
 
-	//fails here
 	result = device->CreateInputLayout(polygon, element_count, vertex_shader_buffer->GetBufferPointer(), 
 		vertex_shader_buffer->GetBufferSize(), &layout);
 	if (FAILED(result))

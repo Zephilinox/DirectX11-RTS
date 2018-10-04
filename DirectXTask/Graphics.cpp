@@ -60,10 +60,10 @@ bool Graphics::draw()
 		return false;
 	}
 
-	camera->draw();
+	world_matrix = dx::XMMatrixIdentity();
 	
 	world->draw(direct3d->get_device_context());
-	result = colour_shader->render(direct3d->get_device_context(), world->get_index_count(), world_matrix, view_matrix, projection_matrix);
+	result = colour_shader->render(direct3d->get_device_context(), world->get_index_count(), world->get_index_count(), 1, world_matrix, view_matrix, projection_matrix);
 	if (!result)
 	{
 		return false;

@@ -28,8 +28,15 @@ private:
 		dx::XMFLOAT4 color;
 	};
 
+	struct InstanceType
+	{
+		dx::XMFLOAT3 position;
+	};
+
 	ID3D11Buffer* vertex_buffer;
 	ID3D11Buffer* index_buffer;
+	ID3D11Buffer* instance_buffer;
 	int vertex_count;
 	int index_count;
+	int instance_count;
 };
