@@ -12,28 +12,28 @@ Model::Model(ID3D11Device* device,
 	unsigned long* indices = new unsigned long[index_count];
 
 	vertices[0].position = { -1.0f, -1.0f, -1.0f };
-	vertices[0].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	vertices[0].colour = {1.0f, 1.0f, 1.0f, 1.0f};
 
 	vertices[1].position = { -1.0f, 1.0f, -1.0f };
-	vertices[1].colour = dx::XMFLOAT4(0.0f, 0.0f, 0.0f, 1.0f);
+	vertices[1].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	vertices[2].position = { 1.0f, 1.0f, -1.0f };;
-	vertices[2].colour = dx::XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+	vertices[2].position = { 1.0f, 1.0f, -1.0f };
+	vertices[2].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	vertices[3].position = { 1.0f, -1.0f, -1.0f };;
-	vertices[3].colour = dx::XMFLOAT4(0.0f, 1.0f, 0.0f, 1.0f);
+	vertices[3].position = { 1.0f, -1.0f, -1.0f };
+	vertices[3].colour = { 1.0f, 0.0f, 0.0f, 1.0f };
 
-	vertices[4].position = { -1.0f, -1.0f, 1.0f };;
-	vertices[4].colour = dx::XMFLOAT4(0.0f, 0.0f, 1.0f, 1.0f);
+	vertices[4].position = { -1.0f, -1.0f, 1.0f };
+	vertices[4].colour = { 1.0f, 0.7f, 0.0f, 1.0f };
 
-	vertices[5].position = { -1.0f, 1.0f, 1.0f };;
-	vertices[5].colour = dx::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	vertices[5].position = { -1.0f, 1.0f, 1.0f };
+	vertices[5].colour = { 1.0f, 0.7f, 0.0f, 1.0f };
 
-	vertices[6].position = { 1.0f, 1.0f, 1.0f };;
-	vertices[6].colour = dx::XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f);
+	vertices[6].position = { 1.0f, 1.0f, 1.0f };
+	vertices[6].colour = { 1.0f, 0.7f, 0.0f, 1.0f };
 
-	vertices[7].position = { 1.0f, -1.0f, 1.0f };;
-	vertices[7].colour = dx::XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f);
+	vertices[7].position = { 1.0f, -1.0f, 1.0f };
+	vertices[7].colour = { 1.0f, 0.7f, 0.0f, 1.0f };
 
 	//front
 	indices[0] = 0;

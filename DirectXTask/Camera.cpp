@@ -1,5 +1,8 @@
 #include "Camera.hpp"
 
+//STD
+#include <cmath>
+
 #include <d3d11.h>
 
 void Camera::set_pos(float x, float y, float z)
@@ -28,77 +31,31 @@ dx::XMFLOAT3 Camera::get_rot()
 
 void Camera::render()
 {
-	if (GetAsyncKeyState(VK_LEFT))
-	{
-		pos_x += 0.05f;
-	}
-
-	if (GetAsyncKeyState(VK_RIGHT))
-	{
-		pos_x += -0.05f;
-	}
-
-	if (GetAsyncKeyState(VK_UP))
-	{
-		pos_y += -0.05f;
-	}
-
-	if (GetAsyncKeyState(VK_DOWN))
-	{
-		pos_y += 0.05f;
-	}
-
 	dx::XMFLOAT3 up{0.0f, 1.0f, 0.0f};
 	dx::XMVECTOR up_vector = XMLoadFloat3(&up);
 	dx::XMFLOAT3 position{pos_x, pos_y, pos_z};
 	dx::XMVECTOR position_vector = XMLoadFloat3(&position);
 
-	static float x_rot = 0;
-	static float y_rot = 0;
-	static float z_rot = 0;
-
 	if (GetAsyncKeyState(VK_NUMPAD4))
 	{
-		x_rot += -0.05f;
+		rot_y -= 0.5f;
 	}
 
 	if (GetAsyncKeyState(VK_NUMPAD6))
 	{
-		x_rot += 0.05f;
+		rot_y += 0.5f;
 	}
 
-	if (GetAsyncKeyState(VK_NUMPAD8))
+	constexpr float deg2rad = 0.0174532925f;
+	dx::XMFLOAT3 lookat
 	{
-		y_rot += -0.05f;
-	}
+		std::sinf(rot_y * deg2rad) + pos_x,
+		pos_y,
+		std::cosf(rot_y * deg2rad) + pos_z
+	};
 
-	if (GetAsyncKeyState(VK_NUMPAD2))
-	{
-		y_rot += 0.05f;
-	}
-
-	if (GetAsyncKeyState(VK_NUMPAD7))
-	{
-		z_rot += -0.05f;
-	}
-
-	if (GetAsyncKeyState(VK_NUMPAD9))
-	{
-		z_rot += 0.05f;
-	}
-
-	dx::XMFLOAT3 lookat{1.0f, 0.0, 1.0f};
 	dx::XMVECTOR lookat_vector = XMLoadFloat3(&lookat);
 
-	float pitch = pos_x * 0.0174532925f * 0;
-	float yaw = pos_y * 0.0174532925f * 0;
-	float roll = pos_z * 0.0174532925f * 0;
-	dx::XMMATRIX rotationMatrix = dx::XMMatrixRotationRollPitchYaw(pitch, yaw, roll);
-
-	lookat_vector = XMVector3TransformCoord(lookat_vector, rotationMatrix);
-	up_vector = XMVector3TransformCoord(up_vector, rotationMatrix);
-
-	lookat_vector = dx::XMVectorAdd(position_vector, lookat_vector);
 	view_matrix = dx::XMMatrixLookAtLH(position_vector, lookat_vector, up_vector);
 }
 

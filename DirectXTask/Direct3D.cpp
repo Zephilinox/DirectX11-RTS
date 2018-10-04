@@ -78,58 +78,10 @@ void Direct3D::begin(float r, float g, float b, float a)
 	device_context.val->ClearRenderTargetView(render_target_view.val, colour);
 	device_context.val->ClearDepthStencilView(depth_stencil_view.val, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
-	static float xpos = 0;
-	static float ypos = 0;
-	static float zpos = 0;
-	static float xrot = 0;
-
-	if (GetAsyncKeyState('A'))
-	{
-		xpos += -0.4f;
-	}
-
-	if (GetAsyncKeyState('D'))
-	{
-		xpos += 0.4f;
-	}
-
-	if (GetAsyncKeyState('W'))
-	{
-		ypos += 0.4f;
-	}
-
-	if (GetAsyncKeyState('S'))
-	{
-		ypos += -0.4f;
-	}
-
-	if (GetAsyncKeyState('Q'))
-	{
-		zpos += 1.0f;
-	}
-
-	if (GetAsyncKeyState('E'))
-	{
-		zpos -= 1.0f;
-	}
-
-	if (GetAsyncKeyState('Z'))
-	{
-		xrot += 4.0f;
-	}
-
-	if (GetAsyncKeyState('X'))
-	{
-		xrot -= 4.0f;
-	}
-
 	if (GetAsyncKeyState(VK_SPACE))
 	{
 		world_matrix = ortho_matrix;
 	}
-
-	world_matrix += dx::XMMatrixRotationX(dx::XMConvertToRadians(xrot));
-	world_matrix += dx::XMMatrixTranslation(xpos, ypos, zpos);
 }
 
 void Direct3D::end()

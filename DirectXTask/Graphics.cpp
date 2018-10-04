@@ -41,6 +41,70 @@ bool Graphics::render()
 {
 	direct3d->begin(0.8f, 0.2f, 0.5f, 0.5f);
 
+	if (GetAsyncKeyState('A'))
+	{
+		camera->set_pos(
+			camera->get_pos().x - 0.4f,
+			camera->get_pos().y,
+			camera->get_pos().z);
+	}
+
+	if (GetAsyncKeyState('D'))
+	{
+		camera->set_pos(
+			camera->get_pos().x + 0.4f,
+			camera->get_pos().y,
+			camera->get_pos().z);
+	}
+
+	if (GetAsyncKeyState('W'))
+	{
+		camera->set_pos(
+			camera->get_pos().x,
+			camera->get_pos().y + 0.4f,
+			camera->get_pos().z);
+	}
+
+	if (GetAsyncKeyState('S'))
+	{
+		camera->set_pos(
+			camera->get_pos().x,
+			camera->get_pos().y - 0.4f,
+			camera->get_pos().z);
+	}
+
+	if (GetAsyncKeyState('Q'))
+	{
+		camera->set_pos(
+			camera->get_pos().x,
+			camera->get_pos().y,
+			camera->get_pos().z + 0.4f);
+	}
+
+	if (GetAsyncKeyState('E'))
+	{
+		camera->set_pos(
+			camera->get_pos().x,
+			camera->get_pos().y,
+			camera->get_pos().z - 0.4f);
+	}
+
+	if (GetAsyncKeyState('Z'))
+	{
+		camera->set_rot(
+			camera->get_rot().x + 4.0f,
+			camera->get_rot().y,
+			camera->get_rot().z);
+	}
+
+	if (GetAsyncKeyState('X'))
+	{
+		camera->set_rot(
+			camera->get_rot().x - 4.0f,
+			camera->get_rot().y,
+			camera->get_rot().z);
+	}
+
 	camera->render();
 
 	dx::XMMATRIX world = direct3d->get_world_matrix();
