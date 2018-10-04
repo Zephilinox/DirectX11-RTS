@@ -28,6 +28,17 @@ bool ColourShader::render(ID3D11DeviceContext* device_context, int index_count, 
 	return successful;
 }
 
+bool ColourShader::render(ID3D11DeviceContext * device_context, int index_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection)
+{
+	bool successful = set_shader_params(device_context, world, view, projection);
+	if (successful)
+	{
+		render_shader(device_context, index_count);
+	}
+
+	return successful;
+}
+
 bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_filename, LPCWSTR ps_filename)
 {
 	ID3D10Blob* error_msg = nullptr;
@@ -232,4 +243,13 @@ void ColourShader::render_shader(ID3D11DeviceContext* device_context, int index_
 	device_context->PSSetShader(pixel_shader, 0, 0);
 
 	device_context->DrawIndexedInstanced(index_count, instance_count, 0, 0, 0);
+}
+
+void ColourShader::render_shader(ID3D11DeviceContext* device_context, int index_count)
+{
+	device_context->IASetInputLayout(layout);
+
+	device_context->VSSetShader(vertex_shader, 0, 0);
+	device_context->PSSetShader(pixel_shader, 0, 0);
+	device_context->DrawIndexed(index_count, 0, 0);
 }

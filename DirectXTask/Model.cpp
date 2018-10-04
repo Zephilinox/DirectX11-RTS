@@ -131,10 +131,10 @@ Model::Model(ID3D11Device* device,
 
 	InstanceType* instances = new InstanceType[instance_count];
 	
-	instances[0].position = dx::XMFLOAT3(-1.5f, -1.5f, 5.0f);
-	instances[1].position = dx::XMFLOAT3(-1.5f, 1.5f, 5.0f);
-	instances[2].position = dx::XMFLOAT3(1.5f, -1.5f, 5.0f);
-	instances[3].position = dx::XMFLOAT3(1.5f, 1.5f, 5.0f);
+	instances[0].position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
+	instances[1].position = dx::XMFLOAT3(16.0f, 1.0f, 32.0f);
+	instances[2].position = dx::XMFLOAT3(32.0f, 1.0f, 32.0f);
+	instances[3].position = dx::XMFLOAT3(48.0f, 1.0f, 32.0f);
 	
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_DEFAULT;

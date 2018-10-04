@@ -1,8 +1,12 @@
 #include "Direct3D.hpp"
 
+//STD
 #include <iostream>
 #include <array>
 #include <vector>
+
+//SELF
+#include "Model.hpp"
 
 Direct3D::Direct3D(int width, int height, bool vsync, HWND window, bool fullscreen, float screen_depth, float screen_near)
 {
@@ -78,10 +82,16 @@ void Direct3D::begin(float r, float g, float b, float a)
 	device_context.val->ClearRenderTargetView(render_target_view.val, colour);
 	device_context.val->ClearDepthStencilView(depth_stencil_view.val, D3D11_CLEAR_DEPTH, 1.0f, 0);
 
+	static dx::XMMATRIX origin_proj_matrix = projection_matrix;
+
 	if (GetAsyncKeyState(VK_SPACE))
 	{
-		world_matrix = ortho_matrix;
+		projection_matrix = ortho_matrix;
 	}
+	else
+	{
+		projection_matrix = origin_proj_matrix;
+	}	
 }
 
 void Direct3D::end()
@@ -347,5 +357,13 @@ void Direct3D::create_matrices(float width, float height, float screen_near, flo
 
 	projection_matrix = dx::XMMatrixPerspectiveFovLH(fov, aspect_ratio, screen_near, screen_depth);
 	world_matrix = dx::XMMatrixIdentity();
-	ortho_matrix = dx::XMMatrixOrthographicLH(width, height, screen_near, screen_depth);
+	ortho_matrix = dx::XMMatrixOrthographicOffCenterLH(
+		-10 * aspect_ratio,
+		10 * aspect_ratio ,
+		-10,
+		10,
+		screen_near,
+		screen_depth);
+
+	//ortho_matrix = dx::XMMatrixOrthographicLH(width, height, screen_near, screen_depth);
 }

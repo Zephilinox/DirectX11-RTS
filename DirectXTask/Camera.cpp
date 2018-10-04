@@ -2,7 +2,9 @@
 
 //STD
 #include <cmath>
+#include <iostream>
 
+//LIBS
 #include <d3d11.h>
 
 void Camera::set_pos(float x, float y, float z)
@@ -32,7 +34,7 @@ dx::XMFLOAT3 Camera::get_rot()
 void Camera::update(Input* input, float dt)
 {
 	constexpr float deg2rad = 0.0174532925f;
-	if (input->is_key_down('A'))
+	if (input->is_key_down(VK_LEFT))
 	{
 		rot_y -= rot_speed * dt;
 
@@ -41,7 +43,7 @@ void Camera::update(Input* input, float dt)
 			rot_y += 360.0f;
 		}
 	}
-	else if (input->is_key_down('D'))
+	else if (input->is_key_down(VK_RIGHT))
 	{
 		rot_y += rot_speed * dt;
 
@@ -90,16 +92,19 @@ void Camera::update(Input* input, float dt)
 		pos_y -= pos_speed * dt;
 	}
 
-	if (input->is_key_down(VK_LEFT))
+	if (input->is_key_down('A'))
 	{
 		pos_x -= std::cosf(rot_y * deg2rad) * pos_speed * dt;
 		pos_z += std::sinf(rot_y * deg2rad) * pos_speed * dt;
 	}
-	else if (input->is_key_down(VK_RIGHT))
+	else if (input->is_key_down('D'))
 	{
 		pos_x += std::cosf(rot_y * deg2rad) * pos_speed * dt;
 		pos_z -= std::sinf(rot_y * deg2rad) * pos_speed * dt;
 	}
+
+	std::cout << "Pos = {" << pos_x << ", " << pos_y << ", " << pos_z << "\n";
+	std::cout << "Rot = {" << rot_x << ", " << rot_y << ", " << rot_z << "\n";
 }
 
 void Camera::draw()
