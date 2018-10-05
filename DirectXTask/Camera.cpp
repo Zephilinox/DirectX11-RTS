@@ -64,7 +64,7 @@ void Camera::update(Input* input, float dt)
 		pos_z -= std::cosf(rot_y * deg2rad) * pos_speed * dt;
 	}
 
-	if (input->is_key_down('Q'))
+	if (input->is_key_down(VK_UP))
 	{
 		rot_x -= rot_speed * dt;
 
@@ -73,7 +73,7 @@ void Camera::update(Input* input, float dt)
 			rot_x = 90.0f;
 		}
 	}
-	else if (input->is_key_down('E'))
+	else if (input->is_key_down(VK_DOWN))
 	{
 		rot_x += rot_speed * dt;
 
@@ -83,11 +83,11 @@ void Camera::update(Input* input, float dt)
 		}
 	}
 
-	if (input->is_key_down(VK_UP))
+	if (input->is_key_down('Q'))
 	{
 		pos_y += pos_speed * dt;
 	}
-	else if (input->is_key_down(VK_DOWN))
+	else if (input->is_key_down('E'))
 	{
 		pos_y -= pos_speed * dt;
 	}

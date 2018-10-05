@@ -123,8 +123,8 @@ void System::create_window(int& width, int& height)
 		int old_width = width;
 		int old_height = height;
 
-		width = 800;
-		height = 600;
+		width = 1280;
+		height = 720;
 
 		x = (old_width - width) / 2;
 		y = (old_height - height) / 2;

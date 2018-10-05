@@ -1,9 +1,6 @@
 #include "Model.hpp"
 
-Model::Model(ID3D11Device* device,
-	dx::XMFLOAT3 vertex1,
-	dx::XMFLOAT3 vertex2,
-	dx::XMFLOAT3 vertex3)
+Model::Model(ID3D11Device* device)
 {
 	vertex_count = 8;
 	index_count = 36;
@@ -121,42 +118,14 @@ Model::Model(ID3D11Device* device,
 		throw;
 	}
 
+	create_instances(device, 0, 0, 0);
+
 	delete [] vertices;
 	vertices = 0;
 
 	delete [] indices;
 	indices = 0;
 
-	instance_count = 4;
-
-	InstanceType* instances = new InstanceType[instance_count];
-	
-	instances[0].position = dx::XMFLOAT3(32.0f, 1.0f, 32.0f);
-	instances[1].position = dx::XMFLOAT3(46.0f, 1.0f, 36.0f);
-	instances[2].position = dx::XMFLOAT3(40.0f, 1.0f, 40.0f);
-	instances[3].position = dx::XMFLOAT3(44.0f, 1.0f, 44.0f);
-	
-	D3D11_BUFFER_DESC instance_buffer_desc;
-	instance_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-	instance_buffer_desc.ByteWidth = sizeof(InstanceType) * instance_count;
-	instance_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-	instance_buffer_desc.CPUAccessFlags = 0;
-	instance_buffer_desc.MiscFlags = 0;
-	instance_buffer_desc.StructureByteStride = 0;
-
-	D3D11_SUBRESOURCE_DATA instance_data;
-	instance_data.pSysMem = instances;
-	instance_data.SysMemPitch = 0;
-	instance_data.SysMemSlicePitch = 0;
-
-	result = device->CreateBuffer(&instance_buffer_desc, &instance_data, &instance_buffer);
-	if (FAILED(result))
-	{
-		throw;
-	}
-
-	delete[] instances;
-	instances = 0;
 }
 
 Model::~Model()
@@ -182,6 +151,56 @@ int Model::get_instance_count()
 int Model::get_index_count()
 {
 	return index_count;
+}
+
+void Model::create_instances(ID3D11Device* device, float x, float y, float z)
+{
+	instance_count = 4;
+
+	InstanceType* instances = new InstanceType[instance_count];
+
+	instances[0].position = dx::XMFLOAT3(32.0f, 1.0f, 32.0f);
+	instances[1].position = dx::XMFLOAT3(36.0f, 1.0f, 36.0f);
+	instances[2].position = dx::XMFLOAT3(40.0f, 1.0f, 40.0f);
+	instances[3].position = dx::XMFLOAT3(44.0f, 1.0f, 44.0f);
+
+	D3D11_BUFFER_DESC instance_buffer_desc;
+	instance_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
+	instance_buffer_desc.ByteWidth = sizeof(InstanceType) * instance_count;
+	instance_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+	instance_buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	instance_buffer_desc.MiscFlags = 0;
+	instance_buffer_desc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA instance_data;
+	instance_data.pSysMem = instances;
+	instance_data.SysMemPitch = 0;
+	instance_data.SysMemSlicePitch = 0;
+
+	HRESULT result = device->CreateBuffer(&instance_buffer_desc, &instance_data, &instance_buffer);
+	if (FAILED(result))
+	{
+		throw;
+	}
+
+	delete[] instances;
+	instances = 0;
+}
+
+void Model::update_instances(ID3D11DeviceContext* device_context, std::vector<InstanceType> instances)
+{
+	assert(instances.size() > 0);
+	assert(instances.size() < 5);
+
+	D3D11_MAPPED_SUBRESOURCE resource;
+	ZeroMemory(&resource, sizeof(resource));
+
+	instance_count = instances.size();
+	size_t size = sizeof(InstanceType) * instance_count;
+
+	device_context->Map(instance_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	memcpy(resource.pData, instances.data(), size);
+	device_context->Unmap(instance_buffer, 0);
 }
 
 void Model::stop_buffers()

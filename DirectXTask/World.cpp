@@ -15,7 +15,10 @@ World::World(ID3D11Device* device)
 	constexpr int terrainWidth = 64;
 
 	// Set the color of the terrain grid.
-	dx::XMFLOAT4 color = dx::XMFLOAT4(0.0f, 1.0f, 0.2f, 0.5f);
+	dx::XMFLOAT4 color  = dx::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.5f);
+	dx::XMFLOAT4 color2 = dx::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.5f);
+	dx::XMFLOAT4 color3 = dx::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.5f);
+	dx::XMFLOAT4 color4 = dx::XMFLOAT4(0.0f, 1.0f, 0.0f, 0.5f);
 	// Calculate the number of vertices in the terrain.
 	vertex_count = (terrainWidth - 1) * (terrainHeight - 1) * 8;
 
@@ -58,7 +61,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)(j + 1);
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color;
+			vertices[index].color = color2;
 			indices[index] = index;
 			index++;
 
@@ -67,7 +70,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)j;
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color;
+			vertices[index].color = color2;
 			indices[index] = index;
 			index++;
 
@@ -75,8 +78,8 @@ World::World(ID3D11Device* device)
 			positionX = (float)(i + 1);
 			positionZ = (float)j;
 
-			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color;
+			vertices[index].position = dx::XMFLOAT3(positionX, 0.01f, positionZ);
+			vertices[index].color = color3;
 			indices[index] = index;
 			index++;
 
@@ -84,8 +87,8 @@ World::World(ID3D11Device* device)
 			positionX = (float)i;
 			positionZ = (float)j;
 
-			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color;
+			vertices[index].position = dx::XMFLOAT3(positionX, 0.01f, positionZ);
+			vertices[index].color = color3;
 			indices[index] = index;
 			index++;
 
@@ -93,8 +96,8 @@ World::World(ID3D11Device* device)
 			positionX = (float)i;
 			positionZ = (float)j;
 
-			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color;
+			vertices[index].position = dx::XMFLOAT3(positionX, 0.01f, positionZ);
+			vertices[index].color = color4;
 			indices[index] = index;
 			index++;
 
@@ -102,8 +105,8 @@ World::World(ID3D11Device* device)
 			positionX = (float)i;
 			positionZ = (float)(j + 1);
 
-			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color;
+			vertices[index].position = dx::XMFLOAT3(positionX, 0.01f, positionZ);
+			vertices[index].color = color4;
 			indices[index] = index;
 			index++;
 		}

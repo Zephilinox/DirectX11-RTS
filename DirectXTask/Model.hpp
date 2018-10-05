@@ -1,5 +1,8 @@
 #pragma once
 
+//STD
+#include <vector>
+
 //LIBS
 #include <d3d11.h>
 #include <directxmath.h>
@@ -8,10 +11,12 @@ namespace dx = DirectX;
 class Model
 {
 public:
-	Model(ID3D11Device* device,
-		dx::XMFLOAT3 vertex1 = dx::XMFLOAT3(-1.0F, -1.0f, 0.0f),
-		dx::XMFLOAT3 vertex2 = dx::XMFLOAT3(0.0F, 1.0f, 0.0f),
-		dx::XMFLOAT3 vertex3 = dx::XMFLOAT3(1.0F, -1.0f, 0.0f));
+	struct InstanceType
+	{
+		dx::XMFLOAT3 position;
+	};
+
+	Model(ID3D11Device* device);
 	~Model();
 
 	void render(ID3D11DeviceContext* device_context);
@@ -20,16 +25,14 @@ public:
 	int get_instance_count();
 	int get_index_count();
 
+	void create_instances(ID3D11Device* device, float x, float y, float z);
+	void update_instances(ID3D11DeviceContext* device_context, std::vector<InstanceType> instances);
+
 private:
 	struct VertexType
 	{
 		dx::XMFLOAT3 position;
 		dx::XMFLOAT4 colour;
-	};
-
-	struct InstanceType
-	{
-		dx::XMFLOAT3 position;
 	};
 
 	void stop_buffers();
