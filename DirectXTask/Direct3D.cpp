@@ -10,7 +10,6 @@
 
 Direct3D::Direct3D(int width, int height, bool vsync, HWND window, bool fullscreen, float screen_depth, float screen_near)
 {
-
 	this->vsync = vsync;
 	this->fullscreen = fullscreen;
 

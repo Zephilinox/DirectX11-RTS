@@ -21,7 +21,7 @@ public:
 
 	int get_index_count();
 
-private:
+//private:
 	struct Vertex
 	{
 		dx::XMFLOAT3 position;

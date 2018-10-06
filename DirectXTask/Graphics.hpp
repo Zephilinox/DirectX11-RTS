@@ -25,6 +25,7 @@ public:
 
 private:
 	float time = 0;
+	HWND window;
 
 	std::unique_ptr<Direct3D> direct3d;
 	std::unique_ptr<Camera> camera;

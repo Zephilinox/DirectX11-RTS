@@ -1,7 +1,12 @@
 #include "Graphics.hpp"
 
+//STD
+#include <iostream>
+
 Graphics::Graphics(int width, int height, HWND window)
 {
+	this->window = window;
+
 	try
 	{
 		direct3d = std::make_unique<Direct3D>(width, height, vsync, window, fullscreen, screen_depth, screen_near);
@@ -41,6 +46,48 @@ bool Graphics::update(Input* input, float dt)
 {
 	time += dt;
 	camera->update(input, dt);
+
+	POINT pos;
+	if (GetCursorPos(&pos))
+	{
+		if (ScreenToClient(window, &pos))
+		{
+			if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
+			{
+				dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
+				dx::XMMATRIX view_matrix = camera->get_view_matrix();
+				dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
+
+				std::cout << pos.x << "," << pos.y << "\n";
+				dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
+				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 1000.0f };
+				dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
+				dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
+
+				near_pos_vec = dx::XMVector3Unproject(
+					near_pos_vec,
+					0, 0,
+					1280, 720,
+					0.0f, 100.0f,
+					projection_matrix,
+					view_matrix,
+					world_matrix);
+
+				far_pos_vec = dx::XMVector3Unproject(
+					far_pos_vec,
+					0, 0,
+					1280, 720,
+					0.0f, 100.0f,
+					projection_matrix,
+					view_matrix,
+					world_matrix);
+
+				auto direction = dx::XMVectorSubtract(near_pos_vec, far_pos_vec);
+
+				std::cout << dx::XMVectorGetX(near_pos_vec) << ", " << dx::XMVectorGetY(near_pos_vec) << ", " << dx::XMVectorGetZ(near_pos_vec) << "\n";
+			}
+		}
+	}
 	return false;
 }
 
@@ -56,11 +103,11 @@ bool Graphics::draw()
 	std::vector<Model::Instance> instances = 
 	{
 		{
-			{ 32.0f - (std::cosf(time) * 4 + 4), 1.0f, 32.0f - (std::sinf(time) * 4 + 4) },
+			{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
 			{ (std::sinf(time) + 1) / 2, 1.0f, (std::cosf(time) + 1) / 2, 1.0f}
 		},
 		{
-			{ 36.0f, 1.0f, 36.0f },
+			{ 32.0f, 1.0f, 32.0f },
 			{ std::cosf(time), std::cosf(time), 1.0f, 1.0f }
 		},
 		{
@@ -72,7 +119,6 @@ bool Graphics::draw()
 			{ 1.0f, std::cosf(time), 0.0f, 1.0f }
 		}
 	};
-
 
 	ID3D11RasterizerState* Fill;
 	D3D11_RASTERIZER_DESC desc;

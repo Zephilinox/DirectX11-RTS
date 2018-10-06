@@ -51,9 +51,17 @@ int WINAPI
 WinMain(HINSTANCE instance, HINSTANCE old_instance, PSTR cmd_line, int cmd_show)
 {
 	create_console();
-
-	std::unique_ptr<System> system = std::make_unique<System>();
-	system->run();
+	
+	try
+	{
+		std::unique_ptr<System> system = std::make_unique<System>();
+		system->run();
+	}
+	catch (...)
+	{
+		std::cout << "Exception occured\n";
+		while (true);
+	}
 
 	return 0;
 }
