@@ -14,6 +14,7 @@ public:
 	struct InstanceType
 	{
 		dx::XMFLOAT3 position;
+		dx::XMFLOAT4 colour;
 	};
 
 	Model(ID3D11Device* device);

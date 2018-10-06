@@ -95,7 +95,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 		return false;
 	}
 
-	D3D11_INPUT_ELEMENT_DESC polygon[3];
+	D3D11_INPUT_ELEMENT_DESC polygon[4];
 	unsigned int element_count;
 
 	polygon[0].SemanticName = "POSITION";
@@ -114,13 +114,21 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	polygon[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygon[1].InstanceDataStepRate = 0;
 
-	polygon[2].SemanticName = "TEXCOORD";
-	polygon[2].SemanticIndex = 0;
+	polygon[2].SemanticName = "POSITION";
+	polygon[2].SemanticIndex = 1;
 	polygon[2].Format = DXGI_FORMAT_R32G32B32_FLOAT;
 	polygon[2].InputSlot = 1;
 	polygon[2].AlignedByteOffset = 0;
 	polygon[2].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
 	polygon[2].InstanceDataStepRate = 1;
+
+	polygon[3].SemanticName = "COLOR";
+	polygon[3].SemanticIndex = 1;
+	polygon[3].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygon[3].InputSlot = 1;
+	polygon[3].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
+	polygon[3].InputSlotClass = D3D11_INPUT_PER_INSTANCE_DATA;
+	polygon[3].InstanceDataStepRate = 1;
 
 	element_count = sizeof(polygon) / sizeof(polygon[0]);
 

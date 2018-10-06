@@ -55,14 +55,26 @@ bool Graphics::draw()
 
 	std::vector<Model::InstanceType> instances = 
 	{
-		{{ 32.0f - (std::cosf(time) * 4 + 4), 1.0f, 32.0f - (std::sinf(time) * 4 + 4) }},
-		{{ 36.0f, 1.0f, 36.0f }},
-		{{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f }},
-		{{ 44.0f + std::sinf(time) * 12, 1.0f, 44.0f }}
+		{
+			{ 32.0f - (std::cosf(time) * 4 + 4), 1.0f, 32.0f - (std::sinf(time) * 4 + 4) },
+			{ (std::sinf(time) + 1) / 2, 1.0f, (std::cosf(time) + 1) / 2, 1.0f}
+		},
+		{
+			{ 36.0f, 1.0f, 36.0f },
+			{ std::cosf(time), std::cosf(time), 1.0f, 1.0f }
+		},
+		{
+			{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
+			{ 1.0f, 0.0f, std::sin(time), 1.0f }
+		},
+		{
+			{ 44.0f + std::sinf(time) * 12, 1.0f, 44.0f },
+			{ 1.0f, std::cosf(time), 0.0f, 1.0f }
+		}
 	};
+
 	model->update_instances(direct3d->get_device_context(), instances);
 
-	world_matrix += dx::XMMatrixTranslation(std::cosf(time) * 4 + 4, 0.0f, std::sinf(time) * 4 + 4);
 	model->render(direct3d->get_device_context());
 
 	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), model->get_vertex_count(), model->get_instance_count(), world_matrix, view_matrix, projection_matrix);

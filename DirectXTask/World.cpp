@@ -43,7 +43,7 @@ World::World(ID3D11Device* device)
 			float positionZ = (float)(j + 1);
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color;
+			vertices[index].colour = color;
 			indices[index] = index;
 			index++;
 
@@ -52,7 +52,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)(j + 1);
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color;
+			vertices[index].colour = color;
 			indices[index] = index;
 			index++;
 
@@ -61,7 +61,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)(j + 1);
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color2;
+			vertices[index].colour = color2;
 			indices[index] = index;
 			index++;
 
@@ -70,7 +70,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)j;
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.0f, positionZ);
-			vertices[index].color = color2;
+			vertices[index].colour = color2;
 			indices[index] = index;
 			index++;
 
@@ -79,7 +79,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)j;
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.01f, positionZ);
-			vertices[index].color = color3;
+			vertices[index].colour = color3;
 			indices[index] = index;
 			index++;
 
@@ -88,7 +88,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)j;
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.01f, positionZ);
-			vertices[index].color = color3;
+			vertices[index].colour = color3;
 			indices[index] = index;
 			index++;
 
@@ -97,7 +97,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)j;
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.01f, positionZ);
-			vertices[index].color = color4;
+			vertices[index].colour = color4;
 			indices[index] = index;
 			index++;
 
@@ -106,7 +106,7 @@ World::World(ID3D11Device* device)
 			positionZ = (float)(j + 1);
 
 			vertices[index].position = dx::XMFLOAT3(positionX, 0.01f, positionZ);
-			vertices[index].color = color4;
+			vertices[index].colour = color4;
 			indices[index] = index;
 			index++;
 		}
@@ -161,6 +161,7 @@ World::World(ID3D11Device* device)
 	InstanceType* instances = new InstanceType[instance_count];
 
 	instances[0].position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
+	instances[0].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_DEFAULT;

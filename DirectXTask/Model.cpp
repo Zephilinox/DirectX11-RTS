@@ -18,19 +18,19 @@ Model::Model(ID3D11Device* device)
 	vertices[2].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	vertices[3].position = { 1.0f, -1.0f, -1.0f };
-	vertices[3].colour = { 1.0f, 0.0f, 0.0f, 1.0f };
+	vertices[3].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	vertices[4].position = { -1.0f, -1.0f, 1.0f };
-	vertices[4].colour = { 1.0f, 0.7f, 0.0f, 1.0f };
+	vertices[4].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	vertices[5].position = { -1.0f, 1.0f, 1.0f };
-	vertices[5].colour = { 1.0f, 0.7f, 0.0f, 1.0f };
+	vertices[5].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	vertices[6].position = { 1.0f, 1.0f, 1.0f };
-	vertices[6].colour = { 1.0f, 0.7f, 0.0f, 1.0f };
+	vertices[6].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	vertices[7].position = { 1.0f, -1.0f, 1.0f };
-	vertices[7].colour = { 1.0f, 0.7f, 0.0f, 1.0f };
+	vertices[7].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	//front
 	indices[0] = 0;
@@ -158,11 +158,6 @@ void Model::create_instances(ID3D11Device* device, float x, float y, float z)
 	instance_count = 4;
 
 	InstanceType* instances = new InstanceType[instance_count];
-
-	instances[0].position = dx::XMFLOAT3(32.0f, 1.0f, 32.0f);
-	instances[1].position = dx::XMFLOAT3(36.0f, 1.0f, 36.0f);
-	instances[2].position = dx::XMFLOAT3(40.0f, 1.0f, 40.0f);
-	instances[3].position = dx::XMFLOAT3(44.0f, 1.0f, 44.0f);
 
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;

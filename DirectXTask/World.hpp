@@ -25,12 +25,13 @@ private:
 	struct VertexType
 	{
 		dx::XMFLOAT3 position;
-		dx::XMFLOAT4 color;
+		dx::XMFLOAT4 colour;
 	};
 
 	struct InstanceType
 	{
 		dx::XMFLOAT3 position;
+		dx::XMFLOAT4 colour;
 	};
 
 	ID3D11Buffer* vertex_buffer;
