@@ -103,8 +103,8 @@ void Camera::update(Input* input, float dt)
 		pos_z -= std::sinf(rot_y * deg2rad) * pos_speed * dt;
 	}
 
-	std::cout << "Pos = {" << pos_x << ", " << pos_y << ", " << pos_z << "\n";
-	std::cout << "Rot = {" << rot_x << ", " << rot_y << ", " << rot_z << "\n";
+	//std::cout << "Pos = {" << pos_x << ", " << pos_y << ", " << pos_z << "\n";
+	//std::cout << "Rot = {" << rot_x << ", " << rot_y << ", " << rot_z << "\n";
 }
 
 void Camera::draw()

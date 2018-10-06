@@ -11,7 +11,7 @@ namespace dx = DirectX;
 class Model
 {
 public:
-	struct InstanceType
+	struct Instance
 	{
 		dx::XMFLOAT3 position;
 		dx::XMFLOAT4 colour;
@@ -27,10 +27,10 @@ public:
 	int get_index_count();
 
 	void create_instances(ID3D11Device* device, float x, float y, float z);
-	void update_instances(ID3D11DeviceContext* device_context, std::vector<InstanceType> instances);
+	void update_instances(ID3D11DeviceContext* device_context, std::vector<Instance> instances);
 
 private:
-	struct VertexType
+	struct Vertex
 	{
 		dx::XMFLOAT3 position;
 		dx::XMFLOAT4 colour;

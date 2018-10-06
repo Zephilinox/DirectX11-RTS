@@ -5,7 +5,7 @@ Model::Model(ID3D11Device* device)
 	vertex_count = 8;
 	index_count = 36;
 
-	VertexType* vertices = new VertexType[vertex_count];
+	Vertex* vertices = new Vertex[vertex_count];
 	unsigned long* indices = new unsigned long[index_count];
 
 	vertices[0].position = { -1.0f, -1.0f, -1.0f };
@@ -82,7 +82,7 @@ Model::Model(ID3D11Device* device)
 
 	D3D11_BUFFER_DESC vertex_buffer_desc;
 	vertex_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-	vertex_buffer_desc.ByteWidth = sizeof(VertexType) * vertex_count;
+	vertex_buffer_desc.ByteWidth = sizeof(Vertex) * vertex_count;
 	vertex_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertex_buffer_desc.CPUAccessFlags = 0;
 	vertex_buffer_desc.MiscFlags = 0;
@@ -157,11 +157,11 @@ void Model::create_instances(ID3D11Device* device, float x, float y, float z)
 {
 	instance_count = 4;
 
-	InstanceType* instances = new InstanceType[instance_count];
+	Instance* instances = new Instance[instance_count];
 
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
-	instance_buffer_desc.ByteWidth = sizeof(InstanceType) * instance_count;
+	instance_buffer_desc.ByteWidth = sizeof(Instance) * instance_count;
 	instance_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	instance_buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	instance_buffer_desc.MiscFlags = 0;
@@ -182,7 +182,7 @@ void Model::create_instances(ID3D11Device* device, float x, float y, float z)
 	instances = 0;
 }
 
-void Model::update_instances(ID3D11DeviceContext* device_context, std::vector<InstanceType> instances)
+void Model::update_instances(ID3D11DeviceContext* device_context, std::vector<Instance> instances)
 {
 	assert(instances.size() > 0);
 	assert(instances.size() < 5);
@@ -191,7 +191,7 @@ void Model::update_instances(ID3D11DeviceContext* device_context, std::vector<In
 	ZeroMemory(&resource, sizeof(resource));
 
 	instance_count = instances.size();
-	size_t size = sizeof(InstanceType) * instance_count;
+	size_t size = sizeof(Instance) * instance_count;
 
 	device_context->Map(instance_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 	memcpy(resource.pData, instances.data(), size);
@@ -221,7 +221,7 @@ void Model::stop_buffers()
 
 void Model::render_buffers(ID3D11DeviceContext* device_context)
 {
-	unsigned int strides[2] = { sizeof(VertexType), sizeof(InstanceType) };
+	unsigned int strides[2] = { sizeof(Vertex), sizeof(Instance) };
 	unsigned int offsets[2] = { 0, 0 };
 
 	ID3D11Buffer* buffer_pointers[2] = { vertex_buffer, instance_buffer };

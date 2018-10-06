@@ -13,8 +13,8 @@ Graphics::Graphics(int width, int height, HWND window)
 	}
 
 	camera = std::make_unique<Camera>();
-	camera->set_pos(32.0f, 10.0f, -10.0f);
-	camera->set_rot(20, 0, 0);
+	camera->set_pos(0.0f, 5.0f, -5.0f);
+	camera->set_rot(40, 0, 0);
 
 	try
 	{
@@ -53,7 +53,7 @@ bool Graphics::draw()
 	dx::XMMATRIX view_matrix =	camera->get_view_matrix();
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 
-	std::vector<Model::InstanceType> instances = 
+	std::vector<Model::Instance> instances = 
 	{
 		{
 			{ 32.0f - (std::cosf(time) * 4 + 4), 1.0f, 32.0f - (std::sinf(time) * 4 + 4) },
@@ -73,9 +73,19 @@ bool Graphics::draw()
 		}
 	};
 
+
+	ID3D11RasterizerState* Fill;
+	D3D11_RASTERIZER_DESC desc;
+	ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
+	desc.FillMode = D3D11_FILL_SOLID;
+	desc.CullMode = D3D11_CULL_BACK;
+	direct3d->get_device()->CreateRasterizerState(&desc, &Fill);
+	direct3d->get_device_context()->RSSetState(Fill);
 	model->update_instances(direct3d->get_device_context(), instances);
 
 	model->render(direct3d->get_device_context());
+
+	Fill->Release();
 
 	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), model->get_vertex_count(), model->get_instance_count(), world_matrix, view_matrix, projection_matrix);
 	if (!result)
@@ -84,13 +94,21 @@ bool Graphics::draw()
 	}
 
 	world_matrix = dx::XMMatrixIdentity();
-	
+
+	ID3D11RasterizerState* Wireframe;
+	ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
+	desc.FillMode = D3D11_FILL_WIREFRAME;
+	desc.CullMode = D3D11_CULL_NONE;
+	direct3d->get_device()->CreateRasterizerState(&desc, &Wireframe);
+	direct3d->get_device_context()->RSSetState(Wireframe);
+
 	world->draw(direct3d->get_device_context());
 	result = colour_shader->render(direct3d->get_device_context(), world->get_index_count(), world->get_index_count(), 1, world_matrix, view_matrix, projection_matrix);
 	if (!result)
 	{
 		return false;
 	}
+	Wireframe->Release();
 
 	direct3d->end();
 

@@ -22,13 +22,13 @@ public:
 	int get_index_count();
 
 private:
-	struct VertexType
+	struct Vertex
 	{
 		dx::XMFLOAT3 position;
 		dx::XMFLOAT4 colour;
 	};
 
-	struct InstanceType
+	struct Instance
 	{
 		dx::XMFLOAT3 position;
 		dx::XMFLOAT4 colour;
