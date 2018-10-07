@@ -85,6 +85,7 @@ World::World(ID3D11Device* device)
 
 	instances[0].position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	instances[0].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+	instances[0].rotation = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;

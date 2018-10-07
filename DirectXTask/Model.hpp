@@ -15,6 +15,7 @@ public:
 	{
 		dx::XMFLOAT3 position;
 		dx::XMFLOAT4 colour;
+		dx::XMFLOAT3 rotation;
 	};
 
 	Model(ID3D11Device* device);

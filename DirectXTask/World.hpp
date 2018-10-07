@@ -32,6 +32,7 @@ public:
 	{
 		dx::XMFLOAT3 position;
 		dx::XMFLOAT4 colour;
+		dx::XMFLOAT3 rotation;
 	};
 
 	ID3D11Buffer* vertex_buffer;

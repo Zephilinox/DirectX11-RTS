@@ -5,37 +5,38 @@ cbuffer MatrixBuffer
 	matrix projection;
 };
 
-struct VertexInputType
+struct Vertex
 {
 	float4 position: POSITION;
 	float4 colour: COLOR;
 };
 
-struct InstanceInputType
+struct Instance
 {
 	float3 position: POSITION1;
 	float4 colour: COLOR1;
+	float3 rotation: POSITION2;
 };
 
-struct PixelInputType
+struct Pixel
 {
 	float4 position: SV_POSITION;
 	float4 colour : COLOR;
 };
 
-PixelInputType ColourVertexShader(VertexInputType input, InstanceInputType instance)
+Pixel ColourVertexShader(Vertex vertex, Instance instance)
 {
-	input.position.w = 1.0f;
-    input.position.x += instance.position.x;
-    input.position.y += instance.position.y;
-    input.position.z += instance.position.z;
+    vertex.position.x += instance.position.x + instance.rotation.x;
+    vertex.position.y += instance.position.y;
+    vertex.position.z += instance.position.z;
+	vertex.position.w = 1.0f;
 
-	PixelInputType output;
-	output.position = mul(input.position, world);
+	Pixel output;
+	output.position = mul(vertex.position, world);
 	output.position = mul(output.position, view);
 	output.position = mul(output.position, projection);
 
-	output.colour = input.colour * instance.colour;
+	output.colour = vertex.colour * instance.colour;
 
 	return output;
 }
