@@ -18,7 +18,7 @@ Graphics::Graphics(int width, int height, HWND window)
 	}
 
 	camera = std::make_unique<Camera>();
-	camera->set_pos(0.0f, 5.0f, -5.0f);
+	camera->set_pos(32.0f, 5.0f, -5.0f);
 	camera->set_rot(40, 0, 0);
 
 	try
@@ -99,32 +99,34 @@ bool Graphics::draw()
 	dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
 	dx::XMMATRIX view_matrix =	camera->get_view_matrix();
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
+	
+	float deg2rad = 0.0174533f;
 
 	std::vector<Model::Instance> instances = 
 	{
 		{
 			{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
 			{ 0.0f, 0.0f, 0.0f },
-			{ 1.0f, 1.0f, 1.0f},
-			{ 0.5f, 0.5f, 0.5f, 1.0f}
+			{ 2.0f, std::sin(time) + 2.0f, 2.0f},
+			{ (std::sin(time) + 1.0f) / 2.0f, 0.5f, 0.5f, 1.0f}
 		},
 		{
 			{ 32.0f, 1.0f, 32.0f },
-			{ 0.0f, 0.0f, 0.0f },
-			{ 1.0f, 1.0f, 1.0f },
-			{ 1.0f, 0.0f, 1.0f, 1.0f }
+			{ std::cosf(time) * 180.0f * deg2rad, 0.0f, 0.0f },
+			{ 1.0f, 1.0f, std::sin(time) + 2.0f},
+			{ 1.0f, (std::sin(time) + 2.0f) / 2.0f, 0.0f, 1.0f }
 		},
 		{
 			{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
-			{ 0.0f, 0.0f, 0.0f },
-			{ 1.0f, 1.0f, 1.0f },
-			{ 1.0f, 0.0f, 0.0f, 1.0f }
+			{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
+			{ 1.0f, std::sin(time) + 2.0f, 1.0f },
+			{ 0.0f, 1.0f, (std::sin(time) + 1.0f) / 2.0f, 1.0f }
 		},
 		{
 			{ 44.0f, 1.0f, 44.0f },
-			{ 0.0f, 0.0f, 0.0f },
-			{ 1.0f, 1.0f, 1.0f },
-			{ 1.0f, 0.0f, 1.0f, 1.0f }
+			{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
+			{ std::sin(time) + 2.0f, 1.0f, 1.0f },
+			{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
 		}
 	};
 
