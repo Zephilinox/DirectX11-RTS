@@ -14,6 +14,8 @@ public:
 	struct Instance
 	{
 		dx::XMFLOAT3 position;
+		dx::XMFLOAT3 rotation;
+		dx::XMFLOAT3 scale;
 		dx::XMFLOAT4 colour;
 		dx::XMFLOAT3 rotation;
 	};

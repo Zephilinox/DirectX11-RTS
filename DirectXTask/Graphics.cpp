@@ -104,23 +104,27 @@ bool Graphics::draw()
 	{
 		{
 			{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
-			{ (std::sinf(time) + 1) / 2, 1.0f, (std::cosf(time) + 1) / 2, 1.0f},
-			{ 0.0f, 0.0f, 0.0f}
+			{ 0.0f, 0.0f, 0.0f },
+			{ 1.0f, 1.0f, 1.0f},
+			{ 0.5f, 0.5f, 0.5f, 1.0f}
 		},
 		{
 			{ 32.0f, 1.0f, 32.0f },
-			{ std::cosf(time), std::cosf(time), 1.0f, 1.0f },
-			{ 0.0f, 0.0f, 0.0f }
+			{ 0.0f, 0.0f, 0.0f },
+			{ 1.0f, 1.0f, 1.0f },
+			{ 1.0f, 0.0f, 1.0f, 1.0f }
 		},
 		{
 			{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
-			{ 1.0f, 0.0f, std::sin(time), 1.0f },
-			{ 0.0f, 0.0f, 0.0f }
+			{ 0.0f, 0.0f, 0.0f },
+			{ 1.0f, 1.0f, 1.0f },
+			{ 1.0f, 0.0f, 0.0f, 1.0f }
 		},
 		{
-			{ 44.0f + std::sinf(time) * 12, 1.0f, 44.0f },
-			{ 1.0f, std::cosf(time), 0.0f, 1.0f },
-			{ 0.0f, 0.0f, 0.0f }
+			{ 44.0f, 1.0f, 44.0f },
+			{ 0.0f, 0.0f, 0.0f },
+			{ 1.0f, 1.0f, 1.0f },
+			{ 1.0f, 0.0f, 1.0f, 1.0f }
 		}
 	};
 
@@ -131,8 +135,8 @@ bool Graphics::draw()
 	desc.CullMode = D3D11_CULL_BACK;
 	direct3d->get_device()->CreateRasterizerState(&desc, &Fill);
 	direct3d->get_device_context()->RSSetState(Fill);
-	model->update_instances(direct3d->get_device_context(), instances);
 
+	model->update_instances(direct3d->get_device_context(), instances);
 	model->render(direct3d->get_device_context());
 
 	Fill->Release();

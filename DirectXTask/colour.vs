@@ -7,15 +7,16 @@ cbuffer MatrixBuffer
 
 struct Vertex
 {
-	float4 position: POSITION;
-	float4 colour: COLOR;
+	float4 position: POSITION0;
+	float4 colour: COLOR0;
 };
 
 struct Instance
 {
 	float3 position: POSITION1;
-	float4 colour: COLOR1;
 	float3 rotation: POSITION2;
+	float3 scale: POSITION3;
+	float4 colour: COLOR1;
 };
 
 struct Pixel

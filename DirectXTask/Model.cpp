@@ -5,7 +5,7 @@ Model::Model(ID3D11Device* device)
 	vertex_count = 8;
 	index_count = 36;
 
-	Vertex* vertices = new Vertex[vertex_count];
+	std::vector<Vertex> vertices(vertex_count);
 	unsigned long* indices = new unsigned long[index_count];
 
 	vertices[0].position = { -1.0f, -1.0f, -1.0f };
@@ -89,7 +89,7 @@ Model::Model(ID3D11Device* device)
 	vertex_buffer_desc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA vertex_data;
-	vertex_data.pSysMem = vertices;
+	vertex_data.pSysMem = vertices.data();
 	vertex_data.SysMemPitch = 0;
 	vertex_data.SysMemSlicePitch = 0;
 
@@ -119,13 +119,9 @@ Model::Model(ID3D11Device* device)
 	}
 
 	create_instances(device, 0, 0, 0);
-
-	delete [] vertices;
-	vertices = 0;
-
+	
 	delete [] indices;
 	indices = 0;
-
 }
 
 Model::~Model()
@@ -157,7 +153,7 @@ void Model::create_instances(ID3D11Device* device, float x, float y, float z)
 {
 	instance_count = 4;
 
-	Instance* instances = new Instance[instance_count];
+	std::vector<Instance> instances(instance_count);
 
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
@@ -168,7 +164,7 @@ void Model::create_instances(ID3D11Device* device, float x, float y, float z)
 	instance_buffer_desc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA instance_data;
-	instance_data.pSysMem = instances;
+	instance_data.pSysMem = instances.data();
 	instance_data.SysMemPitch = 0;
 	instance_data.SysMemSlicePitch = 0;
 
@@ -177,9 +173,6 @@ void Model::create_instances(ID3D11Device* device, float x, float y, float z)
 	{
 		throw;
 	}
-
-	delete[] instances;
-	instances = 0;
 }
 
 void Model::update_instances(ID3D11DeviceContext* device_context, std::vector<Instance> instances)

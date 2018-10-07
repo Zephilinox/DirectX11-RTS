@@ -18,7 +18,7 @@ World::World(ID3D11Device* device)
 		for (int w = 0; w < terrainWidth; ++w)
 		{
 			vertices[index].position = { static_cast<float>(w) * (1.0f / resolution), 0, static_cast<float>(h) * (1.0f / resolution) };
-			vertices[index].colour = { 1.0f, 1.0f, 1.0f, 0.0f };
+			vertices[index].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 			index++;
 		}
 	}
@@ -84,6 +84,8 @@ World::World(ID3D11Device* device)
 	std::vector<Instance> instances(instance_count);
 
 	instances[0].position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
+	instances[0].rotation = dx::XMFLOAT3(1.0f, 1.0f, 1.0f);
+	instances[0].scale = dx::XMFLOAT3(1.0f, 1.0f, 1.0f);
 	instances[0].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 	instances[0].rotation = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
