@@ -8,6 +8,9 @@
 #include <directxmath.h>
 namespace dx = DirectX;
 
+//SELF
+#include "Direct3D.hpp"
+
 class Model
 {
 public:
@@ -28,8 +31,8 @@ public:
 	int get_instance_count();
 	int get_index_count();
 
-	void create_instances(ID3D11Device* device, float x, float y, float z);
-	void update_instances(ID3D11DeviceContext* device_context, std::vector<Instance> instances);
+	void create_instance_buffer(ID3D11Device* device, int max_instances);
+	void update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance> instances);
 
 private:
 	struct Vertex
@@ -38,14 +41,11 @@ private:
 		dx::XMFLOAT4 colour;
 	};
 
-	void stop_buffers();
-	void render_buffers(ID3D11DeviceContext* device_context);
-
-	//Do not wrap, need to call release() manually
-	ID3D11Buffer* vertex_buffer;
-	ID3D11Buffer* index_buffer;
-	ID3D11Buffer* instance_buffer;
+	D3DRAII<ID3D11Buffer> vertex_buffer;
+	D3DRAII<ID3D11Buffer> index_buffer;
+	D3DRAII<ID3D11Buffer> instance_buffer;
 	int vertex_count = 0;
 	int index_count = 0;
 	int instance_count = 0;
+	int max_instance_count = 0;
 };

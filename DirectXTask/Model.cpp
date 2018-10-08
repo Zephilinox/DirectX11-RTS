@@ -1,12 +1,15 @@
 #include "Model.hpp"
 
+//STD
+#include <iostream>
+
 Model::Model(ID3D11Device* device)
 {
 	vertex_count = 8;
 	index_count = 36;
 
 	std::vector<Vertex> vertices(vertex_count);
-	unsigned long* indices = new unsigned long[index_count];
+	std::vector<unsigned long> indices(index_count);
 
 	vertices[0].position = { -1.0f, -1.0f, -1.0f };
 	vertices[0].colour = {0.9f, 0.9f, 0.9f, 1.0f};
@@ -93,7 +96,7 @@ Model::Model(ID3D11Device* device)
 	vertex_data.SysMemPitch = 0;
 	vertex_data.SysMemSlicePitch = 0;
 
-	HRESULT result = device->CreateBuffer(&vertex_buffer_desc, &vertex_data, &vertex_buffer);
+	HRESULT result = device->CreateBuffer(&vertex_buffer_desc, &vertex_data, &vertex_buffer.val);
 	if (FAILED(result))
 	{
 		throw;
@@ -108,30 +111,34 @@ Model::Model(ID3D11Device* device)
 	index_buffer_desc.StructureByteStride = 0;
 
 	D3D11_SUBRESOURCE_DATA index_data;
-	index_data.pSysMem = indices;
+	index_data.pSysMem = indices.data();
 	index_data.SysMemPitch = 0;
 	index_data.SysMemSlicePitch = 0;
 
-	result = device->CreateBuffer(&index_buffer_desc, &index_data, &index_buffer);
+	result = device->CreateBuffer(&index_buffer_desc, &index_data, &index_buffer.val);
 	if (FAILED(result))
 	{
 		throw;
 	}
 
-	create_instances(device, 0, 0, 0);
-	
-	delete [] indices;
-	indices = 0;
+	create_instance_buffer(device, 5);
 }
 
 Model::~Model()
 {
-	stop_buffers();
+	//todo: see if I need this
 }
 
 void Model::render(ID3D11DeviceContext* device_context)
 {
-	render_buffers(device_context);
+	unsigned int strides[2] = { sizeof(Vertex), sizeof(Instance) };
+	unsigned int offsets[2] = { 0, 0 };
+
+	ID3D11Buffer* buffer_pointers[2] = { vertex_buffer.val, instance_buffer.val };
+
+	device_context->IASetVertexBuffers(0, 2, buffer_pointers, strides, offsets);
+	device_context->IASetIndexBuffer(index_buffer.val, DXGI_FORMAT_R32_UINT, 0);
+	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 }
 
 int Model::get_vertex_count()
@@ -149,9 +156,10 @@ int Model::get_index_count()
 	return index_count;
 }
 
-void Model::create_instances(ID3D11Device* device, float x, float y, float z)
+void Model::create_instance_buffer(ID3D11Device* device, int max_instances)
 {
-	instance_count = 4;
+	max_instance_count = max_instances;
+	instance_count = max_instances;
 
 	std::vector<Instance> instances(instance_count);
 
@@ -168,17 +176,30 @@ void Model::create_instances(ID3D11Device* device, float x, float y, float z)
 	instance_data.SysMemPitch = 0;
 	instance_data.SysMemSlicePitch = 0;
 
-	HRESULT result = device->CreateBuffer(&instance_buffer_desc, &instance_data, &instance_buffer);
+	HRESULT result = device->CreateBuffer(&instance_buffer_desc, &instance_data, &instance_buffer.val);
 	if (FAILED(result))
 	{
 		throw;
 	}
 }
 
-void Model::update_instances(ID3D11DeviceContext* device_context, std::vector<Instance> instances)
+void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance> instances)
 {
 	assert(instances.size() > 0);
-	assert(instances.size() < 5);
+	if (instances.size() > max_instance_count)
+	{
+		std::cout << "Grew instance buffer from " << max_instance_count << " to ";
+		if (instances.size() > max_instance_count * 2)
+		{
+			create_instance_buffer(device, instances.size());
+		}
+		else
+		{
+			create_instance_buffer(device, max_instance_count * 2);
+		}
+		std::cout << max_instance_count << "\n";
+	}
+	assert(instances.size() <= max_instance_count);
 
 	D3D11_MAPPED_SUBRESOURCE resource;
 	ZeroMemory(&resource, sizeof(resource));
@@ -186,40 +207,7 @@ void Model::update_instances(ID3D11DeviceContext* device_context, std::vector<In
 	instance_count = instances.size();
 	size_t size = sizeof(Instance) * instance_count;
 
-	device_context->Map(instance_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
+	device_context->Map(instance_buffer.val, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 	memcpy(resource.pData, instances.data(), size);
-	device_context->Unmap(instance_buffer, 0);
-}
-
-void Model::stop_buffers()
-{
-	if (instance_buffer)
-	{
-		instance_buffer->Release();
-		instance_buffer = nullptr;
-	}
-
-	if (index_buffer)
-	{
-		index_buffer->Release();
-		index_buffer = nullptr;
-	}
-
-	if (vertex_buffer)
-	{
-		vertex_buffer->Release();
-		vertex_buffer = nullptr;
-	}
-}
-
-void Model::render_buffers(ID3D11DeviceContext* device_context)
-{
-	unsigned int strides[2] = { sizeof(Vertex), sizeof(Instance) };
-	unsigned int offsets[2] = { 0, 0 };
-
-	ID3D11Buffer* buffer_pointers[2] = { vertex_buffer, instance_buffer };
-
-	device_context->IASetVertexBuffers(0, 2, buffer_pointers, strides, offsets);
-	device_context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
-	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	device_context->Unmap(instance_buffer.val, 0);
 }

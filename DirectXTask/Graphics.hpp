@@ -32,4 +32,5 @@ private:
 	std::unique_ptr<Model> model;
 	std::unique_ptr<World> world;
 	std::unique_ptr<ColourShader> colour_shader;
+	Input* input;
 };

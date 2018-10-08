@@ -209,7 +209,6 @@ std::tuple<unsigned int, unsigned int> Direct3D::get_display_mode_data(int width
 		&mode_count,
 		0);
 
-	//get_display_modes;
 	std::vector<DXGI_MODE_DESC> display_modes(mode_count);
 	{
 		result = adapter_out.val->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
@@ -363,6 +362,4 @@ void Direct3D::create_matrices(float width, float height, float screen_near, flo
 		10,
 		screen_near,
 		screen_depth);
-
-	//ortho_matrix = dx::XMMatrixOrthographicLH(width, height, screen_near, screen_depth);
 }
