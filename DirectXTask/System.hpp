@@ -39,6 +39,7 @@ private:
 	std::unique_ptr<World> world;
 	Timer frame_timer;
 	float dt;
+	float timeSinceLastPrint = 0.0f;
 };
 
 static LRESULT CALLBACK WndProc(HWND window, UINT msg, WPARAM wparam, LPARAM lparam);

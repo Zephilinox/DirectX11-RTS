@@ -43,7 +43,12 @@ void System::run()
 			quit = quit || draw();
 		}
 		dt = frame_timer.getElapsedTime<Timer::seconds_float>();
-		//std::cout << "FPS: " << static_cast<int>(1.0f / dt) << "\n";
+		timeSinceLastPrint += dt;
+		if (timeSinceLastPrint > 1.0f)
+		{
+			std::cout << "FPS: " << static_cast<int>(1.0f / dt) << "\n";
+			timeSinceLastPrint = 0.0f;
+		}
 		frame_timer.restart();
 	}
 }

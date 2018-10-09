@@ -183,7 +183,7 @@ void Model::create_instance_buffer(ID3D11Device* device, int max_instances)
 	}
 }
 
-void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance> instances)
+void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance>& instances)
 {
 	assert(instances.size() > 0);
 	if (instances.size() > max_instance_count)

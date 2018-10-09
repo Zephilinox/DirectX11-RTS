@@ -40,6 +40,25 @@ Graphics::Graphics(int width, int height, HWND window)
 	}
 
 	colour_shader = std::make_unique<ColourShader>(direct3d->get_device(), window);
+
+	float deg2rad = 0.0174533f;
+
+	{
+
+		for (int i = 0; i < 4000000; ++i)
+		{
+			float rand_x = rand() % 64;
+			float rand_z = rand() % 64;
+			instances.push_back({
+				{ rand_x, 1.0f, rand_z },
+				{ 0.0f, 0.0f, 0.0f },
+				{ 1.0f, 1.0f, 1.0f },
+				{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
+				});
+		}
+	}
+
+	model->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), instances);
 }
 
 bool Graphics::update(Input* input, float dt)
@@ -100,54 +119,12 @@ bool Graphics::draw()
 	dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
 	dx::XMMATRIX view_matrix =	camera->get_view_matrix();
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
-	
+
 	float deg2rad = 0.0174533f;
-
-	std::vector<Model::Instance> instances = 
+	/*for (auto& instance : instances)
 	{
-		{
-			{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
-			{ 0.0f, 0.0f, 0.0f },
-			{ 2.0f, std::sin(time) + 2.0f, 2.0f},
-			{ (std::sin(time) + 1.0f) / 2.0f, 0.5f, 0.5f, 1.0f}
-		},
-		{
-			{ 32.0f, 1.0f, 32.0f },
-			{ std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad },
-			{ 1.0f, 1.0f, 1.0f},
-			{ 1.0f, (std::sin(time) + 2.0f) / 2.0f, 0.0f, 1.0f }
-		},
-		{
-			{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
-			{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
-			{ 1.0f, std::sin(time) + 2.0f, 1.0f },
-			{ 0.0f, 1.0f, (std::sin(time) + 1.0f) / 2.0f, 1.0f }
-		},
-		{
-			{ 44.0f, 1.0f, 44.0f },
-			{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
-			{ std::sin(time) + 2.0f, 1.0f, 1.0f },
-			{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
-		}
-	};
-
-	if (input->is_key_down('C'))
-	{
-		float rand_x = rand() % 64;
-		float rand_z = rand() % 64;
-
-		instances.push_back({
-			{ rand_x, 1.0f, rand_z},
-			{ 0.0f, 0.0f, 0.0f },
-			{ 1.0f, 1.0f, 1.0f },
-			{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
-		});
-	}
-
-	for (auto& instance : instances)
-	{
-		//instance.rotation.y = std::cosf(time) * 180.0f * deg2rad;
-	}
+		instance.rotation.y = std::cosf(time) * 180.0f * deg2rad;
+	}*/
 
 	ID3D11RasterizerState* Fill;
 	D3D11_RASTERIZER_DESC desc;
@@ -157,7 +134,7 @@ bool Graphics::draw()
 	direct3d->get_device()->CreateRasterizerState(&desc, &Fill);
 	direct3d->get_device_context()->RSSetState(Fill);
 
-	model->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), instances);
+	//model->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), instances);
 	model->render(direct3d->get_device_context());
 
 	Fill->Release();

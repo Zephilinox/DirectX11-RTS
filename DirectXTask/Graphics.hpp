@@ -19,7 +19,7 @@ public:
 	bool draw();
 
 	static constexpr bool fullscreen = false;
-	static constexpr bool vsync = true;
+	static constexpr bool vsync = false;
 	static constexpr float screen_depth = 1000.0f;
 	static constexpr float screen_near = 0.1f;
 
@@ -32,5 +32,6 @@ private:
 	std::unique_ptr<Model> model;
 	std::unique_ptr<World> world;
 	std::unique_ptr<ColourShader> colour_shader;
+	std::vector<Model::Instance> instances;
 	Input* input;
 };

@@ -242,9 +242,9 @@ bool Direct3D::create_device_and_swapchain(HWND window, int width, int height, i
 
 	D3D_FEATURE_LEVEL feature_level = D3D_FEATURE_LEVEL_11_0;
 
-	HRESULT result = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, D3D11_CREATE_DEVICE_DEBUG, &feature_level, 1,
+	HRESULT result = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, &feature_level, 1,
 		D3D11_SDK_VERSION, &swapchain_desc, &swapchain.val, &device.val, 0, &device_context.val);
-	
+
 	return !FAILED(result);
 }
 
