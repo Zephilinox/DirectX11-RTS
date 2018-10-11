@@ -83,24 +83,27 @@ bool Graphics::update(Input* input, float dt)
 
 	if (input->is_key_down('C'))
 	{
-		for (int i = 0; i < 10000; ++i)
+		for (int i = 0; i < 100; ++i)
 		{
-			float rand_x = (rand() % 6400) / 100.0f;
-			float rand_y = (rand() % 6400) / 100.0f + 10.0f;
-			float rand_z = (rand() % 6400) / 100.0f;
+			float rand_x = (rand() % 51200) / 100.0f;
+			rand_x -= 256 - 64;
+			float rand_y = (rand() % 51200) / 100.0f + 32.0f;
+			float rand_z = (rand() % 51200) / 100.0f;
+			rand_z -= 256 - 64;
 
 			instances.push_back({
 				{ rand_x, rand_y, rand_z},
 				{ 0.0f, 0.0f, 0.0f },
 				{ 1.0f, 1.0f, 1.0f },
-				{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
-				});
+				{ (std::sin(time * 10.0f) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
+			});
 		}
 
 		std::cout.imbue(std::locale(""));
 		std::cout << "\nInstances: " << instances.size() << "\n";
-		std::cout << "Triangles: " << instances.size() * model->get_vertex_count() << "\n";
-		std::cout << "Memory: " << (instances.size() * sizeof(Model::Instance)) / 1024 / 1024 << "MB\n";
+		int instances_mb = (instances.size() * sizeof(Model::Instance)) / 1024.0f / 1024.0f;
+		std::cout << "Instances Memory: " << instances_mb << "MB\n";
+		std::cout << "Vertices: " << instances.size() * model->get_vertex_count() << "\n";
 	}
 
 	static float rot = std::cosf(time) * 180.0f * deg2rad;
@@ -164,7 +167,7 @@ bool Graphics::update(Input* input, float dt)
 				instances.push_back({
 					{pos.x, pos.y, pos.z},
 					{0, 0, 0},
-					{1, 1, 1},
+					{0.2f, 0.2f, 0.2f},
 					{1.0f, 0.0f, 0.0f, 1.0f},
 				});
 			}

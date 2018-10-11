@@ -34,6 +34,15 @@ dx::XMFLOAT3 Camera::get_rot()
 void Camera::update(Input* input, float dt)
 {
 	constexpr float deg2rad = 0.0174532925f;
+	if (input->is_key_down(VK_SHIFT))
+	{
+		pos_speed = 100.0f;
+	}
+	else
+	{
+		pos_speed = 20.0f;
+	}
+
 	if (input->is_key_down(VK_LEFT))
 	{
 		rot_y -= rot_speed * dt;

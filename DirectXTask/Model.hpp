@@ -22,6 +22,13 @@ public:
 		dx::XMFLOAT4 colour;
 	};
 
+	struct Vertex
+	{
+		dx::XMFLOAT3 position;
+		dx::XMFLOAT4 colour;
+		dx::XMFLOAT3 normal;
+	};
+
 	Model(ID3D11Device* device);
 	~Model();
 
@@ -37,12 +44,6 @@ public:
 	void update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance>& instances);
 
 private:
-	struct Vertex
-	{
-		dx::XMFLOAT3 position;
-		dx::XMFLOAT4 colour;
-		dx::XMFLOAT3 normal;
-	};
 
 	struct ModelData
 	{

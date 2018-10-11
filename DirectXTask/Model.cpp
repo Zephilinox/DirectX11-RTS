@@ -6,7 +6,7 @@
 
 Model::Model(ID3D11Device* device)
 {
-	load_from_file("Cube2.txt", 0);
+	load_from_file("Sphere.txt", 0);
 
 	std::vector<Vertex> vertices(vertex_count);
 	std::vector<unsigned long> indices(index_count);
