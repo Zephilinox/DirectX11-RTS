@@ -17,8 +17,9 @@ World::World(ID3D11Device* device)
 	{
 		for (int w = 0; w < terrainWidth; ++w)
 		{
-			vertices[index].position = { static_cast<float>(w) * (1.0f / resolution), 0, static_cast<float>(h) * (1.0f / resolution) };
-			vertices[index].colour = { 1.0f, 1.0f, 1.0f, 1.0f };
+			float y = (std::rand() % 100) / 100.0f;
+			vertices[index].position = { static_cast<float>(w) * (1.0f / resolution), y, static_cast<float>(h) * (1.0f / resolution) };
+			vertices[index].colour = { 0.5f, 0.5f, 0.5f, 1.0f };
 			index++;
 		}
 	}

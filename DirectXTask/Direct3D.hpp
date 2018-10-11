@@ -38,6 +38,8 @@ public:
 	void begin(float r, float g, float b, float a);
 	void end();
 
+	void set_wireframe(bool enabled);
+
 	ID3D11Device* get_device();
 	ID3D11DeviceContext* get_device_context();
 
@@ -62,6 +64,7 @@ private:
 
 	bool vsync;
 	bool fullscreen;
+	bool wireframe;
 
 	int gpu_memory;
 	std::array<char, 128> gpu_description;
@@ -72,7 +75,8 @@ private:
 	D3DRAII<ID3D11Texture2D> depth_stencil_buffer;
 	D3DRAII<ID3D11DepthStencilState> depth_stencil_state;
 	D3DRAII<ID3D11DepthStencilView> depth_stencil_view;
-	D3DRAII<ID3D11RasterizerState> raster_state;
+	D3DRAII<ID3D11RasterizerState> raster_state_fill;
+	D3DRAII<ID3D11RasterizerState> raster_state_wireframe;
 	dx::XMMATRIX projection_matrix;
 	dx::XMMATRIX world_matrix;
 	dx::XMMATRIX ortho_matrix;

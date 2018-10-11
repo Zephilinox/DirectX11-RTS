@@ -61,7 +61,7 @@ Direct3D::Direct3D(int width, int height, bool vsync, HWND window, bool fullscre
 	device_context.val->OMSetRenderTargets(1, &render_target_view.val, depth_stencil_view.val);
 
 	create_rasterizer_state();
-	device_context.val->RSSetState(raster_state.val);
+	device_context.val->RSSetState(raster_state_fill.val);
 
 	create_viewport(static_cast<float>(width), static_cast<float>(height));
 	create_matrices(static_cast<float>(width), static_cast<float>(height), screen_near, screen_depth);
@@ -105,6 +105,19 @@ void Direct3D::end()
 	}
 
 	world_matrix = dx::XMMatrixIdentity();
+}
+
+void Direct3D::set_wireframe(bool enabled)
+{
+	wireframe = enabled;
+	if (wireframe)
+	{
+		device_context.val->RSSetState(raster_state_wireframe.val);
+	}
+	else
+	{
+		device_context.val->RSSetState(raster_state_fill.val);
+	}
 }
 
 ID3D11Device* Direct3D::get_device()
@@ -324,13 +337,21 @@ bool Direct3D::create_rasterizer_state()
 	raster_desc.DepthBias = 0;
 	raster_desc.DepthBiasClamp = 0.0f;
 	raster_desc.DepthClipEnable = true;
-	raster_desc.FillMode = D3D11_FILL_WIREFRAME;
+	raster_desc.FillMode = D3D11_FILL_SOLID;
 	raster_desc.FrontCounterClockwise = false;
 	raster_desc.MultisampleEnable = false;
 	raster_desc.ScissorEnable = false;
 	raster_desc.SlopeScaledDepthBias = 0.0f;
 
-	HRESULT result = device.val->CreateRasterizerState(&raster_desc, &raster_state.val);
+	D3D11_RASTERIZER_DESC raster_desc2 = raster_desc;
+	raster_desc2.FillMode = D3D11_FILL_WIREFRAME;
+
+	HRESULT result = device.val->CreateRasterizerState(&raster_desc, &raster_state_fill.val);
+	result = device.val->CreateRasterizerState(&raster_desc2, &raster_state_wireframe.val) && result;
+
+	assert(raster_state_fill.val);
+	assert(raster_state_wireframe.val);
+
 	return !FAILED(result);
 }
 

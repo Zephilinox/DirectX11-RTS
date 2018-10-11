@@ -30,6 +30,36 @@ Graphics::Graphics(int width, int height, HWND window)
 		MessageBoxW(window, L"Could not init Model", L"ERROR", MB_OK);
 	}
 
+	float deg2rad = 0.0174533f;
+
+	instances.push_back({
+		{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
+		{ 0.0f, 0.0f, 0.0f },
+		{ 2.0f, std::sin(time) + 2.0f, 2.0f },
+		{ (std::sin(time) + 1.0f) / 2.0f, 0.5f, 0.5f, 1.0f }
+	});
+
+	instances.push_back({
+		{ 32.0f, 1.0f, 32.0f },
+		{ std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad },
+		{ 1.0f, 1.0f, 1.0f},
+		{ 1.0f, (std::sin(time) + 2.0f) / 2.0f, 0.0f, 1.0f }
+	});
+
+	instances.push_back({
+		{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
+		{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
+		{ 1.0f, std::sin(time) + 2.0f, 1.0f },
+		{ 0.0f, 1.0f, (std::sin(time) + 1.0f) / 2.0f, 1.0f }
+	});
+
+	instances.push_back({
+		{ 44.0f, 1.0f, 44.0f },
+		{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
+		{ std::sin(time) + 2.0f, 1.0f, 1.0f },
+		{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
+	});
+
 	try
 	{
 		world = std::make_unique<World>(direct3d->get_device());
@@ -47,6 +77,29 @@ bool Graphics::update(Input* input, float dt)
 	time += dt;
 	camera->update(input, dt);
 	this->input = input;
+
+	float deg2rad = 0.0174533f;
+
+	if (input->is_key_down('C'))
+	{
+		float rand_x = (rand() % 6400) / 100.0f;
+		float rand_y = (rand() % 2000) / 100.0f;
+		float rand_z = (rand() % 6400) / 100.0f;
+
+		instances.push_back({
+			{ rand_x, rand_y, rand_z},
+			{ 0.0f, 0.0f, 0.0f },
+			{ 1.0f, 1.0f, 1.0f },
+			{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
+			});
+	}
+
+	for (auto& instance : instances)
+	{
+		instance.rotation.x = std::cosf(time) * 180.0f * deg2rad;
+		instance.rotation.y = std::cosf(time) * 180.0f * deg2rad;
+		instance.rotation.z = std::cosf(time) * 180.0f * deg2rad;
+	}
 
 	POINT pos;
 	if (GetCursorPos(&pos))
@@ -94,74 +147,17 @@ bool Graphics::update(Input* input, float dt)
 
 bool Graphics::draw()
 {
-	direct3d->begin(0.0f, 0.0f, 0.0f, 1.0f);
+	direct3d->begin(1.0f, 1.0f, 0.95f, 1.0f);
 
 	camera->draw();
 	dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
 	dx::XMMATRIX view_matrix =	camera->get_view_matrix();
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 	
-	float deg2rad = 0.0174533f;
-
-	std::vector<Model::Instance> instances = 
-	{
-		{
-			{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
-			{ 0.0f, 0.0f, 0.0f },
-			{ 2.0f, std::sin(time) + 2.0f, 2.0f},
-			{ (std::sin(time) + 1.0f) / 2.0f, 0.5f, 0.5f, 1.0f}
-		},
-		{
-			{ 32.0f, 1.0f, 32.0f },
-			{ std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad },
-			{ 1.0f, 1.0f, 1.0f},
-			{ 1.0f, (std::sin(time) + 2.0f) / 2.0f, 0.0f, 1.0f }
-		},
-		{
-			{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
-			{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
-			{ 1.0f, std::sin(time) + 2.0f, 1.0f },
-			{ 0.0f, 1.0f, (std::sin(time) + 1.0f) / 2.0f, 1.0f }
-		},
-		{
-			{ 44.0f, 1.0f, 44.0f },
-			{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
-			{ std::sin(time) + 2.0f, 1.0f, 1.0f },
-			{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
-		}
-	};
-
-	if (input->is_key_down('C'))
-	{
-		float rand_x = rand() % 64;
-		float rand_z = rand() % 64;
-
-		instances.push_back({
-			{ rand_x, 1.0f, rand_z},
-			{ 0.0f, 0.0f, 0.0f },
-			{ 1.0f, 1.0f, 1.0f },
-			{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
-		});
-	}
-
-	for (auto& instance : instances)
-	{
-		//instance.rotation.y = std::cosf(time) * 180.0f * deg2rad;
-	}
-
-	ID3D11RasterizerState* Fill;
-	D3D11_RASTERIZER_DESC desc;
-	ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
-	desc.FillMode = D3D11_FILL_SOLID;
-	desc.CullMode = D3D11_CULL_BACK;
-	direct3d->get_device()->CreateRasterizerState(&desc, &Fill);
-	direct3d->get_device_context()->RSSetState(Fill);
-
+	direct3d->set_wireframe(false);
 	model->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), instances);
 	model->render(direct3d->get_device_context());
-
-	Fill->Release();
-
+	
 	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), model->get_vertex_count(), model->get_instance_count(), world_matrix, view_matrix, projection_matrix);
 	if (!result)
 	{
@@ -169,21 +165,14 @@ bool Graphics::draw()
 	}
 
 	world_matrix = dx::XMMatrixIdentity();
-
-	ID3D11RasterizerState* Wireframe;
-	ZeroMemory(&desc, sizeof(D3D11_RASTERIZER_DESC));
-	desc.FillMode = D3D11_FILL_WIREFRAME;
-	desc.CullMode = D3D11_CULL_NONE;
-	direct3d->get_device()->CreateRasterizerState(&desc, &Wireframe);
-	direct3d->get_device_context()->RSSetState(Wireframe);
-
+	
+	direct3d->set_wireframe(true);
 	world->draw(direct3d->get_device_context());
 	result = colour_shader->render(direct3d->get_device_context(), world->get_index_count(), world->get_index_count(), 1, world_matrix, view_matrix, projection_matrix);
 	if (!result)
 	{
 		return false;
 	}
-	Wireframe->Release();
 
 	direct3d->end();
 
