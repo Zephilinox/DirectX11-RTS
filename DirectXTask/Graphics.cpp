@@ -103,9 +103,9 @@ bool Graphics::update(Input* input, float dt)
 	float rot = std::cosf(time) * 180.0f * deg2rad;
 	for (auto& instance : instances)
 	{
-		instance.rotation.x = rot;
-		instance.rotation.y = rot;
-		instance.rotation.z = rot;
+		//instance.rotation.x = rot;
+		//instance.rotation.y = rot;
+		//instance.rotation.z = rot;
 	}
 
 	POINT pos;
@@ -155,6 +155,8 @@ bool Graphics::update(Input* input, float dt)
 bool Graphics::draw()
 {
 	direct3d->begin(1.0f, 1.0f, 0.95f, 1.0f);
+	dx::XMFLOAT3 light_direction = { 1.0f, 0.0f, 0.0f };
+	dx::XMFLOAT4 diffuse_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	camera->draw();
 	dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
@@ -165,7 +167,7 @@ bool Graphics::draw()
 	model->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), instances);
 	model->render(direct3d->get_device_context());
 	
-	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), model->get_vertex_count(), model->get_instance_count(), world_matrix, view_matrix, projection_matrix);
+	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), model->get_vertex_count(), model->get_instance_count(), world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
 	if (!result)
 	{
 		return false;
@@ -173,9 +175,9 @@ bool Graphics::draw()
 
 	world_matrix = dx::XMMatrixIdentity();
 	
-	direct3d->set_wireframe(true);
+	direct3d->set_wireframe(false);
 	world->draw(direct3d->get_device_context());
-	result = colour_shader->render(direct3d->get_device_context(), world->get_index_count(), world->get_index_count(), 1, world_matrix, view_matrix, projection_matrix);
+	result = colour_shader->render(direct3d->get_device_context(), world->get_index_count(), world->get_index_count(), 1, world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
 	if (!result)
 	{
 		return false;

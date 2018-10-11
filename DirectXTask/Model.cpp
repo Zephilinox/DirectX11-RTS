@@ -11,29 +11,38 @@ Model::Model(ID3D11Device* device)
 	std::vector<Vertex> vertices(vertex_count);
 	std::vector<unsigned long> indices(index_count);
 
+	//todo: use 12 vertices, fix normals
 	vertices[0].position = { -0.5f, -0.5f, -0.5f };
-	vertices[0].colour = {0.9f, 0.9f, 0.9f, 1.0f};
+	vertices[0].colour = { 0.9f, 0.9f, 0.9f, 1.0f };
+	vertices[0].normal = {0.0f, 0.0f, 1.0f};
 
 	vertices[1].position = { -0.5f, 0.5f, -0.5f };
 	vertices[1].colour = { 0.8f, 0.8f, 0.8f, 1.0f };
+	vertices[1].normal = { 0.0f, 0.0f, -1.0f };
 
 	vertices[2].position = { 0.5f, 0.5f, -0.5f };
 	vertices[2].colour = { 0.7f, 0.7f, 0.7f, 1.0f };
+	vertices[2].normal = { -0.5f, 0.5f, -0.5f };
 
 	vertices[3].position = { 0.5f, -0.5f, -0.5f };
 	vertices[3].colour = { 0.6f, 0.6f, 0.6f, 1.0f };
+	vertices[3].normal = { 0.0f, 0.0f, 1.0f };
 
 	vertices[4].position = { -0.5f, -0.5f, 0.5f };
 	vertices[4].colour = { 0.9f, 0.9f, 0.9f, 1.0f };
+	vertices[4].normal = { -1.0f, 0.0f, 0.0f };
 
 	vertices[5].position = { -0.5f, 0.5f, 0.5f };
 	vertices[5].colour = { 0.8f, 0.8f, 0.8f, 1.0f };
+	vertices[5].normal = { 0.0f, 1.0f, 0.0f };
 
 	vertices[6].position = { 0.5f, 0.5f, 0.5f };
 	vertices[6].colour = { 0.7f, 0.7f, 0.7f, 1.0f };
+	vertices[6].normal = { 0.0f, -1.0f, 0.0f };
 
 	vertices[7].position = { 0.5f, -0.5f, 0.5f };
 	vertices[7].colour = { 0.6f, 0.6f, 0.6f, 1.0f };
+	vertices[7].normal = { 0.0f, 0.0f, -1.0f };
 
 	//front
 	indices[0] = 0;

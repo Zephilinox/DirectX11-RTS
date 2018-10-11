@@ -9,6 +9,7 @@ struct Vertex
 {
 	float4 position: POSITION0;
 	float4 colour: COLOR0;
+	float3 normal: NORMAL;
 };
 
 struct Instance
@@ -22,33 +23,12 @@ struct Instance
 struct Pixel
 {
 	float4 position: SV_POSITION;
-	float4 colour : COLOR;
+	float4 colour: COLOR;
+	float3 normal: NORMAL;
 };
 
 Pixel ColourVertexShader(Vertex vertex, Instance instance)
 {
-	/* don't do this but, funsies
-
-	float a = instance.scale.x;
-	float b = instance.scale.y;
-	float c = instance.scale.z;
-	
-	float j = instance.position.x;
-	float k = instance.position.y;
-	float l = instance.position.z;
-
-	float x = instance.rotation.x;
-	float y = instance.rotation.y;
-	float z = instance.rotation.z;
-	
-	matrix transform ={
-(a*cos(y+z)+a*cos(y-z))/2,	                                                        (-a*sin(y+z)+a*sin(y-z))/2,	                  a*sin(y),	0,
-(-b*cos(x+y+z)+b*cos(x-y+z)-b*cos(x+y-z)+b*cos(x-y-z)+2*b*sin(x+z)-2*b*sin(x-z))/4,	 (2*b*cos(x+z)+2*b*cos(x-z)+b*sin(x+y+z)-b*sin(x-y+z)-b*sin(x+y-z)+b*sin(x-y-z))/4,	(-b*sin(x+y)-b*sin(x-y))/2,	0,
-(-2*c*cos(x+z)+2*c*cos(x-z)-c*sin(x+y+z)+c*sin(x-y+z)-c*sin(x+y-z)+c*sin(x-y-z))/4,	(-c*cos(x+y+z)+c*cos(x-y+z)+c*cos(x+y-z)-c*cos(x-y-z)+2*c*sin(x+z)+2*c*sin(x-z))/4,	 (c*cos(x+y)+c*cos(x-y))/2,	0,
-j,	                                                                                 k,	                         l,	1											
-	};
-	*/
-
 	matrix scale = {
 	instance.scale.x, 0, 0, 0,
 	0, instance.scale.y, 0, 0,
@@ -86,16 +66,20 @@ j,	                                                                             
 
 	vertex.position.w = 1.0f;
 
+	matrix transform = scale;
+	transform = mul(transform, rotation_x);
+	transform = mul(transform, rotation_y);
+	transform = mul(transform, rotation_y);
+	transform = mul(transform, position);
+	
 	Pixel output;
-	output.position = mul(vertex.position, scale);
-	output.position = mul(output.position, rotation_x);
-	output.position = mul(output.position, rotation_y);
-	output.position = mul(output.position, rotation_z);
-	output.position = mul(output.position, position);
+	output.position = mul(vertex.position, transform);
 	output.position = mul(output.position, view);
 	output.position = mul(output.position, projection);
 
 	output.colour = vertex.colour * instance.colour;
+	output.normal = mul(vertex.normal, (float3x3)transform);
+	output.normal = normalize(output.normal);
 
 	return output;
 }

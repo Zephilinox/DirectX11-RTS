@@ -1,10 +1,27 @@
-struct PixelInputType
+cbuffer Light
+{
+	float4 diffuse_colour;
+	float3 light_direction;
+	float padding;
+}
+
+struct Pixel
 {
 	float4 position: SV_POSITION;
 	float4 colour: COLOR;
+	float3 normal: NORMAL;
 };
 
-float4 ColourPixelShader(PixelInputType input) : SV_TARGET
+float4 ColourPixelShader(Pixel pixel) : SV_TARGET
 {
-	return input.colour;
+	float4 original_colour = pixel.colour;
+	float inverse_light_dir = -light_direction;
+	float light_intensity = saturate(dot(pixel.normal, inverse_light_dir));
+	float4 colour = saturate(diffuse_colour * light_intensity);
+	colour = colour * original_colour;
+	//return colour;
+
+	float4 normal_as_colour;
+	normal_as_colour = float4(pixel.normal.x, pixel.normal.y, pixel.normal.z, 1);
+	return normal_as_colour;
 }
