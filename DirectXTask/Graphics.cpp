@@ -103,8 +103,8 @@ bool Graphics::update(Input* input, float dt)
 	float rot = std::cosf(time) * 180.0f * deg2rad;
 	for (auto& instance : instances)
 	{
-		//instance.rotation.x = rot;
-		//instance.rotation.y = rot;
+		instance.rotation.x = rot;
+		instance.rotation.y = rot;
 		//instance.rotation.z = rot;
 	}
 
@@ -154,8 +154,12 @@ bool Graphics::update(Input* input, float dt)
 
 bool Graphics::draw()
 {
+	float deg2rad = 0.0174533f;
+	float rot = std::cosf(time) * 18.0f * deg2rad;
+	float rot2 = -0.24;
+	std::cout << rot << "\n";
 	direct3d->begin(1.0f, 1.0f, 0.95f, 1.0f);
-	dx::XMFLOAT3 light_direction = { 1.0f, 0.0f, 0.0f };
+	dx::XMFLOAT3 light_direction = { -0.3, rot, rot };
 	dx::XMFLOAT4 diffuse_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	camera->draw();

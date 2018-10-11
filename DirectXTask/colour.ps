@@ -14,14 +14,20 @@ struct Pixel
 
 float4 ColourPixelShader(Pixel pixel) : SV_TARGET
 {
-	float4 original_colour = pixel.colour;
+	float4 colour = float4(0.5f, 0.5f, 0.5f, 1.0f);
 	float inverse_light_dir = -light_direction;
 	float light_intensity = saturate(dot(pixel.normal, inverse_light_dir));
-	float4 colour = saturate(diffuse_colour * light_intensity);
-	colour = colour * original_colour;
-	//return colour;
+	if (light_intensity > 0.0f)
+	{
+		colour += (diffuse_colour * light_intensity);
+	}
+	colour = saturate(colour);
+	colour = colour * pixel.colour;
+	return colour;
 
 	float4 normal_as_colour;
-	normal_as_colour = float4(pixel.normal.x, pixel.normal.y, pixel.normal.z, 1);
+	normal_as_colour = float4(abs(pixel.normal.x), abs(pixel.normal.y), abs(pixel.normal.z), 1);
+	float4 light_direction_as_colour;
+	light_direction_as_colour = float4(abs(light_direction.x), abs(light_direction.y), abs(light_direction.z), 1);
 	return normal_as_colour;
 }

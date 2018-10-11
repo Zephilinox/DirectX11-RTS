@@ -78,6 +78,7 @@ Pixel ColourVertexShader(Vertex vertex, Instance instance)
 	output.position = mul(output.position, projection);
 
 	output.colour = vertex.colour * instance.colour;
+
 	output.normal = mul(vertex.normal, (float3x3)transform);
 	output.normal = normalize(output.normal);
 

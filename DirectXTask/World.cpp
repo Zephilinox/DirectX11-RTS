@@ -19,8 +19,8 @@ World::World(ID3D11Device* device)
 		{
 			float y = (std::rand() % 100) / 100.0f;
 			vertices[index].position = { static_cast<float>(w) * (1.0f / resolution), y, static_cast<float>(h) * (1.0f / resolution) };
-			vertices[index].colour = { 0.5f, 0.5f, 0.5f, 1.0f };
-			vertices[index].normal = { 0.5f, 0.5f, 0.5f};
+			vertices[index].colour = { 0.8f, 0.8f, 0.75f, 1.0f };
+			vertices[index].normal = { (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f };
 			index++;
 		}
 	}

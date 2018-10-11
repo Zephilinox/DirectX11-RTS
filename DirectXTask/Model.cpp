@@ -2,95 +2,23 @@
 
 //STD
 #include <iostream>
+#include <fstream>
 
 Model::Model(ID3D11Device* device)
 {
-	vertex_count = 8;
-	index_count = 36;
+	load_from_file("Cube.txt");
 
 	std::vector<Vertex> vertices(vertex_count);
 	std::vector<unsigned long> indices(index_count);
 
-	//todo: use 12 vertices, fix normals
-	vertices[0].position = { -0.5f, -0.5f, -0.5f };
-	vertices[0].colour = { 0.9f, 0.9f, 0.9f, 1.0f };
-	vertices[0].normal = {0.0f, 0.0f, 1.0f};
-
-	vertices[1].position = { -0.5f, 0.5f, -0.5f };
-	vertices[1].colour = { 0.8f, 0.8f, 0.8f, 1.0f };
-	vertices[1].normal = { 0.0f, 0.0f, -1.0f };
-
-	vertices[2].position = { 0.5f, 0.5f, -0.5f };
-	vertices[2].colour = { 0.7f, 0.7f, 0.7f, 1.0f };
-	vertices[2].normal = { -0.5f, 0.5f, -0.5f };
-
-	vertices[3].position = { 0.5f, -0.5f, -0.5f };
-	vertices[3].colour = { 0.6f, 0.6f, 0.6f, 1.0f };
-	vertices[3].normal = { 0.0f, 0.0f, 1.0f };
-
-	vertices[4].position = { -0.5f, -0.5f, 0.5f };
-	vertices[4].colour = { 0.9f, 0.9f, 0.9f, 1.0f };
-	vertices[4].normal = { -1.0f, 0.0f, 0.0f };
-
-	vertices[5].position = { -0.5f, 0.5f, 0.5f };
-	vertices[5].colour = { 0.8f, 0.8f, 0.8f, 1.0f };
-	vertices[5].normal = { 0.0f, 1.0f, 0.0f };
-
-	vertices[6].position = { 0.5f, 0.5f, 0.5f };
-	vertices[6].colour = { 0.7f, 0.7f, 0.7f, 1.0f };
-	vertices[6].normal = { 0.0f, -1.0f, 0.0f };
-
-	vertices[7].position = { 0.5f, -0.5f, 0.5f };
-	vertices[7].colour = { 0.6f, 0.6f, 0.6f, 1.0f };
-	vertices[7].normal = { 0.0f, 0.0f, -1.0f };
-
-	//front
-	indices[0] = 0;
-	indices[1] = 1;
-	indices[2] = 2;
-	indices[3] = 0;
-	indices[4] = 2;
-	indices[5] = 3;
-
-	//back
-	indices[6] = 4;
-	indices[7] = 6;
-	indices[8] = 5;
-	indices[9] = 4;
-	indices[10] = 7;
-	indices[11] = 6;
-
-	//left
-	indices[12] = 4;
-	indices[13] = 5;
-	indices[14] = 1;
-	indices[15] = 4;
-	indices[16] = 1;
-	indices[17] = 0;
-
-	//right
-	indices[18] = 3;
-	indices[19] = 2;
-	indices[20] = 6;
-	indices[21] = 3;
-	indices[22] = 6;
-	indices[23] = 7;
-
-	//top
-	indices[24] = 1;
-	indices[25] = 5;
-	indices[26] = 6;
-	indices[27] = 1;
-	indices[28] = 6;
-	indices[29] = 2;
-
-	//bottom
-	indices[30] = 4;
-	indices[31] = 0;
-	indices[32] = 3;
-	indices[33] = 4;
-	indices[34] = 3;
-	indices[35] = 7;
+	for (int i = 0; i < vertex_count; ++i)
+	{
+		vertices[i].position = dx::XMFLOAT3(model_data[i].x, model_data[i].y, model_data[i].z);
+		vertices[i].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		vertices[i].normal = dx::XMFLOAT3(model_data[i].nx, model_data[i].ny, model_data[i].nz);
+		//todo: texture;
+		indices[i] = i;
+	}
 
 	D3D11_BUFFER_DESC vertex_buffer_desc;
 	vertex_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
@@ -136,6 +64,37 @@ Model::Model(ID3D11Device* device)
 Model::~Model()
 {
 	//todo: see if I need this
+}
+
+bool Model::load_from_file(std::string filename)
+{
+	std::ifstream fin;
+	char input;
+	int i;
+
+	fin.open(filename);
+
+	if (fin.fail())
+	{
+		return false;
+	}
+
+	fin >> vertex_count;
+
+	index_count = vertex_count;
+
+	model_data.resize(vertex_count);
+
+	for (i = 0; i < vertex_count; i++)
+	{
+		fin >> model_data[i].x >> model_data[i].y >> model_data[i].z;
+		fin >> model_data[i].tu >> model_data[i].tv;
+		fin >> model_data[i].nx >> model_data[i].ny >> model_data[i].nz;
+	}
+
+	fin.close();
+
+	return true;
 }
 
 void Model::render(ID3D11DeviceContext* device_context)

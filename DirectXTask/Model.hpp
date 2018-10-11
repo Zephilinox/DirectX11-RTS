@@ -25,6 +25,8 @@ public:
 	Model(ID3D11Device* device);
 	~Model();
 
+	bool load_from_file(std::string filename);
+
 	void render(ID3D11DeviceContext* device_context);
 
 	int get_vertex_count();
@@ -42,6 +44,19 @@ private:
 		dx::XMFLOAT3 normal;
 	};
 
+	struct ModelData
+	{
+		float x;
+		float y;
+		float z;
+		float tu;
+		float tv;
+		float nx;
+		float ny;
+		float nz;
+	};
+
+	std::vector<ModelData> model_data;
 	D3DRAII<ID3D11Buffer> vertex_buffer;
 	D3DRAII<ID3D11Buffer> index_buffer;
 	D3DRAII<ID3D11Buffer> instance_buffer;
