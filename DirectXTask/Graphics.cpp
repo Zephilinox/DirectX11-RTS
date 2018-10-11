@@ -2,6 +2,7 @@
 
 //STD
 #include <iostream>
+#include <iomanip>
 
 Graphics::Graphics(int width, int height, HWND window)
 {
@@ -32,32 +33,31 @@ Graphics::Graphics(int width, int height, HWND window)
 
 	float deg2rad = 0.0174533f;
 
-	instances.reserve(5000000);
 	instances.push_back({
 		{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
 		{ 0.0f, 0.0f, 0.0f },
-		{ 2.0f, std::sin(time) + 2.0f, 2.0f },
+		{ 1.00f, 1.0f, 1.0f},
 		{ 0, 1.0f, 0.8f, 1.0f }
 	});
 
 	instances.push_back({
 		{ 32.0f, 1.0f, 32.0f },
 		{ std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad },
-		{ 1.0f, 1.0f, 1.0f},
+		{ 1.00f, 1.0f, 1.0f},
 		{ 1.0f, 0.8f, 0.0f, 1.0f }
 	});
 
 	instances.push_back({
 		{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
 		{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
-		{ 1.0f, std::sin(time) + 2.0f, 1.0f },
+		{ 1.00f, 1.0f, 1.0f},
 		{ 1.0f, 0.4f, 0.4f, 1.0f }
 	});
 
 	instances.push_back({
 		{ 44.0f, 1.0f, 44.0f },
 		{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
-		{ std::sin(time) + 2.0f, 1.0f, 1.0f },
+		{ 1.00f, 1.0f, 1.0f},
 		{ 0.0f, 0.8f, 1.0f, 1.0f }
 	});
 
@@ -97,7 +97,10 @@ bool Graphics::update(Input* input, float dt)
 				});
 		}
 
+		std::cout.imbue(std::locale(""));
 		std::cout << "Instances: " << instances.size() << "\n";
+		std::cout << "Triangles: " << instances.size() * model->get_vertex_count() << "\n";
+		std::cout << "Memory: " << (instances.size() * sizeof(Model::Instance)) / 1024 / 1024 << "MB\n";
 	}
 
 	static float rot = std::cosf(time) * 180.0f * deg2rad;
@@ -116,20 +119,21 @@ bool Graphics::update(Input* input, float dt)
 		{
 			if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
 			{
+				camera->draw();
 				dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
 				dx::XMMATRIX view_matrix = camera->get_view_matrix();
 				dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 
 				std::cout << pos.x << "," << pos.y << "\n";
 				dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
-				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 1000.0f };
+				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 80.0f };
 				dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
 				dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
 
 				near_pos_vec = dx::XMVector3Unproject(
 					near_pos_vec,
 					0, 0,
-					1280, 720,
+					12.72, 10.80,
 					0.0f, 100.0f,
 					projection_matrix,
 					view_matrix,
@@ -138,15 +142,31 @@ bool Graphics::update(Input* input, float dt)
 				far_pos_vec = dx::XMVector3Unproject(
 					far_pos_vec,
 					0, 0,
-					1280, 720,
+					12.72, 10.80,
 					0.0f, 100.0f,
 					projection_matrix,
 					view_matrix,
 					world_matrix);
-
+				
 				auto direction = dx::XMVectorSubtract(near_pos_vec, far_pos_vec);
 
 				std::cout << dx::XMVectorGetX(near_pos_vec) << ", " << dx::XMVectorGetY(near_pos_vec) << ", " << dx::XMVectorGetZ(near_pos_vec) << "\n";
+				
+				dx::XMFLOAT3 pos;
+				dx::XMStoreFloat3(&pos, near_pos_vec);
+				instances.push_back({
+					{pos.x, pos.y, pos.z * -2},
+					{0, 0, 0},
+					{1, 1, 1},
+					{0.0f, 0.0f, 1.0f, 1.0f},
+					});
+				dx::XMStoreFloat3(&pos, far_pos_vec);
+				instances.push_back({
+					{pos.x, pos.y, pos.z * -2},
+					{0, 0, 0},
+					{1, 1, 1},
+					{1.0f, 0.0f, 0.0f, 1.0f},
+				});
 			}
 		}
 	}

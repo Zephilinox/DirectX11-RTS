@@ -25,7 +25,7 @@ public:
 	Model(ID3D11Device* device);
 	~Model();
 
-	bool load_from_file(std::string filename);
+	bool load_from_file(std::string filename, int filetype);
 
 	void render(ID3D11DeviceContext* device_context);
 

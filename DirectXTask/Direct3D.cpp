@@ -334,7 +334,7 @@ bool Direct3D::create_depth_stencil_state()
 bool Direct3D::create_rasterizer_state()
 {
 	D3D11_RASTERIZER_DESC raster_desc;
-	raster_desc.AntialiasedLineEnable = false;
+	raster_desc.AntialiasedLineEnable = true;
 	raster_desc.CullMode = D3D11_CULL_BACK;
 	raster_desc.DepthBias = 0;
 	raster_desc.DepthBiasClamp = 0.0f;

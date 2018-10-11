@@ -6,7 +6,7 @@
 
 Model::Model(ID3D11Device* device)
 {
-	load_from_file("Cube.txt");
+	load_from_file("Cube2.txt", 0);
 
 	std::vector<Vertex> vertices(vertex_count);
 	std::vector<unsigned long> indices(index_count);
@@ -66,35 +66,42 @@ Model::~Model()
 	//todo: see if I need this
 }
 
-bool Model::load_from_file(std::string filename)
+bool Model::load_from_file(std::string filename, int filetype = 0)
 {
-	std::ifstream fin;
-	char input;
-	int i;
-
-	fin.open(filename);
-
-	if (fin.fail())
+	if (filetype == 0)
 	{
-		return false;
+		std::ifstream fin;
+		char input;
+		int i;
+
+		fin.open(filename);
+
+		if (fin.fail())
+		{
+			return false;
+		}
+
+		fin >> vertex_count;
+
+		index_count = vertex_count;
+
+		model_data.resize(vertex_count);
+
+		for (i = 0; i < vertex_count; i++)
+		{
+			fin >> model_data[i].x >> model_data[i].y >> model_data[i].z;
+			fin >> model_data[i].tu >> model_data[i].tv;
+			fin >> model_data[i].nx >> model_data[i].ny >> model_data[i].nz;
+		}
+
+		fin.close();
+
+		return true;
 	}
-
-	fin >> vertex_count;
-
-	index_count = vertex_count;
-
-	model_data.resize(vertex_count);
-
-	for (i = 0; i < vertex_count; i++)
+	else
 	{
-		fin >> model_data[i].x >> model_data[i].y >> model_data[i].z;
-		fin >> model_data[i].tu >> model_data[i].tv;
-		fin >> model_data[i].nx >> model_data[i].ny >> model_data[i].nz;
+
 	}
-
-	fin.close();
-
-	return true;
 }
 
 void Model::render(ID3D11DeviceContext* device_context)
