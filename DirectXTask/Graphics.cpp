@@ -19,8 +19,8 @@ Graphics::Graphics(int width, int height, HWND window)
 	}
 
 	camera = std::make_unique<Camera>();
-	camera->set_pos(32.0f, 5.0f, -5.0f);
-	camera->set_rot(40, 0, 0);
+	camera->set_pos(32.0f, 20.0f, 0.0f);
+	camera->set_rot(30, 0, 0);
 
 	try
 	{
@@ -98,7 +98,7 @@ bool Graphics::update(Input* input, float dt)
 		}
 
 		std::cout.imbue(std::locale(""));
-		std::cout << "Instances: " << instances.size() << "\n";
+		std::cout << "\nInstances: " << instances.size() << "\n";
 		std::cout << "Triangles: " << instances.size() * model->get_vertex_count() << "\n";
 		std::cout << "Memory: " << (instances.size() * sizeof(Model::Instance)) / 1024 / 1024 << "MB\n";
 	}
@@ -109,7 +109,7 @@ bool Graphics::update(Input* input, float dt)
 	{
 		instance.rotation.x = rot;
 		instance.rotation.y = rot;
-		//instance.rotation.z = rot;
+		instance.rotation.z = rot;
 	}
 
 	POINT pos;
@@ -130,8 +130,8 @@ bool Graphics::update(Input* input, float dt)
 				rel_pos_x -= 1.0f;
 				rel_pos_y *= 2;
 				rel_pos_y -= 1.0f;
-				std::cout << pos.x << "," << pos.y << "\n";
-				std::cout << rel_pos_x << "," << rel_pos_y << "\n";
+				//std::cout << pos.x << "," << pos.y << "\n";
+				//std::cout << rel_pos_x << "," << rel_pos_y << "\n";
 				dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
 				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.995f };
 				dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
@@ -157,16 +157,9 @@ bool Graphics::update(Input* input, float dt)
 				
 				auto direction = dx::XMVectorSubtract(near_pos_vec, far_pos_vec);
 
-				std::cout << dx::XMVectorGetX(near_pos_vec) << ", " << dx::XMVectorGetY(near_pos_vec) << ", " << dx::XMVectorGetZ(near_pos_vec) << "\n";
+				//std::cout << dx::XMVectorGetX(near_pos_vec) << ", " << dx::XMVectorGetY(near_pos_vec) << ", " << dx::XMVectorGetZ(near_pos_vec) << "\n";
 				
 				dx::XMFLOAT3 pos;
-				dx::XMStoreFloat3(&pos, near_pos_vec);
-				instances.push_back({
-					{pos.x, pos.y, pos.z},
-					{0, 0, 0},
-					{1, 1, 1},
-					{0.0f, 0.0f, 1.0f, 1.0f},
-					});
 				dx::XMStoreFloat3(&pos, far_pos_vec);
 				instances.push_back({
 					{pos.x, pos.y, pos.z},

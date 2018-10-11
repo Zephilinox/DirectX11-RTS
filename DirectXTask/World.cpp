@@ -2,7 +2,7 @@
 
 World::World(ID3D11Device* device)
 {
-	constexpr float resolution = 1.0f;
+	constexpr float resolution = 0.5f;
 	constexpr int terrainHeight = 65 * resolution;
 	constexpr int terrainWidth = 65 * resolution;
 
