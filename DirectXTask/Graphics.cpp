@@ -124,7 +124,14 @@ bool Graphics::update(Input* input, float dt)
 				dx::XMMATRIX view_matrix = camera->get_view_matrix();
 				dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 
+				float rel_pos_x = pos.x / 1280.0f;
+				float rel_pos_y = pos.y / 720.0f;
+				rel_pos_x *= 2;
+				rel_pos_x -= 1.0f;
+				rel_pos_y *= 2;
+				rel_pos_y -= 1.0f;
 				std::cout << pos.x << "," << pos.y << "\n";
+				std::cout << rel_pos_x << "," << rel_pos_y << "\n";
 				dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
 				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 80.0f };
 				dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
@@ -133,7 +140,7 @@ bool Graphics::update(Input* input, float dt)
 				near_pos_vec = dx::XMVector3Unproject(
 					near_pos_vec,
 					0, 0,
-					12.72, 10.80,
+					10.0f, 10.0f,
 					0.0f, 100.0f,
 					projection_matrix,
 					view_matrix,
@@ -142,7 +149,7 @@ bool Graphics::update(Input* input, float dt)
 				far_pos_vec = dx::XMVector3Unproject(
 					far_pos_vec,
 					0, 0,
-					12.72, 10.80,
+					10.0f, 10.0f,
 					0.0f, 100.0f,
 					projection_matrix,
 					view_matrix,
@@ -155,14 +162,14 @@ bool Graphics::update(Input* input, float dt)
 				dx::XMFLOAT3 pos;
 				dx::XMStoreFloat3(&pos, near_pos_vec);
 				instances.push_back({
-					{pos.x, pos.y, pos.z * -2},
+					{pos.x, pos.y, pos.z},
 					{0, 0, 0},
 					{1, 1, 1},
 					{0.0f, 0.0f, 1.0f, 1.0f},
 					});
 				dx::XMStoreFloat3(&pos, far_pos_vec);
 				instances.push_back({
-					{pos.x, pos.y, pos.z * -2},
+					{pos.x, pos.y, pos.z},
 					{0, 0, 0},
 					{1, 1, 1},
 					{1.0f, 0.0f, 0.0f, 1.0f},
