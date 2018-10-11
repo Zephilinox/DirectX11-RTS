@@ -37,28 +37,28 @@ Graphics::Graphics(int width, int height, HWND window)
 		{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
 		{ 0.0f, 0.0f, 0.0f },
 		{ 2.0f, std::sin(time) + 2.0f, 2.0f },
-		{ (std::sin(time) + 1.0f) / 2.0f, 0.5f, 0.5f, 1.0f }
+		{ 0, 1.0f, 0.8f, 1.0f }
 	});
 
 	instances.push_back({
 		{ 32.0f, 1.0f, 32.0f },
 		{ std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad },
 		{ 1.0f, 1.0f, 1.0f},
-		{ 1.0f, (std::sin(time) + 2.0f) / 2.0f, 0.0f, 1.0f }
+		{ 1.0f, 0.8f, 0.0f, 1.0f }
 	});
 
 	instances.push_back({
 		{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
 		{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
 		{ 1.0f, std::sin(time) + 2.0f, 1.0f },
-		{ 0.0f, 1.0f, (std::sin(time) + 1.0f) / 2.0f, 1.0f }
+		{ 1.0f, 0.4f, 0.4f, 1.0f }
 	});
 
 	instances.push_back({
 		{ 44.0f, 1.0f, 44.0f },
 		{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
 		{ std::sin(time) + 2.0f, 1.0f, 1.0f },
-		{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
+		{ 0.0f, 0.8f, 1.0f, 1.0f }
 	});
 
 	try
@@ -100,7 +100,8 @@ bool Graphics::update(Input* input, float dt)
 		std::cout << "Instances: " << instances.size() << "\n";
 	}
 
-	float rot = std::cosf(time) * 180.0f * deg2rad;
+	static float rot = std::cosf(time) * 180.0f * deg2rad;
+	rot += 1.0f * dt;
 	for (auto& instance : instances)
 	{
 		instance.rotation.x = rot;
@@ -156,9 +157,7 @@ bool Graphics::draw()
 {
 	float deg2rad = 0.0174533f;
 	float rot = std::cosf(time) * 18.0f * deg2rad;
-	float rot2 = -0.24;
-	std::cout << rot << "\n";
-	direct3d->begin(1.0f, 1.0f, 0.95f, 1.0f);
+	direct3d->begin(0.9f, 0.9f, 0.85f, 1.0f);
 	dx::XMFLOAT3 light_direction = { -0.3, rot, rot };
 	dx::XMFLOAT4 diffuse_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
