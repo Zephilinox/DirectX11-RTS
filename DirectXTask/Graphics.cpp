@@ -44,8 +44,8 @@ Graphics::Graphics(int width, int height, HWND window)
 	float deg2rad = 0.0174533f;
 
 	{
-
-		for (int i = 0; i < 4000000; ++i)
+		instances.reserve(1'000'000);
+		for (int i = 0; i < 1'000'000; ++i)
 		{
 			float rand_x = rand() % 64;
 			float rand_z = rand() % 64;
