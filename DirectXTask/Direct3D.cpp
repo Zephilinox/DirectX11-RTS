@@ -50,6 +50,8 @@ Direct3D::Direct3D(int width, int height, bool vsync, HWND window, bool fullscre
 		throw;
 	}
 
+	std::cout << gpu_description.data() << " with " << gpu_memory << "MB\n";
+
 	create_device_and_swapchain(window, width, height, numerator, denominator);
 	create_render_target_view();
 	create_texture2d(width, height);

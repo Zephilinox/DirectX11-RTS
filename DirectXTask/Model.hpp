@@ -32,7 +32,7 @@ public:
 	int get_index_count();
 
 	void create_instance_buffer(ID3D11Device* device, int max_instances);
-	void update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance> instances);
+	void update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance>& instances);
 
 private:
 	struct Vertex

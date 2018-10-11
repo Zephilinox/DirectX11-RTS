@@ -183,15 +183,15 @@ void Model::create_instance_buffer(ID3D11Device* device, int max_instances)
 	}
 }
 
-void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance> instances)
+void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance>& instances)
 {
 	assert(instances.size() > 0);
-	if (instances.size() > max_instance_count)
+	if (instances.capacity() > max_instance_count)
 	{
 		std::cout << "Grew instance buffer from " << max_instance_count << " to ";
-		if (instances.size() > max_instance_count * 2)
+		if (instances.capacity() > max_instance_count * 2)
 		{
-			create_instance_buffer(device, instances.size());
+			create_instance_buffer(device, instances.capacity());
 		}
 		else
 		{
@@ -199,7 +199,7 @@ void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* de
 		}
 		std::cout << max_instance_count << "\n";
 	}
-	assert(instances.size() <= max_instance_count);
+	assert(instances.capacity() <= max_instance_count);
 
 	D3D11_MAPPED_SUBRESOURCE resource;
 	ZeroMemory(&resource, sizeof(resource));

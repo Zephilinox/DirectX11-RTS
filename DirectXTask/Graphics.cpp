@@ -32,6 +32,7 @@ Graphics::Graphics(int width, int height, HWND window)
 
 	float deg2rad = 0.0174533f;
 
+	instances.reserve(5000000);
 	instances.push_back({
 		{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
 		{ 0.0f, 0.0f, 0.0f },
@@ -82,23 +83,29 @@ bool Graphics::update(Input* input, float dt)
 
 	if (input->is_key_down('C'))
 	{
-		float rand_x = (rand() % 6400) / 100.0f;
-		float rand_y = (rand() % 2000) / 100.0f;
-		float rand_z = (rand() % 6400) / 100.0f;
+		for (int i = 0; i < 10000; ++i)
+		{
+			float rand_x = (rand() % 6400) / 100.0f;
+			float rand_y = (rand() % 6400) / 100.0f + 10.0f;
+			float rand_z = (rand() % 6400) / 100.0f;
 
-		instances.push_back({
-			{ rand_x, rand_y, rand_z},
-			{ 0.0f, 0.0f, 0.0f },
-			{ 1.0f, 1.0f, 1.0f },
-			{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
-			});
+			instances.push_back({
+				{ rand_x, rand_y, rand_z},
+				{ 0.0f, 0.0f, 0.0f },
+				{ 1.0f, 1.0f, 1.0f },
+				{ (std::sin(time) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
+				});
+		}
+
+		std::cout << "Instances: " << instances.size() << "\n";
 	}
 
+	float rot = std::cosf(time) * 180.0f * deg2rad;
 	for (auto& instance : instances)
 	{
-		instance.rotation.x = std::cosf(time) * 180.0f * deg2rad;
-		instance.rotation.y = std::cosf(time) * 180.0f * deg2rad;
-		instance.rotation.z = std::cosf(time) * 180.0f * deg2rad;
+		instance.rotation.x = rot;
+		instance.rotation.y = rot;
+		instance.rotation.z = rot;
 	}
 
 	POINT pos;
