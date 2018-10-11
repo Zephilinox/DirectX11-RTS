@@ -133,15 +133,15 @@ bool Graphics::update(Input* input, float dt)
 				std::cout << pos.x << "," << pos.y << "\n";
 				std::cout << rel_pos_x << "," << rel_pos_y << "\n";
 				dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
-				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 80.0f };
+				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.995f };
 				dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
 				dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
 
 				near_pos_vec = dx::XMVector3Unproject(
 					near_pos_vec,
 					0, 0,
-					10.0f, 10.0f,
-					0.0f, 100.0f,
+					1280.0f, 720.0f,
+					0.0f, 1.0f,
 					projection_matrix,
 					view_matrix,
 					world_matrix);
@@ -149,8 +149,8 @@ bool Graphics::update(Input* input, float dt)
 				far_pos_vec = dx::XMVector3Unproject(
 					far_pos_vec,
 					0, 0,
-					10.0f, 10.0f,
-					0.0f, 100.0f,
+					1280.0f, 720.0f,
+					0.0f, 1.0f,
 					projection_matrix,
 					view_matrix,
 					world_matrix);
