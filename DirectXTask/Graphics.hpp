@@ -29,10 +29,12 @@ private:
 
 	std::unique_ptr<Direct3D> direct3d;
 	std::unique_ptr<Camera> camera;
-	std::unique_ptr<Model> model;
+	std::unique_ptr<Model> sphere;
+	std::unique_ptr<Model> cube;
 	std::unique_ptr<World> world;
 	std::unique_ptr<ColourShader> colour_shader;
-	std::vector<Model::Instance> instances;
+	std::vector<Model::Instance> sphere_instances;
+	std::vector<Model::Instance> cube_instances;
 
 	Input* input;
 };

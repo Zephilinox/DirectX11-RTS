@@ -4,9 +4,9 @@
 #include <iostream>
 #include <fstream>
 
-Model::Model(ID3D11Device* device)
+Model::Model(ID3D11Device* device, std::string filename)
 {
-	load_from_file("Sphere.txt", 0);
+	load_from_file(filename, 0);
 
 	std::vector<Vertex> vertices(vertex_count);
 	std::vector<unsigned long> indices(index_count);
@@ -61,17 +61,11 @@ Model::Model(ID3D11Device* device)
 	create_instance_buffer(device, 5);
 }
 
-Model::~Model()
-{
-	//todo: see if I need this
-}
-
 bool Model::load_from_file(std::string filename, int filetype = 0)
 {
 	if (filetype == 0)
 	{
 		std::ifstream fin;
-		char input;
 		int i;
 
 		fin.open(filename);
@@ -100,7 +94,7 @@ bool Model::load_from_file(std::string filename, int filetype = 0)
 	}
 	else
 	{
-
+		return false;
 	}
 }
 
@@ -160,13 +154,13 @@ void Model::create_instance_buffer(ID3D11Device* device, int max_instances)
 
 void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance>& instances)
 {
-	assert(instances.size() > 0);
+	assert(instances.size() >= 0);
 	if (instances.capacity() > max_instance_count)
 	{
 		std::cout << "Grew instance buffer from " << max_instance_count << " to ";
 		if (instances.capacity() > max_instance_count * 2)
 		{
-			create_instance_buffer(device, instances.capacity());
+			create_instance_buffer(device, static_cast<int>(instances.capacity()));
 		}
 		else
 		{
@@ -179,7 +173,7 @@ void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* de
 	D3D11_MAPPED_SUBRESOURCE resource;
 	ZeroMemory(&resource, sizeof(resource));
 
-	instance_count = instances.size();
+	instance_count = static_cast<int>(instances.size());
 	size_t size = sizeof(Instance) * instance_count;
 
 	device_context->Map(instance_buffer.val, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);

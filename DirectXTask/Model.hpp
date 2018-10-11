@@ -29,10 +29,7 @@ public:
 		dx::XMFLOAT3 normal;
 	};
 
-	Model(ID3D11Device* device);
-	~Model();
-
-	bool load_from_file(std::string filename, int filetype);
+	Model(ID3D11Device* device, std::string filename);
 
 	void render(ID3D11DeviceContext* device_context);
 
@@ -44,6 +41,7 @@ public:
 	void update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance>& instances);
 
 private:
+	bool load_from_file(std::string filename, int filetype);
 
 	struct ModelData
 	{

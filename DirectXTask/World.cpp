@@ -3,8 +3,8 @@
 World::World(ID3D11Device* device)
 {
 	constexpr float resolution = 0.5f;
-	constexpr int terrainHeight = 65 * resolution;
-	constexpr int terrainWidth = 65 * resolution;
+	constexpr int terrainHeight = static_cast<int>(65 * resolution);
+	constexpr int terrainWidth = static_cast<int>(65 * resolution);
 
 	vertex_count = (terrainWidth - 1) * (terrainHeight - 1) * 6;
 	index_count = vertex_count;

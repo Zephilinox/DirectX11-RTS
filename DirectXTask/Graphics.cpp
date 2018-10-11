@@ -24,7 +24,8 @@ Graphics::Graphics(int width, int height, HWND window)
 
 	try
 	{
-		model = std::make_unique<Model>(direct3d->get_device());
+		sphere = std::make_unique<Model>(direct3d->get_device(), "Sphere.txt");
+		cube = std::make_unique<Model>(direct3d->get_device(), "Cube2.txt");
 	}
 	catch (...)
 	{
@@ -33,28 +34,28 @@ Graphics::Graphics(int width, int height, HWND window)
 
 	float deg2rad = 0.0174533f;
 
-	instances.push_back({
+	sphere_instances.push_back({
 		{ 30.0f - (std::cosf(time) * 4 + 4), 1.0f, 30.0f - (std::sinf(time) * 4 + 4) },
 		{ 0.0f, 0.0f, 0.0f },
 		{ 1.00f, 1.0f, 1.0f},
 		{ 0, 1.0f, 0.8f, 1.0f }
 	});
 
-	instances.push_back({
+	sphere_instances.push_back({
 		{ 32.0f, 1.0f, 32.0f },
 		{ std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad, std::sinf(time) * 180.0f * deg2rad },
 		{ 1.00f, 1.0f, 1.0f},
 		{ 1.0f, 0.8f, 0.0f, 1.0f }
 	});
 
-	instances.push_back({
+	sphere_instances.push_back({
 		{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
 		{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
 		{ 1.00f, 1.0f, 1.0f},
 		{ 1.0f, 0.4f, 0.4f, 1.0f }
 	});
 
-	instances.push_back({
+	sphere_instances.push_back({
 		{ 44.0f, 1.0f, 44.0f },
 		{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
 		{ 1.00f, 1.0f, 1.0f},
@@ -91,7 +92,7 @@ bool Graphics::update(Input* input, float dt)
 			float rand_z = (rand() % 51200) / 100.0f;
 			rand_z -= 256 - 64;
 
-			instances.push_back({
+			sphere_instances.push_back({
 				{ rand_x, rand_y, rand_z},
 				{ 0.0f, 0.0f, 0.0f },
 				{ 1.0f, 1.0f, 1.0f },
@@ -100,15 +101,22 @@ bool Graphics::update(Input* input, float dt)
 		}
 
 		std::cout.imbue(std::locale(""));
-		std::cout << "\nInstances: " << instances.size() << "\n";
-		int instances_mb = (instances.size() * sizeof(Model::Instance)) / 1024.0f / 1024.0f;
+		std::cout << "\nInstances: " << sphere_instances.size() << "\n";
+		int instances_mb = static_cast<int>((sphere_instances.size() * sizeof(Model::Instance)) / 1024.0f / 1024.0f);
 		std::cout << "Instances Memory: " << instances_mb << "MB\n";
-		std::cout << "Vertices: " << instances.size() * model->get_vertex_count() << "\n";
+		std::cout << "Vertices: " << sphere_instances.size() * sphere->get_vertex_count() << "\n";
 	}
 
 	static float rot = std::cosf(time) * 180.0f * deg2rad;
 	rot += 1.0f * dt;
-	for (auto& instance : instances)
+	for (auto& instance : sphere_instances)
+	{
+		instance.rotation.x = rot;
+		instance.rotation.y = rot;
+		instance.rotation.z = rot;
+	}
+
+	for (auto& instance : cube_instances)
 	{
 		instance.rotation.x = rot;
 		instance.rotation.y = rot;
@@ -164,11 +172,11 @@ bool Graphics::update(Input* input, float dt)
 				
 				dx::XMFLOAT3 pos;
 				dx::XMStoreFloat3(&pos, far_pos_vec);
-				instances.push_back({
+				cube_instances.push_back({
 					{pos.x, pos.y, pos.z},
 					{0, 0, 0},
-					{0.2f, 0.2f, 0.2f},
-					{1.0f, 0.0f, 0.0f, 1.0f},
+					{1.0f, 1.0f, 1.0f},
+					{0.2f, 0.2f, 0.2f, 1.0f},
 				});
 			}
 		}
@@ -181,7 +189,7 @@ bool Graphics::draw()
 	float deg2rad = 0.0174533f;
 	float rot = std::cosf(time) * 18.0f * deg2rad;
 	direct3d->begin(0.9f, 0.9f, 0.85f, 1.0f);
-	dx::XMFLOAT3 light_direction = { -0.3, rot, rot };
+	dx::XMFLOAT3 light_direction = { -0.3f, rot, rot };
 	dx::XMFLOAT4 diffuse_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	camera->draw();
@@ -190,10 +198,20 @@ bool Graphics::draw()
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 	
 	direct3d->set_wireframe(false);
-	model->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), instances);
-	model->render(direct3d->get_device_context());
+	sphere->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), sphere_instances);
+	sphere->render(direct3d->get_device_context());
 	
-	bool result = colour_shader->render(direct3d->get_device_context(), model->get_index_count(), model->get_vertex_count(), model->get_instance_count(), world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
+	bool result = colour_shader->render(direct3d->get_device_context(), sphere->get_index_count(), sphere->get_vertex_count(), sphere->get_instance_count(), world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
+	if (!result)
+	{
+		return false;
+	}
+
+	direct3d->set_wireframe(false);
+	cube->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), cube_instances);
+	cube->render(direct3d->get_device_context());
+
+	result = colour_shader->render(direct3d->get_device_context(), cube->get_index_count(), cube->get_vertex_count(), cube->get_instance_count(), world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
 	if (!result)
 	{
 		return false;

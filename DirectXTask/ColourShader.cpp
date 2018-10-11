@@ -12,11 +12,6 @@ ColourShader::ColourShader(ID3D11Device* device, HWND window)
 	}
 }
 
-ColourShader::~ColourShader()
-{
-	stop_shader();
-}
-
 bool ColourShader::render(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour)
 {
 	bool successful = set_shader_params(device_context, world, view, projection, light_direction, diffuse_colour);
@@ -70,14 +65,14 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 		return false;
 	}
 
-	result = device->CreateVertexShader(vertex_shader_buffer->GetBufferPointer(), vertex_shader_buffer->GetBufferSize(), NULL, &vertex_shader);
+	result = device->CreateVertexShader(vertex_shader_buffer->GetBufferPointer(), vertex_shader_buffer->GetBufferSize(), NULL, &vertex_shader.val);
 	if (FAILED(result))
 	{
 		throw;
 		return false;
 	}
 
-	result = device->CreatePixelShader(pixel_shader_buffer->GetBufferPointer(), pixel_shader_buffer->GetBufferSize(), NULL, &pixel_shader);
+	result = device->CreatePixelShader(pixel_shader_buffer->GetBufferPointer(), pixel_shader_buffer->GetBufferSize(), NULL, &pixel_shader.val);
 	if (FAILED(result))
 	{
 		throw;
@@ -144,7 +139,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	polygon[6].InstanceDataStepRate = 1;
 
 	result = device->CreateInputLayout(polygon, element_count, vertex_shader_buffer->GetBufferPointer(), 
-		vertex_shader_buffer->GetBufferSize(), &layout);
+		vertex_shader_buffer->GetBufferSize(), &layout.val);
 	if (FAILED(result))
 	{
 		throw;
@@ -165,7 +160,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	matrix_buffer_desc.MiscFlags = 0;
 	matrix_buffer_desc.StructureByteStride = 0;
 
-	result = device->CreateBuffer(&matrix_buffer_desc, 0, &matrix_buffer);
+	result = device->CreateBuffer(&matrix_buffer_desc, 0, &matrix_buffer.val);
 	if (FAILED(result))
 	{
 		return false;
@@ -182,46 +177,13 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	light_buffer_desc.MiscFlags = 0;
 	light_buffer_desc.StructureByteStride = 0;
 
-	result = device->CreateBuffer(&light_buffer_desc, 0, &light_buffer);
+	result = device->CreateBuffer(&light_buffer_desc, 0, &light_buffer.val);
 	if (FAILED(result))
 	{
 		return false;
 	}
 
 	return true;
-}
-
-void ColourShader::stop_shader()
-{
-	if (light_buffer)
-	{
-		light_buffer->Release();
-		light_buffer = 0;
-	}
-
-	if (matrix_buffer)
-	{
-		matrix_buffer->Release();
-		matrix_buffer = 0;
-	}
-
-	if (layout)
-	{
-		layout->Release();
-		layout = 0;
-	}
-
-	if (pixel_shader)
-	{
-		pixel_shader->Release();
-		pixel_shader = 0;
-	}
-
-	if (vertex_shader)
-	{
-		vertex_shader->Release();
-		vertex_shader = 0;
-	}
 }
 
 void ColourShader::print_shader_error(ID3D10Blob* error_msg, HWND window, LPCWSTR filename)
@@ -256,7 +218,7 @@ bool ColourShader::set_shader_params(ID3D11DeviceContext* device_context, dx::XM
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped_resource;
 
-		HRESULT result = device_context->Map(matrix_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
+		HRESULT result = device_context->Map(matrix_buffer.val, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
 		if (FAILED(result))
 		{
 			return false;
@@ -268,14 +230,14 @@ bool ColourShader::set_shader_params(ID3D11DeviceContext* device_context, dx::XM
 		data->view = view;
 		data->projection = projection;
 
-		device_context->Unmap(matrix_buffer, 0);
+		device_context->Unmap(matrix_buffer.val, 0);
 
-		device_context->VSSetConstantBuffers(0, 1, &matrix_buffer);
+		device_context->VSSetConstantBuffers(0, 1, &matrix_buffer.val);
 	}
 
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped_resource;
-		HRESULT result = device_context->Map(light_buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
+		HRESULT result = device_context->Map(light_buffer.val, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped_resource);
 		if (FAILED(result))
 		{
 			return false;
@@ -285,8 +247,8 @@ bool ColourShader::set_shader_params(ID3D11DeviceContext* device_context, dx::XM
 		data->diffuse_colour = diffuse_colour;
 		data->light_direction = light_direction;
 
-		device_context->Unmap(light_buffer, 0);
-		device_context->PSSetConstantBuffers(0, 1, &light_buffer);
+		device_context->Unmap(light_buffer.val, 0);
+		device_context->PSSetConstantBuffers(0, 1, &light_buffer.val);
 	}
 
 	return true;
@@ -294,10 +256,10 @@ bool ColourShader::set_shader_params(ID3D11DeviceContext* device_context, dx::XM
 
 void ColourShader::render_shader(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count)
 {
-	device_context->IASetInputLayout(layout);
+	device_context->IASetInputLayout(layout.val);
 
-	device_context->VSSetShader(vertex_shader, 0, 0);
-	device_context->PSSetShader(pixel_shader, 0, 0);
+	device_context->VSSetShader(vertex_shader.val, 0, 0);
+	device_context->PSSetShader(pixel_shader.val, 0, 0);
 
 	device_context->DrawIndexedInstanced(index_count, instance_count, 0, 0, 0);
 }
