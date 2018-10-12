@@ -44,4 +44,5 @@ public:
 	int index_count;
 	int instance_count;
 	std::vector<Vertex> vertices;
+	std::vector<unsigned long> indices;
 };

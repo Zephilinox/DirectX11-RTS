@@ -128,54 +128,77 @@ bool Graphics::update(Input* input, float dt)
 	{
 		if (ScreenToClient(window, &pos))
 		{
+			camera->draw();
+			dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
+			dx::XMMATRIX view_matrix = camera->get_view_matrix();
+			dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
+
+			float rel_pos_x = pos.x / 1280.0f;
+			float rel_pos_y = pos.y / 720.0f;
+			rel_pos_x *= 2;
+			rel_pos_x -= 1.0f;
+			rel_pos_y *= 2;
+			rel_pos_y -= 1.0f;
+			//std::cout << pos.x << "," << pos.y << "\n";
+			//std::cout << rel_pos_x << "," << rel_pos_y << "\n";
+			dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
+			dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 1.0f };
+			dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
+			dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
+
+			near_pos_vec = dx::XMVector3Unproject(
+				near_pos_vec,
+				0, 0,
+				1280.0f, 720.0f,
+				0.0f, 1.0f,
+				projection_matrix,
+				view_matrix,
+				world_matrix);
+
+			far_pos_vec = dx::XMVector3Unproject(
+				far_pos_vec,
+				0, 0,
+				1280.0f, 720.0f,
+				0.0f, 1.0f,
+				projection_matrix,
+				view_matrix,
+				world_matrix);
+
+			auto direction = dx::XMVectorSubtract(near_pos_vec, far_pos_vec);
+
+			if ((GetKeyState(VK_RBUTTON) & 0x100) != 0)
+			{
+				dx::XMFLOAT3 paint_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.995f };
+				dx::XMVECTOR paint_pos_vec = dx::XMLoadFloat3(&paint_pos);
+				paint_pos_vec = dx::XMVector3Unproject(
+					paint_pos_vec,
+					0, 0,
+					1280.0f, 720.0f,
+					0.0f, 1.0f,
+					projection_matrix,
+					view_matrix,
+					world_matrix);
+
+				dx::XMFLOAT3 pos;
+				dx::XMStoreFloat3(&pos, paint_pos_vec);
+				cube_instances.push_back({
+					pos,
+					{0, 0, 0},
+					{1.0f, 1.0f, 1.0f},
+					{0.8f, 0.2f, 0.2f, 1.0f},
+				});
+			}
+
 			if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
 			{
-				camera->draw();
-				dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
-				dx::XMMATRIX view_matrix = camera->get_view_matrix();
-				dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
-
-				float rel_pos_x = pos.x / 1280.0f;
-				float rel_pos_y = pos.y / 720.0f;
-				rel_pos_x *= 2;
-				rel_pos_x -= 1.0f;
-				rel_pos_y *= 2;
-				rel_pos_y -= 1.0f;
-				//std::cout << pos.x << "," << pos.y << "\n";
-				//std::cout << rel_pos_x << "," << rel_pos_y << "\n";
-				dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
-				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 10.0f };
-				dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
-				dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
-
-				near_pos_vec = dx::XMVector3Unproject(
-					near_pos_vec,
-					0, 0,
-					1280.0f, 720.0f,
-					0.0f, 1.0f,
-					projection_matrix,
-					view_matrix,
-					world_matrix);
-
-				far_pos_vec = dx::XMVector3Unproject(
-					far_pos_vec,
-					0, 0,
-					1280.0f, 720.0f,
-					0.0f, 1.0f,
-					projection_matrix,
-					view_matrix,
-					world_matrix);
-				
-				auto direction = dx::XMVectorSubtract(near_pos_vec, far_pos_vec);
-
 				std::array<dx::XMFLOAT3, 3> triangle;
 				int nan_count = 0;
 				int fail_count = 0;
-				for (int i = 0; i < world->vertices.size(); i += 3)
+				for (int i = 0; i < world->indices.size(); i += 3)
 				{
-					triangle[0] = world->vertices[i].position;
-					triangle[1] = world->vertices[i+1].position;
-					triangle[2] = world->vertices[i+2].position;
+					triangle[0] = world->vertices[world->indices[i]].position;
+					triangle[1] = world->vertices[world->indices[i+1]].position;
+					triangle[2] = world->vertices[world->indices[i+2]].position;
 
 					std::array<float, 3> start_vec = {
 						dx::XMVectorGetX(near_pos_vec),
@@ -215,6 +238,11 @@ bool Graphics::update(Input* input, float dt)
 					};
 
 					float magnitude = (float)sqrt((normal[0] * normal[0]) + (normal[1] * normal[1]) + (normal[2] * normal[2]));
+					if (fabsf(magnitude) < 0.001f)
+					{
+						fail_count++;
+						continue;
+					}
 					normal[0] = normal[0] / magnitude;
 					normal[1] = normal[1] / magnitude;
 					normal[2] = normal[2] / magnitude;
@@ -226,7 +254,7 @@ bool Graphics::update(Input* input, float dt)
 					float denominator = ((normal[0] * dir_vec[0]) + (normal[1] * dir_vec[1]) + (normal[2] * dir_vec[2]));
 
 					// Make sure the result doesn't get too close to zero to prevent divide by zero.
-					if (fabs(denominator) < 0.0001f)
+					if (fabs(denominator) < 0.1f)
 					{
 						fail_count++;
 						continue;
@@ -281,7 +309,7 @@ bool Graphics::update(Input* input, float dt)
 					float determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
 
 					// Check if it is outside.
-					if (determinant > 0.001f)
+					if (determinant > 0.000001f)
 					{
 						fail_count++;
 						continue;
@@ -300,7 +328,7 @@ bool Graphics::update(Input* input, float dt)
 					determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
 
 					// Check if it is outside.
-					if (determinant > 0.001f)
+					if (determinant > 0.000001f)
 					{
 						fail_count++;
 						continue;
@@ -319,7 +347,7 @@ bool Graphics::update(Input* input, float dt)
 					determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
 
 					// Check if it is outside.
-					if (determinant > 0.001f)
+					if (determinant > 0.000001f)
 					{
 						fail_count++;
 						continue;
@@ -337,7 +365,7 @@ bool Graphics::update(Input* input, float dt)
 						cube_instances.push_back({
 							intersection_pos,
 							{0, 0, 0},
-							{1.0f, 1.0f, 1.0f},
+							{0.2f, 0.2f, 0.2f},
 							{0.2f, 0.2f, 0.2f, 1.0f},
 						});
 						break;

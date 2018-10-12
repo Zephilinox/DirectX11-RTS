@@ -5,7 +5,7 @@
 
 World::World(ID3D11Device* device)
 {
-	constexpr float resolution = 0.5f;
+	constexpr float resolution = 0.25f;
 	constexpr int terrainHeight = static_cast<int>(65 * resolution);
 	constexpr int terrainWidth = static_cast<int>(65 * resolution);
 
@@ -13,14 +13,14 @@ World::World(ID3D11Device* device)
 	index_count = vertex_count;
 	std::cout << index_count / 3 << "\n";
 	vertices.resize(vertex_count);
-	std::vector<unsigned long> indices(index_count);
+	indices.resize(index_count);
 
 	int index = 0;
 	for (int h = 0; h < terrainHeight; ++h)
 	{
 		for (int w = 0; w < terrainWidth; ++w)
 		{
-			float y = (std::rand() % 100) / 100.0f;
+			float y = (std::rand() % 400) / 100.0f - 3;
 			vertices[index].position = { static_cast<float>(w) * (1.0f / resolution), y, static_cast<float>(h) * (1.0f / resolution) };
 			vertices[index].colour = { 0.8f, 0.8f, 0.75f, 1.0f };
 			vertices[index].normal = { (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f };
