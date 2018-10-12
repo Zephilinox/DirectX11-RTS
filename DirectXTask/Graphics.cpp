@@ -144,7 +144,7 @@ bool Graphics::update(Input* input, float dt)
 				//std::cout << pos.x << "," << pos.y << "\n";
 				//std::cout << rel_pos_x << "," << rel_pos_y << "\n";
 				dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
-				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.995f };
+				dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 10.0f };
 				dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
 				dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
 
@@ -168,16 +168,189 @@ bool Graphics::update(Input* input, float dt)
 				
 				auto direction = dx::XMVectorSubtract(near_pos_vec, far_pos_vec);
 
-				//std::cout << dx::XMVectorGetX(near_pos_vec) << ", " << dx::XMVectorGetY(near_pos_vec) << ", " << dx::XMVectorGetZ(near_pos_vec) << "\n";
-				
-				dx::XMFLOAT3 pos;
-				dx::XMStoreFloat3(&pos, far_pos_vec);
-				cube_instances.push_back({
-					{pos.x, pos.y, pos.z},
-					{0, 0, 0},
-					{1.0f, 1.0f, 1.0f},
-					{0.2f, 0.2f, 0.2f, 1.0f},
-				});
+				std::array<dx::XMFLOAT3, 3> triangle;
+				int nan_count = 0;
+				int fail_count = 0;
+				for (int i = 0; i < world->vertices.size(); i += 3)
+				{
+					triangle[0] = world->vertices[i].position;
+					triangle[1] = world->vertices[i+1].position;
+					triangle[2] = world->vertices[i+2].position;
+
+					std::array<float, 3> start_vec = {
+						dx::XMVectorGetX(near_pos_vec),
+						dx::XMVectorGetY(near_pos_vec),
+						dx::XMVectorGetZ(near_pos_vec),
+					};
+
+					std::array<float, 3> end_vec = {
+						dx::XMVectorGetX(far_pos_vec),
+						dx::XMVectorGetY(far_pos_vec),
+						dx::XMVectorGetZ(far_pos_vec),
+					};
+
+					std::array<float, 3> dir_vec = {
+						dx::XMVectorGetX(direction),
+						dx::XMVectorGetY(direction),
+						dx::XMVectorGetZ(direction),
+					};
+
+					std::array<float, 3> edge1;
+					std::array<float, 3> edge2;
+
+					// Calculate the two edges from the three points given.
+					edge1[0] = triangle[1].x - triangle[0].x;
+					edge1[1] = triangle[1].y - triangle[0].y;
+					edge1[2] = triangle[1].z - triangle[0].z;
+
+					edge2[0] = triangle[2].x - triangle[0].x;
+					edge2[1] = triangle[2].y - triangle[0].y;
+					edge2[2] = triangle[2].z - triangle[0].z;
+
+					std::array<float, 3> normal =
+					{
+						(edge1[1] * edge2[2]) - (edge1[2] * edge2[1]),
+						(edge1[2] * edge2[0]) - (edge1[0] * edge2[2]),
+						(edge1[0] * edge2[1]) - (edge1[1] * edge2[0]),
+					};
+
+					float magnitude = (float)sqrt((normal[0] * normal[0]) + (normal[1] * normal[1]) + (normal[2] * normal[2]));
+					normal[0] = normal[0] / magnitude;
+					normal[1] = normal[1] / magnitude;
+					normal[2] = normal[2] / magnitude;
+
+					// Find the distance from the origin to the plane.
+					float D = ((-normal[0] * triangle[0].x) + (-normal[1] * triangle[0].y) + (-normal[2] * triangle[0].z));
+
+					// Get the denominator of the equation.
+					float denominator = ((normal[0] * dir_vec[0]) + (normal[1] * dir_vec[1]) + (normal[2] * dir_vec[2]));
+
+					// Make sure the result doesn't get too close to zero to prevent divide by zero.
+					if (fabs(denominator) < 0.0001f)
+					{
+						fail_count++;
+						continue;
+					}
+
+					// Get the numerator of the equation.
+					float numerator = -1.0f * (((normal[0] * start_vec[0]) + (normal[1] * start_vec[1]) + (normal[2] * start_vec[2])) + D);
+
+					// Calculate where we intersect the triangle.
+					float t = numerator / denominator;
+
+					// Find the intersection vector.
+					std::array<float, 3> Q = {
+						start_vec[0] + (dir_vec[0] * t),
+						start_vec[1] + (dir_vec[1] * t),
+						start_vec[2] + (dir_vec[2] * t),
+					};
+
+					// Find the three edges of the triangle.
+					std::array<float, 3> e1 = {
+						triangle[1].x - triangle[0].x,
+						triangle[1].y - triangle[0].y,
+						triangle[1].z - triangle[0].z,
+					};
+
+					std::array<float, 3> e2 = {
+						triangle[2].x - triangle[1].x,
+						triangle[2].y - triangle[1].y,
+						triangle[2].z - triangle[1].z,
+					};
+
+					std::array<float, 3> e3 = {
+						triangle[0].x - triangle[2].x,
+						triangle[0].y - triangle[2].y,
+						triangle[0].z - triangle[2].z,
+					};
+
+					// Calculate the normal for the first edge.
+					std::array<float, 3> edge_normals = {
+						(e1[1] * normal[2]) - (e1[2] * normal[1]),
+						(e1[2] * normal[0]) - (e1[0] * normal[2]),
+						(e1[0] * normal[1]) - (e1[1] * normal[0]),
+					};
+
+					// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
+					std::array<float, 3> temp = {
+						Q[0] - triangle[0].x,
+						Q[1] - triangle[0].y,
+						Q[2] - triangle[0].z,
+					};
+
+					float determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
+
+					// Check if it is outside.
+					if (determinant > 0.001f)
+					{
+						fail_count++;
+						continue;
+					}
+
+					// Calculate the normal for the second edge.
+					edge_normals[0] = (e2[1] * normal[2]) - (e2[2] * normal[1]);
+					edge_normals[1] = (e2[2] * normal[0]) - (e2[0] * normal[2]);
+					edge_normals[2] = (e2[0] * normal[1]) - (e2[1] * normal[0]);
+
+					// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
+					temp[0] = Q[0] - triangle[1].x;
+					temp[1] = Q[1] - triangle[1].y;
+					temp[2] = Q[2] - triangle[1].z;
+
+					determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
+
+					// Check if it is outside.
+					if (determinant > 0.001f)
+					{
+						fail_count++;
+						continue;
+					}
+
+					// Calculate the normal for the third edge.
+					edge_normals[0] = (e3[1] * normal[2]) - (e3[2] * normal[1]);
+					edge_normals[1] = (e3[2] * normal[0]) - (e3[0] * normal[2]);
+					edge_normals[2] = (e3[0] * normal[1]) - (e3[1] * normal[0]);
+
+					// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
+					temp[0] = Q[0] - triangle[2].x;
+					temp[1] = Q[1] - triangle[2].y;
+					temp[2] = Q[2] - triangle[2].z;
+
+					determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
+
+					// Check if it is outside.
+					if (determinant > 0.001f)
+					{
+						fail_count++;
+						continue;
+					}
+
+					// Now we have our intersection position.
+					dx::XMFLOAT3 intersection_pos = { Q[0], Q[1], Q[2] };
+
+					//std::cout << dx::XMVectorGetX(near_pos_vec) << ", " << dx::XMVectorGetY(near_pos_vec) << ", " << dx::XMVectorGetZ(near_pos_vec) << "\n";
+					if (!isnan(intersection_pos.x))
+					{
+						std::cout << intersection_pos.x << ", " << intersection_pos.y << ", " << intersection_pos.z << "\n";
+						dx::XMFLOAT3 pos;
+						dx::XMStoreFloat3(&pos, far_pos_vec);
+						cube_instances.push_back({
+							intersection_pos,
+							{0, 0, 0},
+							{1.0f, 1.0f, 1.0f},
+							{0.2f, 0.2f, 0.2f, 1.0f},
+						});
+						break;
+					}
+					else
+					{
+						nan_count++;
+					}
+				}
+
+				std::cout << "NaN: " << nan_count << "\n";
+				std::cout << "Fail: " << fail_count << "\n";
+				std::cout << "Triangles: " << world->vertex_count / 3 << "\n";
 			}
 		}
 	}

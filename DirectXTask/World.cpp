@@ -1,5 +1,8 @@
 #include "World.hpp"
 
+//STD
+#include <iostream>
+
 World::World(ID3D11Device* device)
 {
 	constexpr float resolution = 0.5f;
@@ -8,8 +11,8 @@ World::World(ID3D11Device* device)
 
 	vertex_count = (terrainWidth - 1) * (terrainHeight - 1) * 6;
 	index_count = vertex_count;
-
-	std::vector<Vertex> vertices(vertex_count);
+	std::cout << index_count / 3 << "\n";
+	vertices.resize(vertex_count);
 	std::vector<unsigned long> indices(index_count);
 
 	int index = 0;
@@ -86,10 +89,9 @@ World::World(ID3D11Device* device)
 	std::vector<Instance> instances(instance_count);
 
 	instances[0].position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
-	instances[0].rotation = dx::XMFLOAT3(1.0f, 1.0f, 1.0f);
+	instances[0].rotation = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	instances[0].scale = dx::XMFLOAT3(1.0f, 1.0f, 1.0f);
 	instances[0].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-	instances[0].rotation = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
 
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;

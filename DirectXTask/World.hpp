@@ -43,4 +43,5 @@ public:
 	int vertex_count;
 	int index_count;
 	int instance_count;
+	std::vector<Vertex> vertices;
 };
