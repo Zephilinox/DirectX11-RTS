@@ -133,12 +133,12 @@ bool Graphics::update(Input* input, float dt)
 			dx::XMMATRIX view_matrix = camera->get_view_matrix();
 			dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 
-			float rel_pos_x = pos.x / 1280.0f;
-			float rel_pos_y = pos.y / 720.0f;
-			rel_pos_x *= 2;
-			rel_pos_x -= 1.0f;
-			rel_pos_y *= 2;
-			rel_pos_y -= 1.0f;
+			//float rel_pos_x = pos.x / 1280.0f;
+			//float rel_pos_y = pos.y / 720.0f;
+			//rel_pos_x *= 2;
+			//rel_pos_x -= 1.0f;
+			//rel_pos_y *= 2;
+			//rel_pos_y -= 1.0f;
 			//std::cout << pos.x << "," << pos.y << "\n";
 			//std::cout << rel_pos_x << "," << rel_pos_y << "\n";
 			dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };

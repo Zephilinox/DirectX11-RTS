@@ -135,14 +135,22 @@ void System::create_window(int& width, int& height)
 		y = (old_height - height) / 2;
 	}
 
-	window = CreateWindowEx(0,
+	RECT desired_window_size;
+	desired_window_size.left = 0;
+	desired_window_size.top = 0;
+	desired_window_size.right = width;
+	desired_window_size.bottom = height;
+
+	AdjustWindowRectEx(&desired_window_size, WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU, false, 0);
+
+	window = CreateWindowExA(0,
 		name, name,
 		WS_CAPTION | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | WS_SYSMENU,
-		x, y, width, height,
+		x, y, desired_window_size.right - desired_window_size.left, desired_window_size.bottom - desired_window_size.top,
 		0, 0, instance, 0);
 
 	ShowWindow(window, SW_SHOW);
-	SetWindowLong(window, GWL_EXSTYLE, GetWindowLong(window, GWL_EXSTYLE) | WS_EX_LAYERED);
+	SetWindowLongA(window, GWL_EXSTYLE, GetWindowLong(window, GWL_EXSTYLE) | WS_EX_LAYERED);
 	SetForegroundWindow(window);
 	SetFocus(window);
 	ShowCursor(true);
