@@ -5,7 +5,7 @@
 
 World::World(ID3D11Device* device)
 {
-	constexpr float resolution = 0.2f;
+	constexpr float resolution = 0.1f;
 	constexpr int terrainHeight = static_cast<int>(320 * resolution) + 1;
 	constexpr int terrainWidth = static_cast<int>(320 * resolution) + 1;
 
@@ -21,7 +21,12 @@ World::World(ID3D11Device* device)
 	{
 		for (int w = 0; w < terrainWidth; ++w)
 		{
-			float y = (std::rand() % 300) / 100.0f - 3;
+			float y = (std::rand() % 1000) / 100.0f;
+			if (y > 9)
+			{
+				y += 2;
+			}
+
 			vertices[index].position = { static_cast<float>(w) * (1.0f / resolution), y, static_cast<float>(h) * (1.0f / resolution) };
 			vertices[index].colour = { 0.8f, 0.8f, 0.75f, 1.0f };
 			vertices[index].normal = { (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f };

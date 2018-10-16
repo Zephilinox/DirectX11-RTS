@@ -6,6 +6,8 @@
 //SELF
 #include "Model.hpp"
 
+class World;
+
 class Entity
 {
 public:
@@ -15,6 +17,8 @@ public:
 	Model::Instance instance;
 
 	std::deque<dx::XMFLOAT3> goal_pos;
+
+	World* world = nullptr;
 
 private:
 

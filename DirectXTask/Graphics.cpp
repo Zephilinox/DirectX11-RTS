@@ -77,7 +77,7 @@ Graphics::Graphics(int width, int height, HWND window)
 	{
 		MessageBoxW(window, L"Could not init World", L"ERROR", MB_OK);
 	}
-
+	entity.world = world.get();
 	pathfinding = std::make_unique<Pathfinding>(world.get());
 
 	for (auto& cell : pathfinding->all_cells)
@@ -88,6 +88,18 @@ Graphics::Graphics(int width, int height, HWND window)
 			{ 0.5f, 0.5f, 0.5f},
 			{0.5f, 1.0f, 0.5f, 1.0f }
 		});
+
+		if (cell.y > 9)
+		{
+			cube_instances.back().colour.x = 1.0f;
+			cube_instances.back().colour.y = 0.5f;
+		}
+
+		if (cell.y < 2)
+		{
+			cube_instances.back().colour.y = 0.5f;
+			cube_instances.back().colour.z = 1.0f;
+		}
 	}
 
 	colour_shader = std::make_unique<ColourShader>(direct3d->get_device(), window);
@@ -137,9 +149,9 @@ bool Graphics::update(Input* input, float dt)
 
 	for (auto& instance : cube_instances)
 	{
-		instance.rotation.x = rot;
-		instance.rotation.y = rot;
-		instance.rotation.z = rot;
+		//instance.rotation.x = rot;
+		//instance.rotation.y = rot;
+		//instance.rotation.z = rot;
 	}
 
 	POINT pos;
@@ -206,15 +218,14 @@ bool Graphics::update(Input* input, float dt)
 
 				if (!isnan(intersection_pos.x))
 				{
-					cube_instances.push_back({
+					entity.goal_pos.push_back(intersection_pos);
+					/*cube_instances.push_back({
 						intersection_pos,
 						{0, 0, 0},
 						{1.0f, 1.0f, 1.0f},
 						{0.2f, 0.2f, 0.2f, 1.0f},
-					});
+					});*/
 				}
-
-				entity.goal_pos.push_back(intersection_pos);
 			}
 		}
 	}
