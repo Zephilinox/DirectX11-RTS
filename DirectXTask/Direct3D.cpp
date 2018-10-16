@@ -379,10 +379,10 @@ void Direct3D::create_matrices(float width, float height, float screen_near, flo
 	projection_matrix = dx::XMMatrixPerspectiveFovLH(fov, aspect_ratio, screen_near, screen_depth);
 	world_matrix = dx::XMMatrixIdentity();
 	ortho_matrix = dx::XMMatrixOrthographicOffCenterLH(
-		-10 * aspect_ratio,
-		10 * aspect_ratio ,
-		-10,
-		10,
+		-64 * aspect_ratio,
+		64 * aspect_ratio ,
+		-64,
+		64,
 		screen_near,
 		screen_depth);
 }

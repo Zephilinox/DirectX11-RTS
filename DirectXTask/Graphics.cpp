@@ -48,17 +48,26 @@ Graphics::Graphics(int width, int height, HWND window)
 		{ 1.0f, 0.8f, 0.0f, 1.0f }
 	});
 
-	sphere_instances.push_back({
+	entities.push_back(std::make_unique<Entity>());
+	entities[0]->instance = {
+		{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
+		{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
+		{ 0.5f, 0.5f, 0.5f},
+		{ 1.0f, 0.4f, 0.4f, 1.0f }
+	};
+
+	/*sphere_instances.push_back({
 		{ 40.0f, 1.0f + std::cosf(time) * 3 + 3, 40.0f },
 		{ 0.0f, std::sinf(time) * 180.0f * deg2rad, 0.0f },
 		{ 1.00f, 1.0f, 1.0f},
 		{ 1.0f, 0.4f, 0.4f, 1.0f }
-	});
+	});*/
 
-	entity.instance = {
+	entities.push_back(std::make_unique<Entity>());
+	entities[1]->instance = {
 		{ 44.0f, 1.0f, 44.0f },
 		{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
-		{ 1.00f, 1.0f, 1.0f},
+		{ 0.5f, 0.5f, 0.5f},
 		{ 0.0f, 0.8f, 1.0f, 1.0f }
 	};
 
@@ -77,15 +86,20 @@ Graphics::Graphics(int width, int height, HWND window)
 	{
 		MessageBoxW(window, L"Could not init World", L"ERROR", MB_OK);
 	}
-	entity.world = world.get();
+
+	for (auto& ent : entities)
+	{
+		ent->world = world.get();
+	}
+
 	pathfinding = std::make_unique<Pathfinding>(world.get());
 
 	for (auto& cell : pathfinding->all_cells)
 	{
 		cube_instances.push_back({
-			{ cell.x, cell.y, cell.z },
+			{ cell.x, cell.y + 0.1f, cell.z },
 			{ 0.0f, 0.0f, 0.0f },
-			{ 0.5f, 0.5f, 0.5f},
+			{ 0.8f, 0.1f, 0.8f},
 			{0.5f, 1.0f, 0.5f, 1.0f }
 		});
 
@@ -118,10 +132,8 @@ bool Graphics::update(Input* input, float dt)
 		for (int i = 0; i < 1000; ++i)
 		{
 			float rand_x = (rand() % 51200) / 100.0f;
-			rand_x -= 256 - 64;
-			float rand_y = (rand() % 51200) / 100.0f + 32.0f;
+			float rand_y = (rand() % 5120) / 100.0f + 64.0f;
 			float rand_z = (rand() % 51200) / 100.0f;
-			rand_z -= 256 - 64;
 
 			cube_instances.push_back({
 				{ rand_x, rand_y, rand_z},
@@ -130,116 +142,71 @@ bool Graphics::update(Input* input, float dt)
 				{ (std::sin(time * 10.0f) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
 			});
 		}
-
-		std::cout.imbue(std::locale(""));
-		std::cout << "\nInstances: " << cube_instances.size() << "\n";
-		int instances_mb = static_cast<int>(static_cast<float>((cube_instances.size() * sizeof(Model::Instance))) / 1024.0f / 1024.0f);
-		std::cout << "Instances Memory: " << instances_mb << "MB\n";
-		std::cout << "Vertices: " << cube_instances.size() * cube->get_vertex_count() << "\n";
-	}
-
-	static float rot = std::cosf(time) * 180.0f * deg2rad;
-	rot += 1.0f * dt;
-	for (auto& instance : sphere_instances)
-	{
-		instance.rotation.x = rot;
-		instance.rotation.y = rot;
-		instance.rotation.z = rot;
 	}
 
 	for (auto& instance : cube_instances)
 	{
-		//instance.rotation.x = rot;
-		//instance.rotation.y = rot;
-		//instance.rotation.z = rot;
+		instance.rotation.y += 1.0f * dt;
 	}
 
 	POINT pos;
-	if (GetCursorPos(&pos))
+	if (GetCursorPos(&pos) && ScreenToClient(window, &pos))
 	{
-		if (ScreenToClient(window, &pos))
+		camera->draw();
+		dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
+		dx::XMMATRIX view_matrix = camera->get_view_matrix();
+		dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
+
+		dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
+		dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 1.0f };
+		dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
+		dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
+
+		float width = fullscreen ? 2560 : 1280;
+		float height = fullscreen ? 1080 : 720;
+
+		near_pos_vec = dx::XMVector3Unproject(
+			near_pos_vec,
+			0, 0,
+			width, height,
+			0.0f, 1.0f,
+			projection_matrix,
+			view_matrix,
+			world_matrix);
+
+		far_pos_vec = dx::XMVector3Unproject(
+			far_pos_vec,
+			0, 0,
+			width, height,
+			0.0f, 1.0f,
+			projection_matrix,
+			view_matrix,
+			world_matrix);
+
+		if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
 		{
-			camera->draw();
-			dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
-			dx::XMMATRIX view_matrix = camera->get_view_matrix();
-			dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
+			auto intersection_pos = world->triangle_intersection(near_pos_vec, far_pos_vec);
 
-			dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
-			dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 1.0f };
-			dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
-			dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
-
-			near_pos_vec = dx::XMVector3Unproject(
-				near_pos_vec,
-				0, 0,
-				1280.0f, 720.0f,
-				0.0f, 1.0f,
-				projection_matrix,
-				view_matrix,
-				world_matrix);
-
-			far_pos_vec = dx::XMVector3Unproject(
-				far_pos_vec,
-				0, 0,
-				1280.0f, 720.0f,
-				0.0f, 1.0f,
-				projection_matrix,
-				view_matrix,
-				world_matrix);
-
-			auto direction = dx::XMVectorSubtract(near_pos_vec, far_pos_vec);
-
-			if ((GetKeyState(VK_RBUTTON) & 0x100) != 0)
+			if (!isnan(intersection_pos.x))
 			{
-				dx::XMFLOAT3 paint_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.995f };
-				dx::XMVECTOR paint_pos_vec = dx::XMLoadFloat3(&paint_pos);
-				paint_pos_vec = dx::XMVector3Unproject(
-					paint_pos_vec,
-					0, 0,
-					1280.0f, 720.0f,
-					0.0f, 1.0f,
-					projection_matrix,
-					view_matrix,
-					world_matrix);
-
-				dx::XMFLOAT3 pos;
-				dx::XMStoreFloat3(&pos, paint_pos_vec);
-				cube_instances.push_back({
-					pos,
-					{0, 0, 0},
-					{1.0f, 1.0f, 1.0f},
-					{0.8f, 0.2f, 0.2f, 1.0f},
-				});
-			}
-
-			if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
-			{
-				auto intersection_pos = world->triangle_intersection(near_pos_vec, far_pos_vec);
-
-				if (!isnan(intersection_pos.x))
-				{
-					entity.goal_pos.push_back(intersection_pos);
-					/*cube_instances.push_back({
-						intersection_pos,
-						{0, 0, 0},
-						{1.0f, 1.0f, 1.0f},
-						{0.2f, 0.2f, 0.2f, 1.0f},
-					});*/
-				}
+				int id = std::rand() % 2;
+				entities[id]->goal_pos.push_back(intersection_pos);
 			}
 		}
 	}
 
-	entity.update(dt);
+	for (auto& ent : entities)
+	{
+		ent->update(dt);
+	}
+
 	return false;
 }
 
 bool Graphics::draw()
 {
-	float deg2rad = 0.0174533f;
-	float rot = std::cosf(time) * 18.0f * deg2rad;
-	direct3d->begin(0.9f, 0.9f, 0.85f, 1.0f);
-	dx::XMFLOAT3 light_direction = { -0.3f, rot, rot };
+	direct3d->begin(0.2f, 0.2f, 0.2f, 1.0f);
+	dx::XMFLOAT3 light_direction = { -0.3, 0, 0 };
 	dx::XMFLOAT4 diffuse_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 
 	camera->draw();
@@ -248,10 +215,19 @@ bool Graphics::draw()
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 	
 	direct3d->set_wireframe(false);
-	sphere_instances.push_back(entity.instance);
+
+	for (auto& ent : entities)
+	{
+		sphere_instances.push_back(ent->instance);
+	}
+
 	sphere->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), sphere_instances);
 	sphere->render(direct3d->get_device_context());
-	sphere_instances.pop_back();
+
+	for (auto& ent : entities)
+	{
+		sphere_instances.pop_back();
+	}
 
 	bool result = colour_shader->render(direct3d->get_device_context(), sphere->get_index_count(), sphere->get_vertex_count(), sphere->get_instance_count(), world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
 	if (!result)

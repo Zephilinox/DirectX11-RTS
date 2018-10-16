@@ -20,7 +20,7 @@ public:
 	bool update(Input* input, float dt);
 	bool draw();
 
-	static constexpr bool fullscreen = false;
+	static constexpr bool fullscreen = true;
 	static constexpr bool vsync = false;
 	static constexpr float screen_depth = 1000.0f;
 	static constexpr float screen_near = 0.1f;
@@ -38,7 +38,7 @@ private:
 	std::unique_ptr<ColourShader> colour_shader;
 	std::vector<Model::Instance> sphere_instances;
 	std::vector<Model::Instance> cube_instances;
-	Entity entity;
+	std::vector<std::unique_ptr<Entity>> entities;
 
 	Input* input;
 };
