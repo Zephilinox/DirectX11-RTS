@@ -10,46 +10,54 @@ void Entity::update(float dt)
 		return;
 	}
 
-	bool at_pos = true;
-	
+	dx::XMFLOAT3 dir = {0, 0, 0};
+
 	if (instance.position.x + 0.1f < goal_pos.front().x)
 	{
-		at_pos = false;
-		instance.position.x += 100.0f * dt;
+		dir.x += 1;
 	}
 
 	if (instance.position.x - 0.1f > goal_pos.front().x)
 	{
-		at_pos = false;
-		instance.position.x -= 100.0f * dt;
+		dir.x -= 1;
 	}
 	
 	if (instance.position.y + 0.1f < goal_pos.front().y + 1)
 	{
-		at_pos = false;
-		instance.position.y += 100.0f * dt;
+		dir.y += 1;
 	}
 
 	if (instance.position.y - 0.1f > goal_pos.front().y + 1)
 	{
-		at_pos = false;
-		instance.position.y -= 100.0f * dt;
+		dir.y -= 1;
 	}
 
 	if (instance.position.z + 0.1f < goal_pos.front().z)
 	{
-		at_pos = false;
-		instance.position.z += 100.0f * dt;
+		dir.z += 1;
 	}
 
 	if (instance.position.z - 0.1f > goal_pos.front().z)
 	{
-		at_pos = false;
-		instance.position.z -= 100.0f * dt;
+		dir.z -= 1;
 	}
 
-	if (at_pos)
+	float magnitude = sqrt((dir.x * dir.x) + (dir.y * dir.y) + (dir.z * dir.z));
+	if (fabsf(magnitude) > 0.01f)
 	{
+		dir.x /= magnitude;
+		dir.y /= magnitude;
+		dir.z /= magnitude;
+
+		float speed = 50.0f;
+
+		instance.position.x += dir.x * speed * dt;
+		instance.position.y += dir.y * speed * dt;
+		instance.position.z += dir.z * speed * dt;
+	}
+	else
+	{
+		//not moving, so we are at our goal
 		goal_pos.pop_front();
 	}
 }
