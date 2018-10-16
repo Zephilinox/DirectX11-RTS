@@ -127,6 +127,7 @@
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Model.cpp" />
+    <ClCompile Include="Pathfinding.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="World.cpp" />
@@ -138,6 +139,7 @@
     <ClInclude Include="Graphics.hpp" />
     <ClInclude Include="Input.hpp" />
     <ClInclude Include="Model.hpp" />
+    <ClInclude Include="Pathfinding.hpp" />
     <ClInclude Include="System.hpp" />
     <ClInclude Include="Timer.hpp" />
     <ClInclude Include="World.hpp" />

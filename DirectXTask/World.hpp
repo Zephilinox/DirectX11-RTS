@@ -21,6 +21,8 @@ public:
 
 	int get_index_count();
 
+	dx::XMFLOAT3 triangle_intersection(dx::XMVECTOR from, dx::XMVECTOR to);
+
 //private:
 	struct Vertex
 	{

@@ -71,6 +71,18 @@ Graphics::Graphics(int width, int height, HWND window)
 		MessageBoxW(window, L"Could not init World", L"ERROR", MB_OK);
 	}
 
+	pathfinding = std::make_unique<Pathfinding>(world.get());
+
+	for (auto& cell : pathfinding->all_cells)
+	{
+		sphere_instances.push_back({
+			{ cell.x, cell.y, cell.z },
+			{ 0.0f, 0.0f, 0.0f },
+			{ 0.2f, 0.2f, 0.2f},
+			{0.5f, 1.0f, 0.5f, 1.0f }
+		});
+	}
+
 	colour_shader = std::make_unique<ColourShader>(direct3d->get_device(), window);
 }
 
@@ -84,7 +96,7 @@ bool Graphics::update(Input* input, float dt)
 
 	if (input->is_key_down('C'))
 	{
-		for (int i = 0; i < 100; ++i)
+		for (int i = 0; i < 1000; ++i)
 		{
 			float rand_x = (rand() % 51200) / 100.0f;
 			rand_x -= 256 - 64;
@@ -92,7 +104,7 @@ bool Graphics::update(Input* input, float dt)
 			float rand_z = (rand() % 51200) / 100.0f;
 			rand_z -= 256 - 64;
 
-			sphere_instances.push_back({
+			cube_instances.push_back({
 				{ rand_x, rand_y, rand_z},
 				{ 0.0f, 0.0f, 0.0f },
 				{ 1.0f, 1.0f, 1.0f },
@@ -101,10 +113,10 @@ bool Graphics::update(Input* input, float dt)
 		}
 
 		std::cout.imbue(std::locale(""));
-		std::cout << "\nInstances: " << sphere_instances.size() << "\n";
-		int instances_mb = static_cast<int>((sphere_instances.size() * sizeof(Model::Instance)) / 1024.0f / 1024.0f);
+		std::cout << "\nInstances: " << cube_instances.size() << "\n";
+		int instances_mb = static_cast<int>(static_cast<float>((cube_instances.size() * sizeof(Model::Instance))) / 1024.0f / 1024.0f);
 		std::cout << "Instances Memory: " << instances_mb << "MB\n";
-		std::cout << "Vertices: " << sphere_instances.size() * sphere->get_vertex_count() << "\n";
+		std::cout << "Vertices: " << cube_instances.size() * cube->get_vertex_count() << "\n";
 	}
 
 	static float rot = std::cosf(time) * 180.0f * deg2rad;
@@ -133,14 +145,6 @@ bool Graphics::update(Input* input, float dt)
 			dx::XMMATRIX view_matrix = camera->get_view_matrix();
 			dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 
-			//float rel_pos_x = pos.x / 1280.0f;
-			//float rel_pos_y = pos.y / 720.0f;
-			//rel_pos_x *= 2;
-			//rel_pos_x -= 1.0f;
-			//rel_pos_y *= 2;
-			//rel_pos_y -= 1.0f;
-			//std::cout << pos.x << "," << pos.y << "\n";
-			//std::cout << rel_pos_x << "," << rel_pos_y << "\n";
 			dx::XMFLOAT3 near_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 0.0f };
 			dx::XMFLOAT3 far_pos{ static_cast<float>(pos.x), static_cast<float>(pos.y), 1.0f };
 			dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
@@ -191,194 +195,17 @@ bool Graphics::update(Input* input, float dt)
 
 			if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
 			{
-				std::array<dx::XMFLOAT3, 3> triangle;
-				int nan_count = 0;
-				int fail_count = 0;
-				for (int i = 0; i < world->indices.size(); i += 3)
+				auto intersection_pos = world->triangle_intersection(near_pos_vec, far_pos_vec);
+
+				if (!isnan(intersection_pos.x))
 				{
-					triangle[0] = world->vertices[world->indices[i]].position;
-					triangle[1] = world->vertices[world->indices[i+1]].position;
-					triangle[2] = world->vertices[world->indices[i+2]].position;
-
-					std::array<float, 3> start_vec = {
-						dx::XMVectorGetX(near_pos_vec),
-						dx::XMVectorGetY(near_pos_vec),
-						dx::XMVectorGetZ(near_pos_vec),
-					};
-
-					std::array<float, 3> end_vec = {
-						dx::XMVectorGetX(far_pos_vec),
-						dx::XMVectorGetY(far_pos_vec),
-						dx::XMVectorGetZ(far_pos_vec),
-					};
-
-					std::array<float, 3> dir_vec = {
-						dx::XMVectorGetX(direction),
-						dx::XMVectorGetY(direction),
-						dx::XMVectorGetZ(direction),
-					};
-
-					std::array<float, 3> edge1;
-					std::array<float, 3> edge2;
-
-					// Calculate the two edges from the three points given.
-					edge1[0] = triangle[1].x - triangle[0].x;
-					edge1[1] = triangle[1].y - triangle[0].y;
-					edge1[2] = triangle[1].z - triangle[0].z;
-
-					edge2[0] = triangle[2].x - triangle[0].x;
-					edge2[1] = triangle[2].y - triangle[0].y;
-					edge2[2] = triangle[2].z - triangle[0].z;
-
-					std::array<float, 3> normal =
-					{
-						(edge1[1] * edge2[2]) - (edge1[2] * edge2[1]),
-						(edge1[2] * edge2[0]) - (edge1[0] * edge2[2]),
-						(edge1[0] * edge2[1]) - (edge1[1] * edge2[0]),
-					};
-
-					float magnitude = (float)sqrt((normal[0] * normal[0]) + (normal[1] * normal[1]) + (normal[2] * normal[2]));
-					if (fabsf(magnitude) < 0.001f)
-					{
-						fail_count++;
-						continue;
-					}
-					normal[0] = normal[0] / magnitude;
-					normal[1] = normal[1] / magnitude;
-					normal[2] = normal[2] / magnitude;
-
-					// Find the distance from the origin to the plane.
-					float D = ((-normal[0] * triangle[0].x) + (-normal[1] * triangle[0].y) + (-normal[2] * triangle[0].z));
-
-					// Get the denominator of the equation.
-					float denominator = ((normal[0] * dir_vec[0]) + (normal[1] * dir_vec[1]) + (normal[2] * dir_vec[2]));
-
-					// Make sure the result doesn't get too close to zero to prevent divide by zero.
-					if (fabs(denominator) < 0.1f)
-					{
-						fail_count++;
-						continue;
-					}
-
-					// Get the numerator of the equation.
-					float numerator = -1.0f * (((normal[0] * start_vec[0]) + (normal[1] * start_vec[1]) + (normal[2] * start_vec[2])) + D);
-
-					// Calculate where we intersect the triangle.
-					float t = numerator / denominator;
-
-					// Find the intersection vector.
-					std::array<float, 3> Q = {
-						start_vec[0] + (dir_vec[0] * t),
-						start_vec[1] + (dir_vec[1] * t),
-						start_vec[2] + (dir_vec[2] * t),
-					};
-
-					// Find the three edges of the triangle.
-					std::array<float, 3> e1 = {
-						triangle[1].x - triangle[0].x,
-						triangle[1].y - triangle[0].y,
-						triangle[1].z - triangle[0].z,
-					};
-
-					std::array<float, 3> e2 = {
-						triangle[2].x - triangle[1].x,
-						triangle[2].y - triangle[1].y,
-						triangle[2].z - triangle[1].z,
-					};
-
-					std::array<float, 3> e3 = {
-						triangle[0].x - triangle[2].x,
-						triangle[0].y - triangle[2].y,
-						triangle[0].z - triangle[2].z,
-					};
-
-					// Calculate the normal for the first edge.
-					std::array<float, 3> edge_normals = {
-						(e1[1] * normal[2]) - (e1[2] * normal[1]),
-						(e1[2] * normal[0]) - (e1[0] * normal[2]),
-						(e1[0] * normal[1]) - (e1[1] * normal[0]),
-					};
-
-					// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
-					std::array<float, 3> temp = {
-						Q[0] - triangle[0].x,
-						Q[1] - triangle[0].y,
-						Q[2] - triangle[0].z,
-					};
-
-					float determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
-
-					// Check if it is outside.
-					if (determinant > 0.000001f)
-					{
-						fail_count++;
-						continue;
-					}
-
-					// Calculate the normal for the second edge.
-					edge_normals[0] = (e2[1] * normal[2]) - (e2[2] * normal[1]);
-					edge_normals[1] = (e2[2] * normal[0]) - (e2[0] * normal[2]);
-					edge_normals[2] = (e2[0] * normal[1]) - (e2[1] * normal[0]);
-
-					// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
-					temp[0] = Q[0] - triangle[1].x;
-					temp[1] = Q[1] - triangle[1].y;
-					temp[2] = Q[2] - triangle[1].z;
-
-					determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
-
-					// Check if it is outside.
-					if (determinant > 0.000001f)
-					{
-						fail_count++;
-						continue;
-					}
-
-					// Calculate the normal for the third edge.
-					edge_normals[0] = (e3[1] * normal[2]) - (e3[2] * normal[1]);
-					edge_normals[1] = (e3[2] * normal[0]) - (e3[0] * normal[2]);
-					edge_normals[2] = (e3[0] * normal[1]) - (e3[1] * normal[0]);
-
-					// Calculate the determinant to see if it is on the inside, outside, or directly on the edge.
-					temp[0] = Q[0] - triangle[2].x;
-					temp[1] = Q[1] - triangle[2].y;
-					temp[2] = Q[2] - triangle[2].z;
-
-					determinant = ((edge_normals[0] * temp[0]) + (edge_normals[1] * temp[1]) + (edge_normals[2] * temp[2]));
-
-					// Check if it is outside.
-					if (determinant > 0.000001f)
-					{
-						fail_count++;
-						continue;
-					}
-
-					// Now we have our intersection position.
-					dx::XMFLOAT3 intersection_pos = { Q[0], Q[1], Q[2] };
-
-					//std::cout << dx::XMVectorGetX(near_pos_vec) << ", " << dx::XMVectorGetY(near_pos_vec) << ", " << dx::XMVectorGetZ(near_pos_vec) << "\n";
-					if (!isnan(intersection_pos.x))
-					{
-						std::cout << intersection_pos.x << ", " << intersection_pos.y << ", " << intersection_pos.z << "\n";
-						dx::XMFLOAT3 pos;
-						dx::XMStoreFloat3(&pos, far_pos_vec);
-						cube_instances.push_back({
-							intersection_pos,
-							{0, 0, 0},
-							{0.2f, 0.2f, 0.2f},
-							{0.2f, 0.2f, 0.2f, 1.0f},
-						});
-						break;
-					}
-					else
-					{
-						nan_count++;
-					}
+					cube_instances.push_back({
+						intersection_pos,
+						{0, 0, 0},
+						{0.2f, 0.2f, 0.2f},
+						{0.2f, 0.2f, 0.2f, 1.0f},
+					});
 				}
-
-				std::cout << "NaN: " << nan_count << "\n";
-				std::cout << "Fail: " << fail_count << "\n";
-				std::cout << "Triangles: " << world->vertex_count / 3 << "\n";
 			}
 		}
 	}
