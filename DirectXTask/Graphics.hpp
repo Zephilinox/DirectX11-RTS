@@ -10,6 +10,7 @@
 #include "ColourShader.hpp"
 #include "World.hpp"
 #include "Pathfinding.hpp"
+#include "Entity.hpp"
 
 class Graphics
 {
@@ -37,6 +38,7 @@ private:
 	std::unique_ptr<ColourShader> colour_shader;
 	std::vector<Model::Instance> sphere_instances;
 	std::vector<Model::Instance> cube_instances;
+	Entity entity;
 
 	Input* input;
 };

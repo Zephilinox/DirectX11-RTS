@@ -55,12 +55,19 @@ Graphics::Graphics(int width, int height, HWND window)
 		{ 1.0f, 0.4f, 0.4f, 1.0f }
 	});
 
-	sphere_instances.push_back({
+	entity.instance = {
 		{ 44.0f, 1.0f, 44.0f },
 		{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
 		{ 1.00f, 1.0f, 1.0f},
 		{ 0.0f, 0.8f, 1.0f, 1.0f }
-	});
+	};
+
+	/*sphere_instances.push_back({
+		{ 44.0f, 1.0f, 44.0f },
+		{ 0.0f, 0.0f, std::cosf(time) * 180.0f * deg2rad },
+		{ 1.00f, 1.0f, 1.0f},
+		{ 0.0f, 0.8f, 1.0f, 1.0f }
+	});*/
 
 	try
 	{
@@ -206,9 +213,13 @@ bool Graphics::update(Input* input, float dt)
 						{0.2f, 0.2f, 0.2f, 1.0f},
 					});
 				}
+
+				entity.goal_pos.push_back(intersection_pos);
 			}
 		}
 	}
+
+	entity.update(dt);
 	return false;
 }
 
@@ -226,9 +237,11 @@ bool Graphics::draw()
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 	
 	direct3d->set_wireframe(false);
+	sphere_instances.push_back(entity.instance);
 	sphere->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), sphere_instances);
 	sphere->render(direct3d->get_device_context());
-	
+	sphere_instances.pop_back();
+
 	bool result = colour_shader->render(direct3d->get_device_context(), sphere->get_index_count(), sphere->get_vertex_count(), sphere->get_instance_count(), world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
 	if (!result)
 	{
