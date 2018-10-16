@@ -9,9 +9,9 @@
 Pathfinding::Pathfinding(World* world)
 	: world(world)
 {
-	float resolution = 0.5f;
-	int height = 32 * (1.0 / resolution) + 1;
-	int width = 32 * (1.0f / resolution) + 1;
+	float resolution = 2.5f;
+	int height = 320 * (1.0 / resolution) + 1;
+	int width = 320 * (1.0f / resolution) + 1;
 
 	for (int h = 0; h < height; ++h)
 	{

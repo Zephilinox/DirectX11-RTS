@@ -5,23 +5,23 @@
 
 World::World(ID3D11Device* device)
 {
-	constexpr float resolution = 1.0f;
-	constexpr int terrainHeight = static_cast<int>(32 * resolution) + 1;
-	constexpr int terrainWidth = static_cast<int>(32 * resolution) + 1;
+	constexpr float resolution = 0.2f;
+	constexpr int terrainHeight = static_cast<int>(320 * resolution) + 1;
+	constexpr int terrainWidth = static_cast<int>(320 * resolution) + 1;
 
 	vertex_count = (terrainWidth - 1) * (terrainHeight - 1) * 6;
 	index_count = vertex_count;
 	std::cout << index_count / 3 << "\n";
 	vertices.resize(vertex_count);
 	indices.resize(index_count);
+	triangle_vertices.resize(index_count);
 
 	int index = 0;
 	for (int h = 0; h < terrainHeight; ++h)
 	{
 		for (int w = 0; w < terrainWidth; ++w)
 		{
-			//float y = (std::rand() % 100) / 100.0f - 3;
-			float y = 0;
+			float y = (std::rand() % 300) / 100.0f - 3;
 			vertices[index].position = { static_cast<float>(w) * (1.0f / resolution), y, static_cast<float>(h) * (1.0f / resolution) };
 			vertices[index].colour = { 0.8f, 0.8f, 0.75f, 1.0f };
 			vertices[index].normal = { (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f };
@@ -46,6 +46,11 @@ World::World(ID3D11Device* device)
 			l = 0;
 			k++;
 		}
+	}
+
+	for (int i = 0; i < index_count; ++i)
+	{
+		triangle_vertices[i] = vertices[indices[i]];
 	}
 
 	D3D11_BUFFER_DESC vertex_buffer_desc;
@@ -155,9 +160,9 @@ dx::XMFLOAT3 World::triangle_intersection(dx::XMVECTOR from, dx::XMVECTOR to)
 
 	for (int i = 0; i < indices.size(); i += 3)
 	{
-		triangle[0] = vertices[indices[i]].position;
-		triangle[1] = vertices[indices[i + 1]].position;
-		triangle[2] = vertices[indices[i + 2]].position;
+		triangle[0] = triangle_vertices[i].position;
+		triangle[1] = triangle_vertices[i+1].position;
+		triangle[2] = triangle_vertices[i+2].position;
 
 		std::array<float, 3> start_vec = {
 			dx::XMVectorGetX(from),
@@ -196,11 +201,8 @@ dx::XMFLOAT3 World::triangle_intersection(dx::XMVECTOR from, dx::XMVECTOR to)
 			(edge1[0] * edge2[1]) - (edge1[1] * edge2[0]),
 		};
 
-		float magnitude = (float)sqrt((normal[0] * normal[0]) + (normal[1] * normal[1]) + (normal[2] * normal[2]));
-		if (fabsf(magnitude) < 0.001f)
-		{
-			continue;
-		}
+		float magnitude = sqrt(normal[0] * normal[0]) + (normal[1] * normal[1]) + (normal[2] * normal[2]);
+
 		normal[0] = normal[0] / magnitude;
 		normal[1] = normal[1] / magnitude;
 		normal[2] = normal[2] / magnitude;
@@ -222,7 +224,7 @@ dx::XMFLOAT3 World::triangle_intersection(dx::XMVECTOR from, dx::XMVECTOR to)
 
 		// Calculate where we intersect the triangle.
 		float t = numerator / denominator;
-
+		
 		// Find the intersection vector.
 		std::array<float, 3> Q = {
 			start_vec[0] + (dir_vec[0] * t),
@@ -310,11 +312,7 @@ dx::XMFLOAT3 World::triangle_intersection(dx::XMVECTOR from, dx::XMVECTOR to)
 		// Now we have our intersection position.
 		dx::XMFLOAT3 intersection_pos = { Q[0], Q[1], Q[2] };
 
-		//std::cout << dx::XMVectorGetX(from) << ", " << dx::XMVectorGetY(from) << ", " << dx::XMVectorGetZ(from) << "\n";
-		if (!isnan(intersection_pos.x))
-		{
-			return intersection_pos;
-		}
+		return intersection_pos;
 	}
 
 	return { std::nanf(""), std::nanf(""), std::nanf("") };

@@ -75,10 +75,10 @@ Graphics::Graphics(int width, int height, HWND window)
 
 	for (auto& cell : pathfinding->all_cells)
 	{
-		sphere_instances.push_back({
+		cube_instances.push_back({
 			{ cell.x, cell.y, cell.z },
 			{ 0.0f, 0.0f, 0.0f },
-			{ 0.2f, 0.2f, 0.2f},
+			{ 0.5f, 0.5f, 0.5f},
 			{0.5f, 1.0f, 0.5f, 1.0f }
 		});
 	}
@@ -202,7 +202,7 @@ bool Graphics::update(Input* input, float dt)
 					cube_instances.push_back({
 						intersection_pos,
 						{0, 0, 0},
-						{0.2f, 0.2f, 0.2f},
+						{1.0f, 1.0f, 1.0f},
 						{0.2f, 0.2f, 0.2f, 1.0f},
 					});
 				}

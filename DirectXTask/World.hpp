@@ -47,4 +47,5 @@ public:
 	int instance_count;
 	std::vector<Vertex> vertices;
 	std::vector<unsigned long> indices;
+	std::vector<Vertex> triangle_vertices;
 };
