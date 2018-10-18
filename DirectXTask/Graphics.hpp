@@ -17,28 +17,23 @@ class Graphics
 public:
 	Graphics(int width, int height, HWND window);
 
-	bool update(Input* input, float dt);
-	bool draw();
+	void begin(float r, float g, float b, Camera* camera);
+	void draw();
+	void draw(ID3D11Buffer* vertex_buffer, ID3D11Buffer* index_buffer, ID3D11Buffer* instance_buffer, int vertex_count, int index_count, int instance_count);
+	void end();
 
 	static constexpr bool fullscreen = false;
 	static constexpr bool vsync = false;
 	static constexpr float screen_depth = 1000.0f;
 	static constexpr float screen_near = 0.1f;
 
+	std::unique_ptr<Direct3D> direct3d;
 private:
 	float time = 0;
 	HWND window;
 
-	std::unique_ptr<Direct3D> direct3d;
-	std::unique_ptr<Camera> camera;
-	std::unique_ptr<Model> sphere;
-	std::unique_ptr<Model> cube;
-	std::unique_ptr<World> world;
-	std::unique_ptr<Pathfinding> pathfinding;
 	std::unique_ptr<ColourShader> colour_shader;
-	std::vector<Model::Instance> sphere_instances;
-	std::vector<Model::Instance> cube_instances;
-	std::vector<std::unique_ptr<Entity>> entities;
 
 	Input* input;
+	dx::XMMATRIX view_matrix;
 };

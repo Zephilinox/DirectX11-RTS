@@ -6,8 +6,8 @@
 World::World(ID3D11Device* device)
 {
 	constexpr float resolution = 0.1f;
-	constexpr int terrainHeight = static_cast<int>(320 * resolution) + 1;
-	constexpr int terrainWidth = static_cast<int>(320 * resolution) + 1;
+	constexpr int terrainHeight = static_cast<int>(160 * resolution) + 1;
+	constexpr int terrainWidth = static_cast<int>(160 * resolution) + 1;
 
 	vertex_count = (terrainWidth - 1) * (terrainHeight - 1) * 6;
 	index_count = vertex_count;
@@ -60,7 +60,7 @@ World::World(ID3D11Device* device)
 
 	D3D11_BUFFER_DESC vertex_buffer_desc;
 	vertex_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
-	vertex_buffer_desc.ByteWidth = sizeof(Vertex) * vertex_count;
+	vertex_buffer_desc.ByteWidth = sizeof(ColourShader::Vertex) * vertex_count;
 	vertex_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertex_buffer_desc.CPUAccessFlags = 0;
 	vertex_buffer_desc.MiscFlags = 0;
@@ -97,7 +97,7 @@ World::World(ID3D11Device* device)
 	}
 	
 	instance_count = 1;
-	std::vector<Instance> instances(instance_count);
+	std::vector<ColourShader::Instance> instances(instance_count);
 
 	instances[0].position = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
 	instances[0].rotation = dx::XMFLOAT3(0.0f, 0.0f, 0.0f);
@@ -106,7 +106,7 @@ World::World(ID3D11Device* device)
 
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_IMMUTABLE;
-	instance_buffer_desc.ByteWidth = sizeof(Instance) * instance_count;
+	instance_buffer_desc.ByteWidth = sizeof(ColourShader::Instance) * instance_count;
 	instance_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	instance_buffer_desc.CPUAccessFlags = 0;
 	instance_buffer_desc.MiscFlags = 0;
@@ -325,8 +325,7 @@ dx::XMFLOAT3 World::triangle_intersection(dx::XMVECTOR from, dx::XMVECTOR to)
 
 bool World::draw(ID3D11DeviceContext* device_context)
 {
-
-	unsigned int strides[2] = { sizeof(Vertex), sizeof(Instance) };
+	unsigned int strides[2] = { sizeof(ColourShader::Vertex), sizeof(ColourShader::Instance) };
 	unsigned int offsets[2] = { 0, 0 };
 
 	ID3D11Buffer* buffer_pointers[2] = { vertex_buffer, instance_buffer };

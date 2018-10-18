@@ -10,25 +10,11 @@ namespace dx = DirectX;
 
 //SELF
 #include "Direct3D.hpp"
+#include "ColourShader.hpp"
 
 class Model
 {
 public:
-	struct Instance
-	{
-		dx::XMFLOAT3 position;
-		dx::XMFLOAT3 rotation;
-		dx::XMFLOAT3 scale;
-		dx::XMFLOAT4 colour;
-	};
-
-	struct Vertex
-	{
-		dx::XMFLOAT3 position;
-		dx::XMFLOAT4 colour;
-		dx::XMFLOAT3 normal;
-	};
-
 	Model(ID3D11Device* device, std::string filename);
 
 	void render(ID3D11DeviceContext* device_context);
@@ -38,9 +24,9 @@ public:
 	int get_index_count();
 
 	void create_instance_buffer(ID3D11Device* device, int max_instances);
-	void update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance>& instances);
+	void update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<ColourShader::Instance>& instances);
 
-private:
+//private:
 	bool load_from_file(std::string filename, int filetype);
 
 	struct ModelData

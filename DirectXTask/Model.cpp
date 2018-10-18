@@ -8,7 +8,7 @@ Model::Model(ID3D11Device* device, std::string filename)
 {
 	load_from_file(filename, 0);
 
-	std::vector<Vertex> vertices(vertex_count);
+	std::vector<ColourShader::Vertex> vertices(vertex_count);
 	std::vector<unsigned long> indices(index_count);
 
 	for (int i = 0; i < vertex_count; ++i)
@@ -22,7 +22,7 @@ Model::Model(ID3D11Device* device, std::string filename)
 
 	D3D11_BUFFER_DESC vertex_buffer_desc;
 	vertex_buffer_desc.Usage = D3D11_USAGE_DEFAULT;
-	vertex_buffer_desc.ByteWidth = sizeof(Vertex) * vertex_count;
+	vertex_buffer_desc.ByteWidth = sizeof(ColourShader::Vertex) * vertex_count;
 	vertex_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	vertex_buffer_desc.CPUAccessFlags = 0;
 	vertex_buffer_desc.MiscFlags = 0;
@@ -100,7 +100,7 @@ bool Model::load_from_file(std::string filename, int filetype = 0)
 
 void Model::render(ID3D11DeviceContext* device_context)
 {
-	unsigned int strides[2] = { sizeof(Vertex), sizeof(Instance) };
+	unsigned int strides[2] = { sizeof(ColourShader::Vertex), sizeof(ColourShader::Instance) };
 	unsigned int offsets[2] = { 0, 0 };
 
 	ID3D11Buffer* buffer_pointers[2] = { vertex_buffer.val, instance_buffer.val };
@@ -130,11 +130,11 @@ void Model::create_instance_buffer(ID3D11Device* device, int max_instances)
 	max_instance_count = max_instances;
 	instance_count = max_instances;
 
-	std::vector<Instance> instances(instance_count);
+	std::vector<ColourShader::Instance> instances(instance_count);
 
 	D3D11_BUFFER_DESC instance_buffer_desc;
 	instance_buffer_desc.Usage = D3D11_USAGE_DYNAMIC;
-	instance_buffer_desc.ByteWidth = sizeof(Instance) * instance_count;
+	instance_buffer_desc.ByteWidth = sizeof(ColourShader::Instance) * instance_count;
 	instance_buffer_desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 	instance_buffer_desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
 	instance_buffer_desc.MiscFlags = 0;
@@ -152,7 +152,7 @@ void Model::create_instance_buffer(ID3D11Device* device, int max_instances)
 	}
 }
 
-void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<Instance>& instances)
+void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* device_context, std::vector<ColourShader::Instance>& instances)
 {
 	assert(instances.size() >= 0);
 	if (instances.capacity() > max_instance_count)
@@ -174,7 +174,7 @@ void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* de
 	ZeroMemory(&resource, sizeof(resource));
 
 	instance_count = static_cast<int>(instances.size());
-	size_t size = sizeof(Instance) * instance_count;
+	size_t size = sizeof(ColourShader::Instance) * instance_count;
 
 	device_context->Map(instance_buffer.val, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 	memcpy(resource.pData, instances.data(), size);

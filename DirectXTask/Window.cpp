@@ -69,6 +69,7 @@ Window::Window(WindowSettings settings)
 	SetForegroundWindow(window_handle);
 	SetFocus(window_handle);
 	ShowCursor(true);
+	open = true;
 }
 
 Window::~Window()
@@ -89,23 +90,64 @@ Window::~Window()
 	window = nullptr;
 }
 
+bool Window::poll(Event& e)
+{
+	MSG msg;
+	ZeroMemory(&msg, sizeof(MSG));
+
+	if (PeekMessageA(&msg, nullptr, 0, 0, PM_REMOVE))
+	{
+		TranslateMessage(&msg);
+		DispatchMessageA(&msg);
+
+		switch (msg.message)
+		{
+			case WM_QUIT:
+			{
+				e = EventWindowClosed();
+			} break;
+
+			case WM_MOUSEMOVE:
+			{
+				EventMouseMoved emm;
+				emm.x = GET_X_LPARAM(msg.lParam);
+				emm.y = GET_Y_LPARAM(msg.lParam);
+				emm.modifier_key = msg.wParam;
+				e = emm;
+			} break;
+
+			case WM_KEYDOWN:
+			{
+				EventKeyPress ekp;
+				ekp.key_code = static_cast<unsigned int>(msg.wParam);
+				ekp.key_down = true;
+				e = ekp;
+			} break;
+
+			case WM_KEYUP:
+			{
+				EventKeyPress ekp;
+				ekp.key_code = static_cast<unsigned int>(msg.wParam);
+				ekp.key_down = false;
+				e = ekp;
+			} break;
+
+			default:
+			{
+				return false;
+			}
+		}
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 LRESULT Window::MessageHandler(HWND window, UINT msg, WPARAM wparam, LPARAM lparam)
 {
-	switch (msg)
-	{
-	case WM_KEYDOWN:
-	{
-		//input->key_down(static_cast<unsigned int>(wparam));
-		return 0;
-	} break;
-
-	case WM_KEYUP:
-	{
-		//input->key_up(static_cast<unsigned int>(wparam));
-		return 0;
-	} break;
-	}
-
 	return DefWindowProc(window, msg, wparam, lparam);
 }
 

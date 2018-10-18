@@ -52,7 +52,7 @@ void Entity::update(float dt)
 		dir.y /= magnitude;
 		dir.z /= magnitude;
 
-		float speed = 50.0f;
+		float speed = 10.0f;
 
 		instance.position.x += dir.x * speed * dt;
 		instance.position.z += dir.z * speed * dt;

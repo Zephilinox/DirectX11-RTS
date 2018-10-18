@@ -15,6 +15,21 @@ namespace dx = DirectX;
 class ColourShader
 {
 public:
+	struct Vertex
+	{
+		dx::XMFLOAT3 position;
+		dx::XMFLOAT4 colour;
+		dx::XMFLOAT3 normal;
+	};
+
+	struct Instance
+	{
+		dx::XMFLOAT3 position;
+		dx::XMFLOAT3 rotation;
+		dx::XMFLOAT3 scale;
+		dx::XMFLOAT4 colour;
+	};
+
 	ColourShader(ID3D11Device* device, HWND window);
 
 	bool render(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour);

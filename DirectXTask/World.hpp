@@ -24,20 +24,6 @@ public:
 	dx::XMFLOAT3 triangle_intersection(dx::XMVECTOR from, dx::XMVECTOR to);
 
 //private:
-	struct Vertex
-	{
-		dx::XMFLOAT3 position;
-		dx::XMFLOAT4 colour;
-		dx::XMFLOAT3 normal;
-	};
-
-	struct Instance
-	{
-		dx::XMFLOAT3 position;
-		dx::XMFLOAT3 rotation;
-		dx::XMFLOAT3 scale;
-		dx::XMFLOAT4 colour;
-	};
 
 	ID3D11Buffer* vertex_buffer;
 	ID3D11Buffer* index_buffer;
@@ -45,7 +31,7 @@ public:
 	int vertex_count;
 	int index_count;
 	int instance_count;
-	std::vector<Vertex> vertices;
+	std::vector<ColourShader::Vertex> vertices;
 	std::vector<unsigned long> indices;
-	std::vector<Vertex> triangle_vertices;
+	std::vector<ColourShader::Vertex> triangle_vertices;
 };

@@ -14,7 +14,7 @@ public:
 
 	void update(float dt);
 
-	Model::Instance instance;
+	ColourShader::Instance instance;
 
 	std::deque<dx::XMFLOAT3> goal_pos;
 
