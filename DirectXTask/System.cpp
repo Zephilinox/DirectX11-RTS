@@ -214,6 +214,7 @@ void System::update()
 
 				if (cell.valid && cell.walkable)
 				{
+					entities[0]->goal_pos.clear();
 					entities[0]->goal_pos.push_back({cell.x, cell.y, cell.z});
 				}
 			}
@@ -234,6 +235,7 @@ void System::update()
 
 				if (cell.valid && cell.walkable)
 				{
+					entities[1]->goal_pos.clear();
 					entities[1]->goal_pos.push_back({ cell.x, cell.y, cell.z });
 				}
 			}

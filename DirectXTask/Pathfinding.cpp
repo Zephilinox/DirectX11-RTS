@@ -37,8 +37,8 @@ Pathfinding::Pathfinding(World* world)
 
 Cell Pathfinding::find_closest_cell(float x, float y, float z)
 {
-	int grid_x = std::round(x) * cell_size;
-	int grid_z = std::round(z) * cell_size;
+	int grid_x = std::round(x / cell_size);
+	int grid_z = std::round(z / cell_size);
 	if (grid_x > 0 && grid_x < grid_width)
 	{
 		if (grid_z > 0 && grid_z < grid_height)
