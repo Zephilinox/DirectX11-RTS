@@ -55,6 +55,11 @@ public:
 	HWND window_handle;
 	bool open = false;
 
+	float width;
+	float height;
+	bool fullscreen;
+	bool vsync;
+
 private:
 	LRESULT CALLBACK MessageHandler(HWND window, UINT msg, WPARAM wparam, LPARAM lparan);
 	HINSTANCE instance_handle;

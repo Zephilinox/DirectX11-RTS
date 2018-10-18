@@ -8,7 +8,7 @@ System::System()
 	WindowSettings ws{ "RTS", 1280, 720 };
 	window = std::make_unique<Window>(ws);
 	input = std::make_unique<Input>();
-	graphics = std::make_unique<Graphics>(ws.width, ws.height, window->window_handle);
+	graphics = std::make_unique<Graphics>(window.get());
 	world = std::make_unique<World>(graphics->direct3d->get_device());
 
 	camera = std::make_unique<Camera>();
@@ -75,12 +75,14 @@ System::System()
 		{
 			cube_instances.back().colour.x = 1.0f;
 			cube_instances.back().colour.y = 0.5f;
+			cell.walkable = false;
 		}
 
 		if (cell.y < 2)
 		{
 			cube_instances.back().colour.y = 0.5f;
 			cube_instances.back().colour.z = 1.0f;
+			cell.walkable = false;
 		}
 	}
 }
@@ -167,7 +169,6 @@ void System::update()
 	POINT pos;
 	if (GetCursorPos(&pos) && ScreenToClient(window->window_handle, &pos))
 	{
-		camera->draw();
 		dx::XMMATRIX world_matrix = graphics->direct3d->get_world_matrix();
 		dx::XMMATRIX view_matrix = camera->get_view_matrix();
 		dx::XMMATRIX projection_matrix = graphics->direct3d->get_projection_matrix();
@@ -177,8 +178,8 @@ void System::update()
 		dx::XMVECTOR near_pos_vec = dx::XMLoadFloat3(&near_pos);
 		dx::XMVECTOR far_pos_vec = dx::XMLoadFloat3(&far_pos);
 
-		float width = graphics->fullscreen ? 2560 : 1280;
-		float height = graphics->fullscreen ? 1080 : 720;
+		float width = window->width;
+		float height = window->height;
 
 		near_pos_vec = dx::XMVector3Unproject(
 			near_pos_vec,
@@ -204,7 +205,17 @@ void System::update()
 
 			if (!isnan(intersection_pos.x))
 			{
-				entities[0]->goal_pos.push_back(intersection_pos);
+				//entities[0]->goal_pos.push_back(intersection_pos);
+
+				std::cout << intersection_pos.x << ", " << intersection_pos.y << ", " << intersection_pos.z << "\n";
+				auto cell = pathfinding->find_closest_cell(intersection_pos.x, intersection_pos.y, intersection_pos.z);
+				std::cout << std::boolalpha << cell.walkable << " " << cell.grid_x << ", " << cell.grid_y << "\n";
+				std::cout << cell.x << ", " << cell.y << ", " << cell.z << "\n\n";
+
+				if (cell.valid && cell.walkable)
+				{
+					entities[0]->goal_pos.push_back({cell.x, cell.y, cell.z});
+				}
 			}
 		}
 
@@ -214,7 +225,17 @@ void System::update()
 
 			if (!isnan(intersection_pos.x))
 			{
-				entities[1]->goal_pos.push_back(intersection_pos);
+				//entities[1]->goal_pos.push_back(intersection_pos);
+
+				std::cout << intersection_pos.x << ", " << intersection_pos.y << ", " << intersection_pos.z << "\n";
+				auto cell = pathfinding->find_closest_cell(intersection_pos.x, intersection_pos.y, intersection_pos.z);
+				std::cout << std::boolalpha << cell.walkable << " " << cell.grid_x << ", " << cell.grid_y << "\n";
+				std::cout << cell.x << ", " << cell.y << ", " << cell.z << "\n\n";
+
+				if (cell.valid && cell.walkable)
+				{
+					entities[1]->goal_pos.push_back({ cell.x, cell.y, cell.z });
+				}
 			}
 		}
 	}

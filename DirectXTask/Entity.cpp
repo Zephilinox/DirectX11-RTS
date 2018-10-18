@@ -25,12 +25,12 @@ void Entity::update(float dt)
 		dir.x -= 1;
 	}
 	
-	if (instance.position.y + 1.0f < goal_pos.front().y + 1)
+	if (instance.position.y + 1.0f < goal_pos.front().y)
 	{
 		dir.y += 1;
 	}
 
-	if (instance.position.y - 1.0f > goal_pos.front().y + 1)
+	if (instance.position.y - 1.0f > goal_pos.front().y)
 	{
 		dir.y -= 1;
 	}
@@ -65,7 +65,7 @@ void Entity::update(float dt)
 			auto pos = world->triangle_intersection(from_vec, to_vec);
 			if (!isnan(pos.y))
 			{
-				instance.position.y = pos.y + 1;
+				instance.position.y = pos.y;
 			}
 			else
 			{

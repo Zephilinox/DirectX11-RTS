@@ -70,6 +70,11 @@ Window::Window(WindowSettings settings)
 	SetFocus(window_handle);
 	ShowCursor(true);
 	open = true;
+
+	this->width = width;
+	this->height = height;
+	this->fullscreen = settings.fullscreen;
+	this->vsync = settings.vsync;
 }
 
 Window::~Window()

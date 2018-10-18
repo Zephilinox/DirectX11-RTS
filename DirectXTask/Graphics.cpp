@@ -4,21 +4,24 @@
 #include <iostream>
 #include <iomanip>
 
-Graphics::Graphics(int width, int height, HWND window)
+//SELF
+#include "Window.hpp"
+
+Graphics::Graphics(Window* window)
 {
-	this->window = window;
+	this->window_handle = window->window_handle;
 
 	try
 	{
-		direct3d = std::make_unique<Direct3D>(width, height, vsync, window, fullscreen, screen_depth, screen_near);
+		direct3d = std::make_unique<Direct3D>(window->width, window->height, window->vsync, window_handle, window->fullscreen, screen_depth, screen_near);
 	}
 	catch (...)
 	{
-		MessageBox(window, "Could not init Direct3D", "ERROR", MB_OK);
+		MessageBox(window_handle, "Could not init Direct3D", "ERROR", MB_OK);
 		throw;
 	}
 
-	colour_shader = std::make_unique<ColourShader>(direct3d->get_device(), window);
+	colour_shader = std::make_unique<ColourShader>(direct3d->get_device(), window_handle);
 }
 
 void Graphics::begin(float r, float g, float b, Camera* camera)
