@@ -160,7 +160,7 @@ int World::get_index_count()
 
 dx::XMFLOAT3 World::triangle_intersection(dx::XMVECTOR from, dx::XMVECTOR to)
 {
-	dx::XMVECTOR direction = dx::XMVectorSubtract(to, from);
+	dx::XMVECTOR direction = dx::XMVectorSubtract(from, to);
 	std::array<dx::XMFLOAT3, 3> triangle;
 
 	for (int i = 0; i < indices.size(); i += 3)

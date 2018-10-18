@@ -199,8 +199,29 @@ void System::update()
 			view_matrix,
 			world_matrix);
 
+		dx::XMFLOAT3 far_pos2;
+		dx::XMStoreFloat3(&far_pos2, far_pos_vec);
+
+		dx::XMFLOAT3 near_pos2;
+		dx::XMStoreFloat3(&near_pos2, near_pos_vec);
+
+
 		if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
 		{
+			/*cube_instances.push_back({
+				{ far_pos2.x, far_pos2.y, far_pos2.z},
+				{ 0.0f, 0.0f, 0.0f },
+				{ 100.0f, 100.0f, 100.0f },
+				{ 0.2f, 0.2f, 0.5f, 1.0f }
+				});
+
+			cube_instances.push_back({
+				{ near_pos2.x, near_pos2.y, near_pos2.z},
+				{ 0.0f, 0.0f, 0.0f },
+				{ 1.0f, 1.0f, 1.0f },
+				{ 1.0f, 0.2f, 0.5f, 1.0f }
+				});*/
+
 			auto intersection_pos = world->triangle_intersection(near_pos_vec, far_pos_vec);
 
 			if (!isnan(intersection_pos.x))
@@ -208,7 +229,7 @@ void System::update()
 				//entities[0]->goal_pos.push_back(intersection_pos);
 
 				std::cout << intersection_pos.x << ", " << intersection_pos.y << ", " << intersection_pos.z << "\n";
-				auto cell = pathfinding->find_closest_cell(intersection_pos.x, intersection_pos.y, intersection_pos.z);
+				Cell& cell = *pathfinding->find_closest_cell(intersection_pos.x, intersection_pos.y, intersection_pos.z);
 				std::cout << std::boolalpha << cell.walkable << " " << cell.grid_x << ", " << cell.grid_y << "\n";
 				std::cout << cell.x << ", " << cell.y << ", " << cell.z << "\n\n";
 
@@ -220,23 +241,27 @@ void System::update()
 			}
 		}
 
+		//A*
 		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0)
 		{
 			auto intersection_pos = world->triangle_intersection(near_pos_vec, far_pos_vec);
 
 			if (!isnan(intersection_pos.x))
 			{
-				//entities[1]->goal_pos.push_back(intersection_pos);
-
 				std::cout << intersection_pos.x << ", " << intersection_pos.y << ", " << intersection_pos.z << "\n";
-				auto cell = pathfinding->find_closest_cell(intersection_pos.x, intersection_pos.y, intersection_pos.z);
+				Cell& cell = *pathfinding->find_closest_cell(intersection_pos.x, intersection_pos.y, intersection_pos.z);
 				std::cout << std::boolalpha << cell.walkable << " " << cell.grid_x << ", " << cell.grid_y << "\n";
 				std::cout << cell.x << ", " << cell.y << ", " << cell.z << "\n\n";
 
 				if (cell.valid && cell.walkable)
 				{
-					entities[1]->goal_pos.clear();
-					entities[1]->goal_pos.push_back({ cell.x, cell.y, cell.z });
+					auto cells = pathfinding->find_path(entities[0]->instance.position, intersection_pos);
+					std::cout << "Path of " << cells.size() << " found\n";
+					entities[0]->goal_pos.clear();
+					for (auto& cell : cells)
+					{
+						entities[0]->goal_pos.push_back({ cell.x, cell.y, cell.z });
+					}
 				}
 			}
 		}
