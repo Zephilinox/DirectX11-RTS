@@ -222,7 +222,7 @@ int Pathfinding::heuristic_distance(Cell start, Cell end)
 	float total_standard_cost = standard_cost * (x + z);
 	float diagonal_savings = diagonal_cost - (2.0f * standard_cost);
 	float total_diagonal_cost = diagonal_savings * min(x, z);
-	float height_penalty = standard_cost * y * (1.0f - cell_size);
+	float height_penalty = standard_cost * 10 * y * (1.0f / cell_size);
 	return std::round(total_standard_cost + total_diagonal_cost + height_penalty);
 }
 

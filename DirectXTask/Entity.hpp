@@ -22,5 +22,6 @@ public:
 	World* world = nullptr;
 
 private:
-
+	dx::XMFLOAT3 lerp(dx::XMFLOAT3 from, dx::XMFLOAT3 to, float t);
+	float percent_along = 0;
 };

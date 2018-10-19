@@ -46,7 +46,7 @@ public:
 
 	static constexpr float worldgrid_width = 160;
 	static constexpr float worldgrid_height = 160;
-	static constexpr float cell_size = 0.25f;
+	static constexpr float cell_size = 1.0f;
 	static constexpr float grid_width = worldgrid_width * (1.0f / cell_size) + 1;
 	static constexpr float grid_height = worldgrid_height * (1.0f / cell_size) + 1;
 

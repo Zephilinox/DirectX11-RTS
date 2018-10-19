@@ -67,7 +67,7 @@ System::System()
 		cube_instances.push_back({
 			{ cell.x, cell.y + 0.1f, cell.z },
 			{ 0.0f, 0.0f, 0.0f },
-			{ 0.1f, 0.1f, 0.1f},
+			{ 0.3f, 0.2f, 0.3f},
 			{0.5f, 1.0f, 0.5f, 1.0f }
 			});
 
@@ -248,6 +248,7 @@ void System::update()
 				{
 					entities[0]->goal_pos.clear();
 					entities[0]->goal_pos_index = 0;
+					entities[0]->goal_pos.push_back({ entities[0]->instance.position});
 					entities[0]->goal_pos.push_back({cell.x, cell.y, cell.z});
 				}
 			}
@@ -275,10 +276,12 @@ void System::update()
 					{
 						entities[0]->goal_pos.clear();
 						entities[0]->goal_pos_index = 0;
+						entities[0]->goal_pos.push_back(entities[0]->instance.position);
 						for (auto& cell : cells)
 						{
 							entities[0]->goal_pos.push_back({ cell.x, cell.y, cell.z });
 						}
+						entities[0]->goal_pos.push_back(intersection_pos);
 					}
 				}
 			}
@@ -302,8 +305,8 @@ void System::update()
 			{
 				pos,
 				{0, 0, 0},
-				{0.1f, 1.0f, 0.1f},
-				{1.0f, 0.7f, 0.0f, 1.0f},
+				{0.15f, 2.0f, 0.15f},
+				{0.98f, 0.643f, 0.0f, 1.0f},
 			});
 		}
 	}
