@@ -17,6 +17,7 @@ public:
 	ColourShader::Instance instance;
 
 	std::deque<dx::XMFLOAT3> goal_pos;
+	int goal_pos_index = 0;
 
 	World* world = nullptr;
 

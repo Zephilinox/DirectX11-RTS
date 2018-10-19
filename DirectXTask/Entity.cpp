@@ -10,37 +10,38 @@ void Entity::update(float dt)
 {
 	if (goal_pos.empty())
 	{
+		goal_pos_index = 0;
 		return;
 	}
 
 	dx::XMFLOAT3 dir = {0, 0, 0};
 
-	if (instance.position.x + 0.1f < goal_pos.front().x)
+	if (instance.position.x + 0.1f < goal_pos[goal_pos_index].x)
 	{
 		dir.x += 1;
 	}
 
-	if (instance.position.x - 0.1f > goal_pos.front().x)
+	if (instance.position.x - 0.1f > goal_pos[goal_pos_index].x)
 	{
 		dir.x -= 1;
 	}
 	
-	if (instance.position.y + 1.0f < goal_pos.front().y)
+	if (instance.position.y + 1.0f < goal_pos[goal_pos_index].y)
 	{
 		dir.y += 1;
 	}
 
-	if (instance.position.y - 1.0f > goal_pos.front().y)
+	if (instance.position.y - 1.0f > goal_pos[goal_pos_index].y)
 	{
 		dir.y -= 1;
 	}
 
-	if (instance.position.z + 0.1f < goal_pos.front().z)
+	if (instance.position.z + 0.1f < goal_pos[goal_pos_index].z)
 	{
 		dir.z += 1;
 	}
 
-	if (instance.position.z - 0.1f > goal_pos.front().z)
+	if (instance.position.z - 0.1f > goal_pos[goal_pos_index].z)
 	{
 		dir.z -= 1;
 	}
@@ -80,6 +81,13 @@ void Entity::update(float dt)
 	else
 	{
 		//not moving, so we are at our goal
-		goal_pos.pop_front();
+		//goal_pos.pop_front();
+		goal_pos_index++;
+
+		if (goal_pos_index >= goal_pos.size())
+		{
+			goal_pos_index = 0;
+			goal_pos.clear();
+		}
 	}
 }

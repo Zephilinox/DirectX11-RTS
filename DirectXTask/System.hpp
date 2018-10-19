@@ -31,6 +31,7 @@ private:
 	std::vector<ColourShader::Instance> sphere_instances;
 	std::vector<ColourShader::Instance> cube_instances;
 	std::vector<ColourShader::Instance> entity_instances;
+	std::vector<ColourShader::Instance> pathfinding_instances;
 	std::vector<std::unique_ptr<Entity>> entities;
 	std::unique_ptr<Model> sphere;
 	std::unique_ptr<Model> cube;

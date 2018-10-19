@@ -28,7 +28,13 @@ struct EventKeyPress
 	bool key_down;
 };
 
-using Event = std::variant<EventWindowClosed, EventMouseMoved, EventKeyPress>;
+struct EventMouseKeyPress
+{
+	unsigned int mouse_key_code = 0;
+	bool key_down;
+};
+
+using Event = std::variant<EventWindowClosed, EventMouseMoved, EventKeyPress, EventMouseKeyPress>;
 
 struct WindowSettings
 {

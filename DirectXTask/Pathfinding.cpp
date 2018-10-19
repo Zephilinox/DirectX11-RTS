@@ -3,6 +3,7 @@
 //STD
 #include <iostream>
 #include <algorithm>
+#include <experimental/vector>
 
 //SELF
 #include "World.hpp"
@@ -22,11 +23,13 @@ Pathfinding::Pathfinding(World* world)
 
 			if (!isnan(intersection_pos.x))
 			{
-				all_cells.push_back({ w, h, intersection_pos.x, intersection_pos.y, intersection_pos.z, true, true });
+				int id = all_cells.size();
+				all_cells.push_back({ id, w, h, intersection_pos.x, intersection_pos.y, intersection_pos.z, true, true });
 			}
 			else
 			{
-				all_cells.push_back({ w, h, -1, -1, -1, true, false });
+				int id = all_cells.size();
+				all_cells.push_back({ id, w, h, -1, -1, -1, false, false });
 			}
 		}
 
@@ -70,6 +73,8 @@ std::vector<Cell> Pathfinding::find_path(dx::XMFLOAT3 start_pos, dx::XMFLOAT3 go
 	
 	if (start_cell->valid && start_cell->walkable && goal_cell->valid && goal_cell->walkable)
 	{
+		start_cell->in_closed_list = false;
+		start_cell->in_open_list = true;
 		open_cells.push_back(start_cell);
 
 		while (!open_cells.empty())
@@ -87,11 +92,15 @@ std::vector<Cell> Pathfinding::find_path(dx::XMFLOAT3 start_pos, dx::XMFLOAT3 go
 				}
 			}
 			current_cell->in_closed_list = true;
-			open_cells.erase(open_cells.begin());
+			current_cell->in_open_list = false;
+			std::experimental::erase_if(open_cells, [&](auto cell)
+			{
+				return cell->grid_id == current_cell->grid_id;
+			});
+
 			closed_cells.push_back(current_cell);
 
-			if (current_cell->grid_x == goal_cell->grid_x &&
-				current_cell->grid_y == goal_cell->grid_y)
+			if (current_cell->grid_id == goal_cell->grid_id)
 			{
 				return get_final_path(start_cell, goal_cell);
 			}
@@ -109,29 +118,27 @@ std::vector<Cell> Pathfinding::find_path(dx::XMFLOAT3 start_pos, dx::XMFLOAT3 go
 				{
 					cell->g_cost = move_cost;
 					cell->h_cost = heuristic_distance(*cell, *goal_cell);
-					cell->parent_id = grid_width * current_cell->grid_y + current_cell->grid_x;
+					cell->parent_id = current_cell->grid_id;
 
 					if (!cell->in_open_list)
 					{
+						cell->in_open_list = true;
 						open_cells.push_back(cell);
 					}
 				}
 			}
 		}
-
 	}
-	else
+
+	for (auto& cell : all_cells)
 	{
-		for (auto& cell : all_cells)
-		{
-			cell.in_open_list = false;
-			cell.in_closed_list = false;
-			cell.parent_id = -1;
-		}
-
-		open_cells.clear();
-		closed_cells.clear();
+		cell.in_open_list = false;
+		cell.in_closed_list = false;
+		cell.parent_id = -1;
 	}
+
+	open_cells.clear();
+	closed_cells.clear();
 
 	return {};
 }
@@ -206,10 +213,17 @@ bool Pathfinding::valid_grid_pos(int x, int y)
 
 int Pathfinding::heuristic_distance(Cell start, Cell end)
 {
-	int x = std::abs(start.x - end.x);
+	//octile distance
+	int x = std::abs(start.grid_x - end.grid_x);
 	int y = std::abs(start.y - end.y);
-
-	return x + y;
+	int z = std::abs(start.grid_y - end.grid_y);
+	float standard_cost = 100.0f;
+	float diagonal_cost = 140.0f;
+	float total_standard_cost = standard_cost * (x + z);
+	float diagonal_savings = diagonal_cost - (2.0f * standard_cost);
+	float total_diagonal_cost = diagonal_savings * min(x, z);
+	float height_penalty = standard_cost * y * (1.0f - cell_size);
+	return std::round(total_standard_cost + total_diagonal_cost + height_penalty);
 }
 
 std::vector<Cell> Pathfinding::get_final_path(Cell* start, Cell* goal)
@@ -217,8 +231,7 @@ std::vector<Cell> Pathfinding::get_final_path(Cell* start, Cell* goal)
 	std::vector<Cell> path;
 	Cell* current_cell = goal;
 
-	while (current_cell->grid_x != start->grid_x &&
-		current_cell->grid_y != start->grid_y)
+	while (current_cell->grid_id != start->grid_id)
 	{
 		path.push_back(*current_cell);
 		current_cell = &all_cells[current_cell->parent_id];
@@ -236,5 +249,32 @@ std::vector<Cell> Pathfinding::get_final_path(Cell* start, Cell* goal)
 	open_cells.clear();
 	closed_cells.clear();
 
-	return path;
+	return simplify_path(path);
+}
+
+std::vector<Cell> Pathfinding::simplify_path(std::vector<Cell> path)
+{
+	//lazy mans jump point search haha (not really)
+	std::vector<Cell> waypoints;
+
+	dx::XMFLOAT2 direction_old{ 0, 0};
+
+	for (int i = 0; i < path.size() - 1; ++i)
+	{
+		dx::XMFLOAT2 direction{
+			static_cast<float>(path[i + 1].grid_x - path[i].grid_x),
+			static_cast<float>(path[i + 1].grid_y - path[i].grid_y)
+		};
+
+		if (direction.x != direction_old.x ||
+			direction.y != direction_old.y)
+		{
+			waypoints.push_back(path[i]);
+		}
+		direction_old = direction;
+	}
+
+	waypoints.push_back(path[path.size() - 1]);
+
+	return waypoints;
 }

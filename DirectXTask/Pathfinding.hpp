@@ -11,6 +11,7 @@ class World;
 
 struct Cell
 {
+	int grid_id = 0;
 	int grid_x = 0;
 	int grid_y = 0;
 
@@ -18,7 +19,7 @@ struct Cell
 	float y = 0;
 	float z = 0;
 
-	bool walkable = true;
+	bool walkable = false;
 	bool valid = false;
 
 	int g_cost = 0;
@@ -45,12 +46,13 @@ public:
 
 	static constexpr float worldgrid_width = 160;
 	static constexpr float worldgrid_height = 160;
-	static constexpr float cell_size = 1.0f;
+	static constexpr float cell_size = 0.25f;
 	static constexpr float grid_width = worldgrid_width * (1.0f / cell_size) + 1;
 	static constexpr float grid_height = worldgrid_height * (1.0f / cell_size) + 1;
 
 private:
 	std::vector<Cell> get_final_path(Cell* start, Cell* goal);
+	std::vector<Cell> simplify_path(std::vector<Cell> cells);
 
 	std::vector<Cell*> open_cells;
 	std::vector<Cell*> closed_cells;

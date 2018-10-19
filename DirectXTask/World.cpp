@@ -22,6 +22,7 @@ World::World(ID3D11Device* device)
 		for (int w = 0; w < terrainWidth; ++w)
 		{
 			float y = (std::rand() % 1000) / 100.0f;
+
 			if (y > 9)
 			{
 				y += 2;

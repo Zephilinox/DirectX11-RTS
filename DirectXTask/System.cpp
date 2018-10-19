@@ -133,6 +133,17 @@ void System::event()
 					input->key_up(arg.key_code);
 				}
 			}
+			else if constexpr (std::is_same_v<T, EventMouseKeyPress>)
+			{
+				if (arg.key_down)
+				{
+					input->mouse_key_down(arg.mouse_key_code);
+				}
+				else
+				{
+					input->mouse_key_up(arg.mouse_key_code);
+				}
+			}
 		}, e);
 	}
 }
@@ -206,7 +217,7 @@ void System::update()
 		dx::XMStoreFloat3(&near_pos2, near_pos_vec);
 
 
-		if ((GetKeyState(VK_LBUTTON) & 0x100) != 0)
+		if (input->is_mouse_key_down(0))
 		{
 			/*cube_instances.push_back({
 				{ far_pos2.x, far_pos2.y, far_pos2.z},
@@ -236,14 +247,17 @@ void System::update()
 				if (cell.valid && cell.walkable)
 				{
 					entities[0]->goal_pos.clear();
+					entities[0]->goal_pos_index = 0;
 					entities[0]->goal_pos.push_back({cell.x, cell.y, cell.z});
 				}
 			}
 		}
 
+		static bool rmb_down = false;
 		//A*
-		if ((GetKeyState(VK_RBUTTON) & 0x100) != 0)
+		if (!rmb_down && input->is_mouse_key_down(1))
 		{
+			rmb_down = true;
 			auto intersection_pos = world->triangle_intersection(near_pos_vec, far_pos_vec);
 
 			if (!isnan(intersection_pos.x))
@@ -257,22 +271,41 @@ void System::update()
 				{
 					auto cells = pathfinding->find_path(entities[0]->instance.position, intersection_pos);
 					std::cout << "Path of " << cells.size() << " found\n";
-					entities[0]->goal_pos.clear();
-					for (auto& cell : cells)
+					if (cells.size())
 					{
-						entities[0]->goal_pos.push_back({ cell.x, cell.y, cell.z });
+						entities[0]->goal_pos.clear();
+						entities[0]->goal_pos_index = 0;
+						for (auto& cell : cells)
+						{
+							entities[0]->goal_pos.push_back({ cell.x, cell.y, cell.z });
+						}
 					}
 				}
 			}
 		}
+		else
+		{
+			rmb_down = input->is_mouse_key_down(1);
+		}
 	}
 
 	entity_instances.clear();
-
+	pathfinding_instances.clear();
 	for (auto& ent : entities)
 	{
 		ent->update(dt);
 		entity_instances.push_back(ent->instance);
+
+		for (auto& pos : ent->goal_pos)
+		{
+			pathfinding_instances.push_back(
+			{
+				pos,
+				{0, 0, 0},
+				{0.1f, 1.0f, 0.1f},
+				{1.0f, 0.7f, 0.0f, 1.0f},
+			});
+		}
 	}
 }
 
@@ -287,6 +320,9 @@ void System::draw()
 	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count);
 
 	cube->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), cube_instances);
+	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count);
+
+	cube->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), pathfinding_instances);
 	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count);
 
 	graphics->draw(world->vertex_buffer, world->index_buffer, world->instance_buffer, world->vertex_count, world->index_count, world->instance_count);

@@ -137,6 +137,54 @@ bool Window::poll(Event& e)
 				e = ekp;
 			} break;
 
+			case WM_LBUTTONDOWN:
+			{
+				EventMouseKeyPress emkp;
+				emkp.mouse_key_code = 0;
+				emkp.key_down = true;
+				e = emkp;
+			} break;
+
+			case WM_RBUTTONDOWN:
+			{
+				EventMouseKeyPress emkp;
+				emkp.mouse_key_code = 1;
+				emkp.key_down = true;
+				e = emkp;
+			} break;
+
+			case WM_MBUTTONDOWN:
+			{
+				EventMouseKeyPress emkp;
+				emkp.mouse_key_code = 2;
+				emkp.key_down = true;
+				e = emkp;
+			} break;
+
+			case WM_LBUTTONUP:
+			{
+				EventMouseKeyPress emkp;
+				emkp.mouse_key_code = 0;
+				emkp.key_down = false;
+				e = emkp;
+			} break;
+
+			case WM_RBUTTONUP:
+			{
+				EventMouseKeyPress emkp;
+				emkp.mouse_key_code = 1;
+				emkp.key_down = false;
+				e = emkp;
+			} break;
+
+			case WM_MBUTTONUP:
+			{
+				EventMouseKeyPress emkp;
+				emkp.mouse_key_code = 2;
+				emkp.key_down = false;
+				e = emkp;
+			} break;
+
 			default:
 			{
 				return false;
