@@ -215,14 +215,18 @@ int Pathfinding::heuristic_distance(Cell start, Cell end)
 {
 	//octile distance
 	int x = std::abs(start.grid_x - end.grid_x);
-	int y = std::abs(start.y - end.y);
 	int z = std::abs(start.grid_y - end.grid_y);
 	float standard_cost = 100.0f;
 	float diagonal_cost = 140.0f;
 	float total_standard_cost = standard_cost * (x + z);
 	float diagonal_savings = diagonal_cost - (2.0f * standard_cost);
 	float total_diagonal_cost = diagonal_savings * min(x, z);
-	float height_penalty = standard_cost * 10 * y * (1.0f / cell_size);
+
+	int y = std::abs(start.y - end.y);
+	int y_up = start.y - end.y;
+	float height_penalty = standard_cost * 1 * y * (1.0f / cell_size);
+	height_penalty -= y_up;
+
 	return std::round(total_standard_cost + total_diagonal_cost + height_penalty);
 }
 
