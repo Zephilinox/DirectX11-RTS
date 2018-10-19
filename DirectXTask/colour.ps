@@ -29,6 +29,7 @@ float4 ColourPixelShader(Pixel pixel) : SV_TARGET
 	colour = saturate(colour);
 	colour = colour * pixel.colour;
 	colour = colour * texture_colour;
+	colour = colour * 1.5;
 	return colour;
 
 	float4 normal_as_colour;

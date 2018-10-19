@@ -223,9 +223,7 @@ int Pathfinding::heuristic_distance(Cell start, Cell end)
 	float total_diagonal_cost = diagonal_savings * min(x, z);
 
 	int y = std::abs(start.y - end.y);
-	int y_up = start.y - end.y;
-	float height_penalty = standard_cost * 1 * y * (1.0f / cell_size);
-	height_penalty -= y_up;
+	float height_penalty = standard_cost * 2 * y * (1.0f / cell_size);
 
 	return std::round(total_standard_cost + total_diagonal_cost + height_penalty);
 }
@@ -253,7 +251,7 @@ std::vector<Cell> Pathfinding::get_final_path(Cell* start, Cell* goal)
 	open_cells.clear();
 	closed_cells.clear();
 
-	return simplify_path(path);
+	return path;
 }
 
 std::vector<Cell> Pathfinding::simplify_path(std::vector<Cell> path)

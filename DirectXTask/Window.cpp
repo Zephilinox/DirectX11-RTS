@@ -71,10 +71,11 @@ Window::Window(WindowSettings settings)
 	ShowCursor(true);
 	open = true;
 
-	this->width = this->fullscreen ? width : settings.width;
-	this->height = this->fullscreen ? height : settings.height;
 	this->fullscreen = settings.fullscreen;
 	this->vsync = settings.vsync;
+
+	this->width = this->fullscreen ? system_width : settings.width;
+	this->height = this->fullscreen ? system_height : settings.height;
 }
 
 Window::~Window()
