@@ -5,7 +5,7 @@
 
 System::System()
 {
-	WindowSettings ws{ "RTS", 1280, 720, true, false };
+	WindowSettings ws{ "RTS", 1280, 720, false, false };
 	window = std::make_unique<Window>(ws);
 	input = std::make_unique<Input>();
 	graphics = std::make_unique<Graphics>(window.get());

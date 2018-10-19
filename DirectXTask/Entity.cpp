@@ -21,7 +21,6 @@ void Entity::update(float dt)
 		dx::XMVECTOR direction = dx::XMVectorSubtract(from_vec, to_vec);
 		
 		float distance = dx::XMVectorGetX(dx::XMVector3Length(direction));
-		std::cout << distance << "\n";
 		if (percent_along < 0.99)
 		{
 			percent_along += (10.0f * dt) / distance;

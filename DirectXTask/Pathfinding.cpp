@@ -11,6 +11,8 @@
 Pathfinding::Pathfinding(World* world)
 	: world(world)
 {
+	int fails = 0;
+
 	for (int h = 0; h < grid_height; ++h)
 	{
 		for (int w = 0; w < grid_width; ++w)
@@ -28,15 +30,30 @@ Pathfinding::Pathfinding(World* world)
 			}
 			else
 			{
-				int id = all_cells.size();
-				all_cells.push_back({ id, w, h, -1, -1, -1, false, false });
+				from = { static_cast<float>(w) * cell_size, 50.0f, static_cast<float>(h) * cell_size };
+				to = { static_cast<float>(w) * cell_size, -50.0f, static_cast<float>(h) * cell_size };
+				from_vec = dx::XMLoadFloat3(&from);
+				to_vec = dx::XMLoadFloat3(&to);
+				intersection_pos = world->triangle_intersection(from_vec, to_vec);
+
+				if (!isnan(intersection_pos.x))
+				{
+					int id = all_cells.size();
+					all_cells.push_back({ id, w, h, intersection_pos.x, intersection_pos.y, intersection_pos.z, true, true });
+				}
+				else
+				{
+					int id = all_cells.size();
+					all_cells.push_back({ id, w, h, -1, -1, -1, false, false });
+					fails++;
+				}
 			}
 		}
 
 		std::cout << (static_cast<float>(h) / static_cast<float>(grid_height)) * 100.0f << "%\n";
 	}
 
-	std::cout << "A* Cells: " << all_cells.size() << " out of " << grid_width*grid_height << "\n";
+	std::cout << "A* Cells: " << fails << " failed.\n";
 }
 
 Cell* Pathfinding::find_closest_cell(float x, float y, float z)

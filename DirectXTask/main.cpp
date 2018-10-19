@@ -52,6 +52,8 @@ WinMain(HINSTANCE instance, HINSTANCE old_instance, PSTR cmd_line, int cmd_show)
 {
 	create_console();
 	
+	srand(1);
+
 	try
 	{
 		std::unique_ptr<System> system = std::make_unique<System>();
