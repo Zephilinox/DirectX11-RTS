@@ -29,8 +29,12 @@ World::World(ID3D11Device* device)
 			}
 
 			vertices[index].position = { static_cast<float>(w) * (1.0f / resolution), y, static_cast<float>(h) * (1.0f / resolution) };
-			vertices[index].colour = { 0.8f, 0.8f, 0.8f, 1.0f };
+			//vertices[index].colour = { 0.8f, 0.8f, 0.8f, 1.0f };
 			vertices[index].normal = { (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f, (std::rand() % 100) / 100.0f };
+			vertices[index].texture = {
+				vertices[index].position.x / (terrainWidth * (1.0f / resolution)),
+				1.0f - (vertices[index].position.z / (terrainHeight * (1.0f / resolution)))
+			};
 			index++;
 		}
 	}

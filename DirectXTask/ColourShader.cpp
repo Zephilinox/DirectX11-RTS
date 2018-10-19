@@ -12,9 +12,9 @@ ColourShader::ColourShader(ID3D11Device* device, HWND window)
 	}
 }
 
-bool ColourShader::render(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour)
+bool ColourShader::render(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour, ID3D11ShaderResourceView* texture)
 {
-	bool successful = set_shader_params(device_context, world, view, projection, light_direction, diffuse_colour);
+	bool successful = set_shader_params(device_context, world, view, projection, light_direction, diffuse_colour, texture);
 	if (successful)
 	{
 		render_shader(device_context, index_count, vertex_count, instance_count);
@@ -90,9 +90,9 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	polygon[0].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
 	polygon[0].InstanceDataStepRate = 0;
 
-	polygon[1].SemanticName = "COLOR";
+	polygon[1].SemanticName = "TEXCOORD";
 	polygon[1].SemanticIndex = 0;
-	polygon[1].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
+	polygon[1].Format = DXGI_FORMAT_R32G32_FLOAT;
 	polygon[1].InputSlot = 0;
 	polygon[1].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
 	polygon[1].InputSlotClass = D3D11_INPUT_PER_VERTEX_DATA;
@@ -131,7 +131,7 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 	polygon[5].InstanceDataStepRate = 1;
 
 	polygon[6].SemanticName = "COLOR";
-	polygon[6].SemanticIndex = 1;
+	polygon[6].SemanticIndex = 0;
 	polygon[6].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
 	polygon[6].InputSlot = 1;
 	polygon[6].AlignedByteOffset = D3D11_APPEND_ALIGNED_ELEMENT;
@@ -183,6 +183,27 @@ bool ColourShader::init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_fil
 		return false;
 	}
 
+	D3D11_SAMPLER_DESC sampler_desc;
+	sampler_desc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+	sampler_desc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampler_desc.MipLODBias = 0.0f;
+	sampler_desc.MaxAnisotropy = 1;
+	sampler_desc.ComparisonFunc = D3D11_COMPARISON_ALWAYS;
+	sampler_desc.BorderColor[0] = 0;
+	sampler_desc.BorderColor[1] = 0;
+	sampler_desc.BorderColor[2] = 0;
+	sampler_desc.BorderColor[3] = 0;
+	sampler_desc.MinLOD = 0;
+	sampler_desc.MaxLOD = D3D11_FLOAT32_MAX;
+
+	result = device->CreateSamplerState(&sampler_desc, &sample_state.val);
+	if (FAILED(result))
+	{
+		return false;
+	}
+
 	return true;
 }
 
@@ -208,12 +229,11 @@ void ColourShader::print_shader_error(ID3D10Blob* error_msg, HWND window, LPCWST
 	MessageBoxW(window, L"Error compiling shader.  Check shader-error.txt for message.", filename, MB_OK);
 }
 
-bool ColourShader::set_shader_params(ID3D11DeviceContext* device_context, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour)
+bool ColourShader::set_shader_params(ID3D11DeviceContext* device_context, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour, ID3D11ShaderResourceView* texture)
 {
 	world = dx::XMMatrixTranspose(world);
 	view = dx::XMMatrixTranspose(view);
 	projection = dx::XMMatrixTranspose(projection);
-
 
 	{
 		D3D11_MAPPED_SUBRESOURCE mapped_resource;
@@ -249,6 +269,13 @@ bool ColourShader::set_shader_params(ID3D11DeviceContext* device_context, dx::XM
 
 		device_context->Unmap(light_buffer.val, 0);
 		device_context->PSSetConstantBuffers(0, 1, &light_buffer.val);
+
+		if (texture == nullptr)
+		{
+			throw;
+		}
+
+		device_context->PSSetShaderResources(0, 1, &texture);
 	}
 
 	return true;
@@ -261,5 +288,6 @@ void ColourShader::render_shader(ID3D11DeviceContext* device_context, int index_
 	device_context->VSSetShader(vertex_shader.val, 0, 0);
 	device_context->PSSetShader(pixel_shader.val, 0, 0);
 
+	device_context->PSSetSamplers(0, 1, &sample_state.val);
 	device_context->DrawIndexedInstanced(index_count, instance_count, 0, 0, 0);
 }

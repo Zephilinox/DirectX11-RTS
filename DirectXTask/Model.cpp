@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-Model::Model(ID3D11Device* device, std::string filename)
+Model::Model(ID3D11Device* device, ID3D11DeviceContext* device_context, std::string filename)
 {
 	load_from_file(filename, 0);
 
@@ -14,9 +14,9 @@ Model::Model(ID3D11Device* device, std::string filename)
 	for (int i = 0; i < vertex_count; ++i)
 	{
 		vertices[i].position = dx::XMFLOAT3(model_data[i].x, model_data[i].y, model_data[i].z);
-		vertices[i].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		//vertices[i].colour = dx::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 		vertices[i].normal = dx::XMFLOAT3(model_data[i].nx, model_data[i].ny, model_data[i].nz);
-		//todo: texture;
+		vertices[i].texture = dx::XMFLOAT2(model_data[i].tu, model_data[i].tv);
 		indices[i] = i;
 	}
 
@@ -59,6 +59,8 @@ Model::Model(ID3D11Device* device, std::string filename)
 	}
 
 	create_instance_buffer(device, 5);
+
+	texture = std::make_unique<Texture>(device, device_context, "texture1.tga");
 }
 
 bool Model::load_from_file(std::string filename, int filetype = 0)
@@ -179,4 +181,9 @@ void Model::update_instance_buffer(ID3D11Device* device, ID3D11DeviceContext* de
 	device_context->Map(instance_buffer.val, 0, D3D11_MAP_WRITE_DISCARD, 0, &resource);
 	memcpy(resource.pData, instances.data(), size);
 	device_context->Unmap(instance_buffer.val, 0);
+}
+
+ID3D11ShaderResourceView* Model::get_texture()
+{
+	return texture->get_texture_view();
 }

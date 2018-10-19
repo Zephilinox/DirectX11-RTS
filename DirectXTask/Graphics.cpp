@@ -31,42 +31,14 @@ void Graphics::begin(float r, float g, float b, Camera* camera)
 	view_matrix = camera->get_view_matrix();
 }
 
-void Graphics::draw()
+void Graphics::draw(ID3D11Buffer* vertex_buffer, ID3D11Buffer* index_buffer, ID3D11Buffer* instance_buffer, int vertex_count, int index_count, int instance_count, ID3D11ShaderResourceView* texture)
 {
-	/*dx::XMFLOAT3 light_direction = { -0.3, 0, 0 };
-	dx::XMFLOAT4 diffuse_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-	dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
-	dx::XMMATRIX view_matrix =	camera->get_view_matrix();
-	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
-	
-	direct3d->set_wireframe(false);
-
-	for (auto& ent : entities)
+	if (texture == nullptr)
 	{
-		sphere_instances.push_back(ent->instance);
+		throw;
 	}
 
-	sphere->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), sphere_instances);
-	sphere->render(direct3d->get_device_context());
-
-	for (auto& ent : entities)
-	{
-		sphere_instances.pop_back();
-	}
-
-	bool result = colour_shader->render(direct3d->get_device_context(), sphere->get_index_count(), sphere->get_vertex_count(), sphere->get_instance_count(), world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
-
-	direct3d->set_wireframe(false);
-	cube->update_instance_buffer(direct3d->get_device(), direct3d->get_device_context(), cube_instances);
-	cube->render(direct3d->get_device_context());
-
-	result = colour_shader->render(direct3d->get_device_context(), cube->get_index_count(), cube->get_vertex_count(), cube->get_instance_count(), world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);*/
-}
-
-void Graphics::draw(ID3D11Buffer* vertex_buffer, ID3D11Buffer* index_buffer, ID3D11Buffer* instance_buffer, int vertex_count, int index_count, int instance_count)
-{
-	dx::XMFLOAT3 light_direction = { -0.3, 0, 0 };
+	dx::XMFLOAT3 light_direction = { -0.3f, 0, 0 };
 	dx::XMFLOAT4 diffuse_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 	dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
@@ -83,7 +55,7 @@ void Graphics::draw(ID3D11Buffer* vertex_buffer, ID3D11Buffer* index_buffer, ID3
 	device_context->IASetIndexBuffer(index_buffer, DXGI_FORMAT_R32_UINT, 0);
 	device_context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-	HRESULT result = colour_shader->render(direct3d->get_device_context(), vertex_count, index_count, instance_count, world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour);
+	HRESULT result = colour_shader->render(direct3d->get_device_context(), vertex_count, index_count, instance_count, world_matrix, view_matrix, projection_matrix, light_direction, diffuse_colour, texture);
 }
 
 void Graphics::end()

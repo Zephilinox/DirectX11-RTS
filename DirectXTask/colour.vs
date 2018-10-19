@@ -8,7 +8,7 @@ cbuffer MatrixBuffer
 struct Vertex
 {
 	float4 position: POSITION0;
-	float4 colour: COLOR0;
+	float2 tex: TEXCOORD0;
 	float3 normal: NORMAL;
 };
 
@@ -17,13 +17,14 @@ struct Instance
 	float3 position: POSITION1;
 	float3 rotation: POSITION2;
 	float3 scale: POSITION3;
-	float4 colour: COLOR1;
+	float4 colour: COLOR0;
 };
 
 struct Pixel
 {
 	float4 position: SV_POSITION;
 	float4 colour: COLOR;
+	float2 tex: TEXCOORD;
 	float3 normal: NORMAL;
 };
 
@@ -77,10 +78,11 @@ Pixel ColourVertexShader(Vertex vertex, Instance instance)
 	output.position = mul(output.position, view);
 	output.position = mul(output.position, projection);
 
-	output.colour = vertex.colour * instance.colour;
+	output.colour = instance.colour;
+	output.tex = vertex.tex;
 
 	output.normal = mul(vertex.normal, (float3x3)transform);
 	output.normal = normalize(output.normal);
-
+	
 	return output;
 }

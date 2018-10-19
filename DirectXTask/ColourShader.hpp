@@ -18,7 +18,7 @@ public:
 	struct Vertex
 	{
 		dx::XMFLOAT3 position;
-		dx::XMFLOAT4 colour;
+		dx::XMFLOAT2 texture;
 		dx::XMFLOAT3 normal;
 	};
 
@@ -32,7 +32,7 @@ public:
 
 	ColourShader(ID3D11Device* device, HWND window);
 
-	bool render(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour);
+	bool render(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour, ID3D11ShaderResourceView* texture);
 
 private:
 	struct MatrixBuffer
@@ -52,7 +52,7 @@ private:
 	bool init_shader(ID3D11Device* device, HWND window, LPCWSTR vs_filename, LPCWSTR ps_filename);
 	void print_shader_error(ID3D10Blob* error_msg, HWND window, LPCWSTR filename);
 
-	bool set_shader_params(ID3D11DeviceContext* device_context, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour);
+	bool set_shader_params(ID3D11DeviceContext* device_context, dx::XMMATRIX world, dx::XMMATRIX view, dx::XMMATRIX projection, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour, ID3D11ShaderResourceView* texture);
 	void render_shader(ID3D11DeviceContext* device_context, int index_count, int vertex_count, int instance_count);
 
 	D3DRAII<ID3D11VertexShader> vertex_shader;
@@ -60,4 +60,5 @@ private:
 	D3DRAII<ID3D11InputLayout> layout;
 	D3DRAII<ID3D11Buffer> matrix_buffer;
 	D3DRAII<ID3D11Buffer> light_buffer;
+	D3DRAII<ID3D11SamplerState> sample_state;
 };

@@ -17,8 +17,8 @@ System::System()
 
 	try
 	{
-		sphere = std::make_unique<Model>(graphics->direct3d->get_device(), "Sphere.txt");
-		cube = std::make_unique<Model>(graphics->direct3d->get_device(), "Cube2.txt");
+		sphere = std::make_unique<Model>(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), "Sphere.txt");
+		cube = std::make_unique<Model>(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), "Cube2.txt");
 	}
 	catch (...)
 	{
@@ -317,18 +317,18 @@ void System::draw()
 	graphics->begin(0.2f, 0.2f, 0.2f, camera.get());
 
 	sphere->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), sphere_instances);
-	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count);
+	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count, sphere->get_texture());
 
 	sphere->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), entity_instances);
-	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count);
+	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count, sphere->get_texture());
 
 	cube->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), cube_instances);
-	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count);
+	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count, cube->get_texture());
 
 	cube->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), pathfinding_instances);
-	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count);
+	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count, cube->get_texture());
 
-	graphics->draw(world->vertex_buffer, world->index_buffer, world->instance_buffer, world->vertex_count, world->index_count, world->instance_count);
+	graphics->draw(world->vertex_buffer, world->index_buffer, world->instance_buffer, world->vertex_count, world->index_count, world->instance_count, sphere->get_texture());
 
 	graphics->end();
 }
