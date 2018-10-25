@@ -20,7 +20,7 @@ public:
 	Graphics(Window* window);
 
 	void begin(float r, float g, float b, Camera* camera);
-	void draw(ID3D11Buffer* vertex_buffer, ID3D11Buffer* index_buffer, ID3D11Buffer* instance_buffer, int vertex_count, int index_count, int instance_count, ID3D11ShaderResourceView* texture);
+	void draw(ID3D11Buffer* vertex_buffer, ID3D11Buffer* index_buffer, ID3D11Buffer* instance_buffer, int vertex_count, int index_count, int instance_count, ID3D11ShaderResourceView* texture, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour);
 	void end();
 
 	static constexpr float screen_depth = 1000.0f;

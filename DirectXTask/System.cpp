@@ -55,6 +55,30 @@ System::System()
 		{ 0.0f, 0.8f, 1.0f, 1.0f }
 	};
 
+	entities.push_back(std::make_unique<Entity>());
+	entities[2]->instance = {
+		{ 44.0f, 1.0f, 44.0f },
+		{ 0.0f, 0.0f, 0.0f },
+		{ 0.5f, 0.5f, 0.5f},
+		{ 0.0f, 1.0f, 0.2f, 1.0f }
+	};
+
+	entities.push_back(std::make_unique<Entity>());
+	entities[3]->instance = {
+		{ 44.0f, 1.0f, 44.0f },
+		{ 0.0f, 0.0f, 0.0f },
+		{ 0.5f, 0.5f, 0.5f},
+		{ 1.0f, 0.7f, 0.0f, 1.0f }
+	};
+
+	entities.push_back(std::make_unique<Entity>());
+	entities[4]->instance = {
+		{ 44.0f, 1.0f, 44.0f },
+		{ 0.0f, 0.0f, 0.0f },
+		{ 0.5f, 0.5f, 0.5f},
+		{ 1.0f, 0.6f, 0.6f, 1.0f }
+	};
+
 	for (auto& ent : entities)
 	{
 		ent->world = world.get();
@@ -64,6 +88,11 @@ System::System()
 
 	for (auto& cell : pathfinding->all_cells)
 	{
+		if (cell.y >= 2 && cell.y <= 9)
+		{
+			continue;
+		}
+
 		cube_instances.push_back({
 			{ cell.x, cell.y + 0.1f, cell.z },
 			{ 0.0f, 0.0f, 0.0f },
@@ -85,6 +114,12 @@ System::System()
 			cell.walkable = false;
 		}
 	}
+
+	group_1 = std::make_unique<Group>(input.get(), pathfinding.get());
+	group_2 = std::make_unique<Group>(input.get(), pathfinding.get());
+	group_3 = std::make_unique<Group>(input.get(), pathfinding.get());
+	group_4 = std::make_unique<Group>(input.get(), pathfinding.get());
+	group_5 = std::make_unique<Group>(input.get(), pathfinding.get());
 }
 
 void System::run()
@@ -155,28 +190,18 @@ void System::update()
 		quit = true;
 	}
 
-	time += dt;
-	camera->update(input.get(), dt);
-
-	float deg2rad = 0.0174533f;
-
-	if (input->is_key_down('C'))
+	for (int i = 0; i < 5; ++i)
 	{
-		for (int i = 0; i < 1000; ++i)
+		if (input->is_key_down('0' + i))
 		{
-			float rand_x = (rand() % 51200) / 100.0f;
-			float rand_y = (rand() % 5120) / 100.0f + 64.0f;
-			float rand_z = (rand() % 51200) / 100.0f;
-
-			cube_instances.push_back({
-				{ rand_x, rand_y, rand_z},
-				{ 0.0f, 0.0f, 0.0f },
-				{ 1.0f, 1.0f, 1.0f },
-				{ (std::sin(time * 10.0f) + 1.0f) / 2.0f, 0.2f, 0.5f, 1.0f }
-				});
+			active_group = i;
+			std::cout << "Activated " << i << "\n";
 		}
 	}
 
+	time += dt;
+	camera->update(input.get(), dt);
+	
 	POINT pos;
 	if (GetCursorPos(&pos) && ScreenToClient(window->window_handle, &pos))
 	{
@@ -237,8 +262,6 @@ void System::update()
 
 			if (!isnan(intersection_pos.x))
 			{
-				//entities[0]->goal_pos.push_back(intersection_pos);
-
 				std::cout << intersection_pos.x << ", " << intersection_pos.y << ", " << intersection_pos.z << "\n";
 				Cell& cell = *pathfinding->find_closest_cell(intersection_pos.x, intersection_pos.y, intersection_pos.z);
 				std::cout << std::boolalpha << cell.walkable << " " << cell.grid_x << ", " << cell.grid_y << "\n";
@@ -246,10 +269,10 @@ void System::update()
 
 				if (cell.valid && cell.walkable)
 				{
-					entities[0]->goal_pos.clear();
-					entities[0]->goal_pos_index = 0;
-					entities[0]->goal_pos.push_back({ entities[0]->instance.position});
-					entities[0]->goal_pos.push_back({cell.x, cell.y, cell.z});
+					entities[active_group]->goal_pos.clear();
+					entities[active_group]->goal_pos_index = 0;
+					entities[active_group]->goal_pos.push_back({ entities[active_group]->instance.position});
+					entities[active_group]->goal_pos.push_back({cell.x, cell.y, cell.z});
 				}
 			}
 		}
@@ -270,18 +293,18 @@ void System::update()
 
 				if (cell.valid && cell.walkable)
 				{
-					auto cells = pathfinding->find_path(entities[0]->instance.position, intersection_pos);
+					auto cells = pathfinding->find_path(entities[active_group]->instance.position, intersection_pos);
 					std::cout << "Path of " << cells.size() << " found\n";
 					if (cells.size())
 					{
-						entities[0]->goal_pos.clear();
-						entities[0]->goal_pos_index = 0;
-						entities[0]->goal_pos.push_back(entities[0]->instance.position);
+						entities[active_group]->goal_pos.clear();
+						entities[active_group]->goal_pos_index = 0;
+						entities[active_group]->goal_pos.push_back(entities[active_group]->instance.position);
 						for (auto& cell : cells)
 						{
-							entities[0]->goal_pos.push_back({ cell.x, cell.y, cell.z });
+							entities[active_group]->goal_pos.push_back({ cell.x, cell.y, cell.z });
 						}
-						entities[0]->goal_pos.push_back(intersection_pos);
+						entities[active_group]->goal_pos.push_back(intersection_pos);
 					}
 				}
 			}
@@ -290,6 +313,10 @@ void System::update()
 		{
 			rmb_down = input->is_mouse_key_down(1);
 		}
+	}
+	else
+	{
+		throw;
 	}
 
 	entity_instances.clear();
@@ -306,7 +333,7 @@ void System::update()
 				pos,
 				{0, 0, 0},
 				{0.15f, 2.0f, 0.15f},
-				{0.98f, 0.643f, 0.0f, 1.0f},
+				ent->instance.colour
 			});
 		}
 	}
@@ -314,21 +341,25 @@ void System::update()
 
 void System::draw()
 {
+	dx::XMFLOAT3 light_direction = { -0.3f, 0, 0 };
+	dx::XMFLOAT4 diffuse_colour = { 5.0f, 5.0f, 5.0f, 1.0f };
+	dx::XMFLOAT4 diffuse_colour_world = { 1.0f, 1.0f, 1.0f, 1.0f };
+
 	graphics->begin(0.2f, 0.2f, 0.2f, camera.get());
 
 	sphere->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), sphere_instances);
-	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count, sphere->get_texture());
+	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count, sphere->get_texture(), light_direction, diffuse_colour);
 
 	sphere->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), entity_instances);
-	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count, sphere->get_texture());
+	graphics->draw(sphere->vertex_buffer.val, sphere->index_buffer.val, sphere->instance_buffer.val, sphere->vertex_count, sphere->index_count, sphere->instance_count, sphere->get_texture(), light_direction, diffuse_colour);
 
 	cube->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), cube_instances);
-	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count, cube->get_texture());
+	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count, cube->get_texture(), light_direction, diffuse_colour);
 
 	cube->update_instance_buffer(graphics->direct3d->get_device(), graphics->direct3d->get_device_context(), pathfinding_instances);
-	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count, cube->get_texture());
+	graphics->draw(cube->vertex_buffer.val, cube->index_buffer.val, cube->instance_buffer.val, cube->vertex_count, cube->index_count, cube->instance_count, cube->get_texture(), light_direction, diffuse_colour);
 
-	graphics->draw(world->vertex_buffer, world->index_buffer, world->instance_buffer, world->vertex_count, world->index_count, world->instance_count, sphere->get_texture());
+	graphics->draw(world->vertex_buffer, world->index_buffer, world->instance_buffer, world->vertex_count, world->index_count, world->instance_count, sphere->get_texture(), light_direction, diffuse_colour_world);
 
 	graphics->end();
 }

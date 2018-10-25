@@ -9,6 +9,7 @@
 #include "Timer.hpp"
 #include "World.hpp"
 #include "Window.hpp"
+#include "Group.hpp"
 
 class System
 {
@@ -35,6 +36,12 @@ private:
 	std::vector<std::unique_ptr<Entity>> entities;
 	std::unique_ptr<Model> sphere;
 	std::unique_ptr<Model> cube;
+	std::unique_ptr<Group> group_1;
+	std::unique_ptr<Group> group_2;
+	std::unique_ptr<Group> group_3;
+	std::unique_ptr<Group> group_4;
+	std::unique_ptr<Group> group_5;
+	int active_group = 0;
 	Timer frame_timer;
 	float dt;
 	float time;

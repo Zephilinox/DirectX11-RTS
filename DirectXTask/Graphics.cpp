@@ -31,15 +31,13 @@ void Graphics::begin(float r, float g, float b, Camera* camera)
 	view_matrix = camera->get_view_matrix();
 }
 
-void Graphics::draw(ID3D11Buffer* vertex_buffer, ID3D11Buffer* index_buffer, ID3D11Buffer* instance_buffer, int vertex_count, int index_count, int instance_count, ID3D11ShaderResourceView* texture)
+void Graphics::draw(ID3D11Buffer* vertex_buffer, ID3D11Buffer* index_buffer, ID3D11Buffer* instance_buffer, int vertex_count, int index_count, int instance_count, ID3D11ShaderResourceView* texture, dx::XMFLOAT3 light_direction, dx::XMFLOAT4 diffuse_colour)
 {
 	if (texture == nullptr)
 	{
 		throw;
 	}
 
-	dx::XMFLOAT3 light_direction = { -0.3f, 0, 0 };
-	dx::XMFLOAT4 diffuse_colour = { 1.0f, 1.0f, 1.0f, 1.0f };
 	dx::XMMATRIX world_matrix = direct3d->get_world_matrix();
 	dx::XMMATRIX projection_matrix = direct3d->get_projection_matrix();
 

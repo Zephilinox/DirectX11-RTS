@@ -19,17 +19,25 @@ struct Pixel
 float4 ColourPixelShader(Pixel pixel) : SV_TARGET
 {
 	float4 texture_colour = shader_texture.Sample(sample_type, pixel.tex);
-	float4 colour = float4(0.5f, 0.5f, 0.5f, 1.0f);
+	float4 colour = float4(0.3f, 0.3f, 0.3f, 1.0f);
 	float inverse_light_dir = -light_direction;
 	float light_intensity = saturate(dot(pixel.normal, inverse_light_dir));
-	if (light_intensity > 0.0f)
+	if (light_intensity > 0.5f)
 	{
-		colour += (diffuse_colour * light_intensity);
+		colour += (diffuse_colour * light_intensity * 1.0);
 	}
+	else if (light_intensity > 0.4f)
+	{
+		colour += (diffuse_colour * light_intensity * 0.9);
+	}
+	else
+	{
+		colour += (diffuse_colour * light_intensity * 0.8);
+	}
+
 	colour = saturate(colour);
 	colour = colour * pixel.colour;
 	colour = colour * texture_colour;
-	colour = colour * 1.5;
 	return colour;
 
 	float4 normal_as_colour;
