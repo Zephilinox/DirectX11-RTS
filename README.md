@@ -1,7 +1,16 @@
 # DirectX11-RTS
-An "RTS Game" made using Win32 and DirectX11 in 5 weeks
+An "RTS Game" made using Win32 and DirectX11 in 5 weeks for a university module
 
-You can see the weekly development in these videos https://www.youtube.com/watch?v=7nHGPGpBY6I&list=PLAu3dU8p746BB1z4TUxNWb8e1J3OjnxYR&index=2&t=0s
+## 30-second Trailer
+https://www.youtube.com/watch?v=kowQeYRZGaw
+
+## Paper
+todo
+
+## Weekly Development Videos
+https://www.youtube.com/watch?v=7nHGPGpBY6I&list=PLAu3dU8p746BB1z4TUxNWb8e1J3OjnxYR&index=2&t=0s
+
+## Images
 
 ![image](https://user-images.githubusercontent.com/2060863/55733856-6dd58180-5a16-11e9-8675-76d79c1369b1.png)
 
