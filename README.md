@@ -4,9 +4,6 @@ An "RTS Game" made using Win32 and DirectX11 in 5 weeks for a university module
 ## 30-second Trailer
 https://www.youtube.com/watch?v=kowQeYRZGaw
 
-## Paper
-todo
-
 ## Weekly Development Videos
 https://www.youtube.com/watch?v=7nHGPGpBY6I&list=PLAu3dU8p746BB1z4TUxNWb8e1J3OjnxYR&index=2&t=0s
 
